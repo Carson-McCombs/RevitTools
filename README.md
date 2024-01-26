@@ -43,3 +43,9 @@ Dockable Element Parameter Assistance:
 
 -Can also set the User's current selection by highlighting specific elements
 ![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/2b9939df-a2e1-4995-94bb-3cd2f7fbe58e)
+
+
+V2 (12 / 18 / 23): Fixed issue where updaters that were disabled -and therefore unregistered- were attempting to be disabled on shutdown, causing an error.
+V3 (12 / 19 / 23): Fixed issue where user was unable to set single segment dimensions. Fixed issue where pipe end prep manager was crashing on enable ( hotfix, not optimal ). Fixed issue where if end preps on a pipe are the same type (bell x bell, spigot x spigot, or none x none), the end prep is alphabetically ordered (unless 'PE').
+V4 (12 / 19/ 23 ): Fixed issue where user wouldn't be able to set a dimension in a section 
+V5 (12 / 21 / 23 ): Allowed grouped categories for the "Complex Filter" to seperate null and empty strings with and label them appropriately
