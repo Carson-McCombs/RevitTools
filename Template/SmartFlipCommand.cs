@@ -33,7 +33,6 @@ namespace CarsonsAddins
         }
         public Result Execute(UIApplication uiapp, ref string message, ElementSet elements)
         {
-            int flag = 0;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
@@ -47,21 +46,18 @@ namespace CarsonsAddins
                 transaction.Start();
                 try
                 {
-                    //SelectionFilter
                     Reference elemReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilter_PipeFittingPartType(PartType.PipeFlange), "Please select the pipe flange or bell you wish to flip.");
                     if (elemReference == null)
                     {
                         transaction.RollBack();
                         return Result.Succeeded;
                     }
-                    flag++;
                     Element elem = doc.GetElement(elemReference);
                     if (elem == null)
                     {
                         transaction.RollBack();
                         return Result.Cancelled;
                     }
-                    flag++;
 
                     FamilyInstance familyInstance = elem as FamilyInstance;
                     if (familyInstance == null)
@@ -69,16 +65,14 @@ namespace CarsonsAddins
                         transaction.RollBack();
                         return Result.Cancelled;
                     }
-                    flag++;
 
                     if (!Flip(doc, familyInstance))
                     {
                         transaction.RollBack();
                         return Result.Failed;
                     }
-                    flag++;
+
                     transaction.Commit();
-                    //return Result.Succeeded;
                 }
                 catch (Exception ex)
                 {
