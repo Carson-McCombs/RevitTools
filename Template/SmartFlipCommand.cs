@@ -83,7 +83,7 @@ namespace CarsonsAddins
                 catch (Exception ex)
                 {
                     transaction.RollBack();
-                    return Result.Failed;
+                    return Result.Succeeded;
                 }
 
             }
