@@ -69,15 +69,15 @@ namespace CarsonsAddins
             this.uidoc = uidoc;
             new ParametersByTypeId(uidoc);
 
-            Definition definition;
-            Transaction transaction = new Transaction(uidoc.Document);
-            transaction.Start("DummyGetParameterDefinition");
+            //Definition definition;
+            //Transaction transaction = new Transaction(uidoc.Document);
+            //transaction.Start("DummyGetParameterDefinition");
 
-            Pipe pipe = Pipe.Create(uidoc.Document, ElementId.InvalidElementId, new ElementId(4646900), ElementId.InvalidElementId, new XYZ(0,0,0), new XYZ(5,5,5));
-            definition = pipe.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).Definition;
-            transaction.RollBack();
+            //Pipe pipe = Pipe.Create(uidoc.Document, ElementId.InvalidElementId, new ElementId(4646900), ElementId.InvalidElementId, new XYZ(0,0,0), new XYZ(5,5,5));
+            //definition = pipe.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).Definition;
+            //transaction.RollBack();
             
-            table.AddParameter(definition);
+            //table.AddParameter(definition);
         }
         public PushButtonData RegisterButton(Assembly assembly)
         {
@@ -86,17 +86,16 @@ namespace CarsonsAddins
             return pushButtonData;
         }
 
-        private void RefreshButtonPress(object sender, RoutedEventArgs e)
+        private void LoadSelectionButtonPress(object sender, RoutedEventArgs e)
         {
-            RefreshSelection();
+            LoadSelection();
         }
-        public void RefreshSelection()
+        public void LoadSelection()
         {
             if (uidoc == null) return;
             table.Clear();
-            //filterableElements.Clear();
-
-
+            ParameterGroupComboBox.SelectedItem = null;
+            ParameterNameControl.Text = "";
             List<ElementId> elementIds = uidoc.Selection.GetElementIds() as List<ElementId>;
             if (elementIds.Count == 0)
             {
@@ -109,12 +108,9 @@ namespace CarsonsAddins
             {
                 Element elem = uidoc.Document.GetElement(id);
                 if (elem == null) continue;
-                //filterableElements.Add(new FilterableElement(elem));
                 table.AddElement(elem);
             }
         }
-
-        //private void RefreshSelectedCount(object sender, RoutedEventArgs e) => TotalSelectedLabel.Content = "Total Selected Items:            " + CalculateTotalSelectedCount().ToString();
 
         public void SetupDockablePane(DockablePaneProviderData data)
         {
@@ -131,7 +127,6 @@ namespace CarsonsAddins
 
         private void AddParameterButton(object sender, RoutedEventArgs e)
         {
-
             try
             {
                 if (ParameterNameControl.Text == "") return;
@@ -145,17 +140,13 @@ namespace CarsonsAddins
 
         private void ApplyButtonPress(object sender, RoutedEventArgs e)
         {
-            //Transaction transaction = new Transaction(uidoc.Document);
-            //transaction.Start("ApplyParameterChanges");
             try
             {
                 table.PushUpdatesToElements();
-                //transaction.Commit();
             }
             catch (Exception ex)
             {
                 TaskDialog.Show("Complex Filter Apply Parameter Changes Error", ex.Message);
-                //transaction.RollBack();
             }
         }
 
@@ -191,7 +182,8 @@ namespace CarsonsAddins
         
     }
 
-
+    //  CURRENTLY UNUSED
+    //  Purpose: to act as a buffer for retrieving element parameters. Will attempt to retrieve the a via parameter if no definition is saved, otherwise retrieving the parameter through the definition.
     class ParametersByTypeId
     {
         public static ParametersByTypeId instance;
@@ -259,10 +251,12 @@ namespace CarsonsAddins
             columnNames.Clear();
             parameterDefinitions.Clear();
             parameterReadOnly.Clear();
+            
             CollectionViewSource.GetDefaultView(rows).GroupDescriptions.Clear();
-            for (int i = 1; i < dataGrid.Columns.Count; i++)
-            {
+            for (int i = dataGrid.Columns.Count - 1; i >= 1; i--)
+            { 
                 dataGrid.Columns.RemoveAt(i);
+                
             }
         }
         public void AddElement(Element element)
