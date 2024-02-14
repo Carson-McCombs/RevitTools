@@ -20,6 +20,13 @@ namespace CarsonsAddins
     {
         public const bool IsWIP = false;
 
+        public PushButtonData RegisterButton(Assembly assembly)
+        {
+            PushButtonData pushButtonData = new PushButtonData("QuestionMarkDimensionsCommand", "Question Mark Dimensions", assembly.Location, "CarsonsAddins.QuestionMarkDimensionsCommand");
+            pushButtonData.ToolTip = "Overrides selected dimensions' value with a question mark.";
+            return pushButtonData;
+        }
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
@@ -171,12 +178,7 @@ namespace CarsonsAddins
             return rf;
         }
 
-        public PushButtonData RegisterButton(Assembly assembly)
-        {
-            PushButtonData pushButtonData = new PushButtonData("QuestionMarkDimensionsCommand", "Question Mark Dimensions", assembly.Location, "CarsonsAddins.QuestionMarkDimensionsCommand");
-            pushButtonData.ToolTip = "Overrides selected dimensions' value with a question mark.";
-            return pushButtonData;
-        }
+        
     }
     
     

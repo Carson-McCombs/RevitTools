@@ -39,9 +39,7 @@ namespace CarsonsAddins
     //[Autodesk.Revit.DB.Macros.AddInId("82283650-43D8-4B1F-ABAF-C8BDCF5EF3A3")]
     public partial class ThisApplication : IExternalApplication
     {
-        //private PreferenceWindow preferenceWindow;
-        //private PipingLCUpdater pipingLCUpdater;
-        //private PipingEndPrepUpdater pipingConnectionsUpdater;
+
         private List<ComponentState> componentStates = new List<ComponentState>();
         private List<ISettingsComponent> settingsComponents = new List<ISettingsComponent>();
         public static ThisApplication instance {  get; private set; }
@@ -52,12 +50,11 @@ namespace CarsonsAddins
             app.CreateRibbonTab("Carsons Addins");
             RibbonPanel panel = app.CreateRibbonPanel("Carsons Addins", "Piping Preferences");
             Assembly assembly = Assembly.GetExecutingAssembly();
-            //MyApplicationSettings settings = new MyApplicationSettings();
-            //componentStates = MyApplicationSettingsWindow.settings.InitComponentStates(assembly);
+
             MyApplicationSettings.Instance = new MyApplicationSettings();
             panel.AddItem(MyApplicationSettingsWindow.RegisterButton(assembly));
             componentStates = MyApplicationSettings.Instance.InitComponentStates(assembly);
-            //string assemblyPath = assembly.Location;
+
 
             PulldownButtonData uiComponentsPulldownButtonData = new PulldownButtonData("UIComponentsPullDownButton","Windows");
             uiComponentsPulldownButtonData.ToolTip = "All tools with their own dedicated window or dockable pane.";
@@ -78,15 +75,17 @@ namespace CarsonsAddins
                 {
                     ISettingsComponent component = (ISettingsComponent)state.ComponentType.GetConstructor(new Type[0]).Invoke(new object[0]);
 
-                    //if (component is ISettingUpdaterComponent updaterComponent) updaterComponent.RegisterUpdater(app);
                     settingsComponents.Add(component);
-                    //panel.AddItem(component.RegisterButton(assembly));
                     PushButtonData buttonData = component.RegisterButton(assembly);
                     if (component is ISettingsUIComponent uiComponent) uiComponentsPulldownButton.AddPushButton(buttonData);
                     else miscComponentsPulldownButton.AddPushButton(buttonData);
                 }
             }
-            /*
+            /* Below is the method I was originally using to load in external commands
+             * - Reason for changing to ComponentStates: 
+             *  -> I didn't like having to recompile everytime I wanted to enable or disable a command,
+             *  -> I didn't like having all of this information, specific to each command and window, all located in the main application class
+             *  
             if (PreferenceWindow.LoadWindow || PipeEndPrepWindow.LoadWindow || SimpleFilterDockablePane.LoadWindow || ComplexFilterDockablePane.LoadWindow)
             {
                 PulldownButtonData dockablesPulldownData = new PulldownButtonData("Open Dockable Panes", "Dockables");
@@ -205,13 +204,13 @@ namespace CarsonsAddins
                 }
                 
             }
-
+            RegisterUpdaters(app);
             */
 
 
 
 
-            //RegisterUpdaters(app);
+
             app.ControlledApplication.ApplicationInitialized += RegisterDockablePanes;
             return Result.Succeeded;
         }
@@ -235,11 +234,12 @@ namespace CarsonsAddins
                     var registerCommandType = typeof( RegisterDockablePane<>).MakeGenericType(component.GetType());
                     var registerCommand = Activator.CreateInstance(registerCommandType);
                     if (registerCommand is IExecuteWithUIApplication command) command.Execute(uiapp);
-                    //if (registerCommand is ISettingUpdaterComponent updaterComponent) updaterComponent.RegisterUpdater(ActiveAddInId);
+                    //if (registerCommand is ISettingUpdaterComponent updaterComponent) updaterComponent.RegisterUpdater(ActiveAddInId); //updater is now registered on command register
 
                 }
             }
-            /*
+            /* Registering logic now located and information located in each command's class and ComponentState respectively
+             * 
             //if (PreferenceWindow.LoadWindow)
             //{
             //    RegisterPreferenceWindow registerPreferenceWindow = new RegisterPreferenceWindow();
