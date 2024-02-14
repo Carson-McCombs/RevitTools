@@ -36,7 +36,7 @@ namespace CarsonsAddins
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
             {
-                TaskDialog.Show("Question Mark Dimensions Command", "Command should not be used within a family document.");
+                TaskDialog.Show("Dimension Pipe Command", "Command should not be used within a family document.");
                 return Result.Failed;
             }
             Transaction transaction = new Transaction(doc);
