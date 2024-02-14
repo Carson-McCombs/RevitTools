@@ -27,17 +27,17 @@ using System.Threading;
 
 namespace CarsonsAddins
 {
-    /// <summary>
-    /// Interaction logic for MyApplicationSettingsWindow.xaml
-    /// </summary>
+    /*
+     * Note: This class and command are always registered and active within the application. Also, I might should move the ISettingsComponent hierarchy to their own class to save space and increase readability.
+     * Purpose: To load, set, and save ComponentState information for each Command within a Window
+     */
     public partial class MyApplicationSettingsWindow : Window
     {
         public MyApplicationSettingsWindow()
         {
             InitializeComponent();
-            
-            
         }
+        
         public static PushButtonData RegisterButton(Assembly assembly)
         {
             PushButtonData pushButtonData = new PushButtonData("Carsons Addins Settings", "Carson's Addins Settings", assembly.Location, typeof(ShowSettingsWindow).FullName);
@@ -55,7 +55,9 @@ namespace CarsonsAddins
 
         }
 
-
+        /*
+         * The ShowSettingsWindow class is needed so that the MyApplicationSettingsWindow doesn't need extend the ISettingsComponent to prevent feedback loops on register
+         */
         [Transaction(TransactionMode.Manual)]
         public class ShowSettingsWindow : IExternalCommand
         {
@@ -66,7 +68,6 @@ namespace CarsonsAddins
                 try
                 {
                     if (instance == null) instance = new MyApplicationSettingsWindow();
-                    //MyApplicationSettings.Instance.InitComponentStates(Assembly.GetExecutingAssembly());
                     instance.SettingsDataGrid.ItemsSource = MyApplicationSettings.Instance.settingsState;
                     instance.Show();
 
@@ -83,24 +84,20 @@ namespace CarsonsAddins
         }
 
     }
+    //Stores the Settings state, either by loading it in from the user's preferences or setting the state to their default values
     public class MyApplicationSettings
     {
         public static MyApplicationSettings Instance;
         public ObservableCollection<ComponentState> settingsState = new ObservableCollection<ComponentState>();
-        //private Dictionary<string, int> componentsByName = new Dictionary<string, int>();
+
 
         public List<ComponentState> InitComponentStates(Assembly assembly)
         {
             //List<ComponentState> states;
             if (!string.IsNullOrEmpty(MySettings.Default.ComponentState_Preferences)) LoadFromDB(assembly);
-            else LoadFromDefault(assembly);
+            else SetToDefault(assembly);
             return settingsState.ToList();
         }
-        /*public bool GetState(string componentName)
-        {
-            if (!componentsByName.ContainsKey(componentName)) return false;
-            return settingsState[componentsByName[componentName]].IsEnabled;
-        }*/
         public void SaveToDB()
         {
             if (settingsState == null || settingsState.Count == 0) return;
@@ -121,7 +118,12 @@ namespace CarsonsAddins
 
             return componentTypes;
         }
-        private void LoadFromDefault(Assembly assembly)
+        /*
+         * - Uses reflection to determine which of the components found within the namespace should be enabled and loaded in by default ( determined by the field: "public const bool IsWIP" ) 
+         * - Unfortunately, this causes all ISettingsComponents to require the ISWIP field without it being stated in the inherited class
+         * - The IsWIP Field should be const such that the value is loaded and can be evaluated at compile time, this is also because the field never changes between sessions of Revit ( unless the user changes addin versions ).
+         */
+        private void SetToDefault(Assembly assembly)
         {
             settingsState.Clear();
             List<Type> types = FindComponentsInNamespace(assembly);
@@ -141,6 +143,11 @@ namespace CarsonsAddins
             }
             if (!string.IsNullOrEmpty(log)) TaskDialog.Show("Types Missing IsWIP Check", log);
         }
+
+        /*
+         * Attempts to load the ComponentState preferences ( which store what commands are enabled and disabled at application start ),
+         * if it cannot, then set the settings to default ( based on the WIP or Work-in-Progress const in each class )
+         */
         public void LoadFromDB(Assembly assembly)
         {
             try
@@ -149,21 +156,19 @@ namespace CarsonsAddins
                 if (!string.IsNullOrWhiteSpace(MySettings.Default.ComponentState_Preferences))
                 {
                     List<ComponentState> states = JsonConvert.DeserializeObject<List<ComponentState>>(MySettings.Default.ComponentState_Preferences);
-                    //componentsByName = GetComponentIndexDictionary(states);
                     foreach (ComponentState state in states)
                     {
                         settingsState.Add(state);
                     }
-                    //settingsState = new ObservableCollection<ComponentState>(states);
                 }
                 else
                 {
-                    LoadFromDefault(assembly);
+                    SetToDefault(assembly);
                 }
             }catch (Exception ex)
             {
                 TaskDialog.Show("ERROR LOADING FROM DB", ex.Message);
-                LoadFromDefault(assembly);
+                SetToDefault(assembly);
             }
             
 
@@ -171,9 +176,20 @@ namespace CarsonsAddins
         }
     }
 
+
+    /*
+     * Purpose: 
+     *  ->To store data related to loading in commands as ribbon buttons and where those buttons are located
+     * -Pro: 
+     *  -> Can easily enable and disable commands ( and their updaters ) without having to recompile.
+     *  -> Can easily add new commands with less code
+     *  -> Abstracts away how and which commands should be loaded and registered
+     *  -> Abstracts away a command and their dependent buttons, updaters, and windows
+     * -Cons: 
+     *  -> Now each command ( with a button ) must implement ISettingsComponent and have a const bool IsWIP to be loaded in properly. This is unless the command is just set to always be loaded in, such as the open settings window command.
+     */
     public interface ISettingsComponent
     {
-        //ComponentInfo info { get; set; }
         PushButtonData RegisterButton(Assembly assembly);
     }
     public interface ISettingsUIComponent : ISettingsComponent 
@@ -188,23 +204,6 @@ namespace CarsonsAddins
         void UnregisterUpdater();
     }
 
-
-
-    //class ComponentInfo 
-    //{
-
-    //    public string ComponentName;
-
-    //    public string ComponentType;
-    //    public string ClassPath;
-    //    public ComponentInfo(Type t) 
-    //    {
-
-    //        ComponentName = t.Name;
-    //        ClassPath = t.FullName;
-    //        ComponentType = t.BaseType.Name;
-    //    }
-    //}
 
     public class ComponentState : INotifyPropertyChanged
 
@@ -243,15 +242,20 @@ namespace CarsonsAddins
             IsEnabled = isEnabled;
             IsWIP = isWIP;
         }
-        /*public static void RegisterComponent<T>(Assembly assembly)
+        /* Below was considered to be held within the ComponentState class such that a more generic method of registering a component ( a class and their respective buttons, updates, and windows ), 
+         * but the added complexity using lowered readability. Thus just loading in the Command's buttons, updaters, windows, etc. are now located within the ThisApplication class
+         * 
+         * public static void RegisterComponent<T>(Assembly assembly)
         {
             Type componentType = typeof(T);
             if (!(componentType is ISettingsComponent)) return;
             componentType.GetMethod(componentType.FullName + ".RegisterButton()")?.Invoke(null, new object[]{ assembly });
         }*/
-        
 
-        protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
+    /*
+     * This is used for databinding to the Settings Window, detecting when the user changes a detail of the ComponentStates ( i.e. enabling / disabling a component )
+     */
+    protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
         {
             if (PropertyChanged != null)
             {
