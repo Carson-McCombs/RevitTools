@@ -52,27 +52,35 @@ namespace CarsonsAddins
             Assembly assembly = Assembly.GetExecutingAssembly();
 
             MyApplicationSettings.Instance = new MyApplicationSettings();
+
+            // Always loads in the Application Settings Window
             panel.AddItem(MyApplicationSettingsWindow.RegisterButton(assembly));
+
+            // Then loads in ComponentStates based on the user's saved preference on which Component should be enabled at launch ( or loads in whichever is not a work in progress component by default )
             componentStates = MyApplicationSettings.Instance.InitComponentStates(assembly);
 
-
+            // Includes all components with UI, such as Windows and DockablePanes
             PulldownButtonData uiComponentsPulldownButtonData = new PulldownButtonData("UIComponentsPullDownButton","Windows");
             uiComponentsPulldownButtonData.ToolTip = "All tools with their own dedicated window or dockable pane.";
             uiComponentsPulldownButtonData.Image = Util.GetImage(assembly, "CarsonsAddins.Resources.blockC_32.png");
             uiComponentsPulldownButtonData.LargeImage = Util.GetImage(assembly, "CarsonsAddins.Resources.blockC_32.png");
             PulldownButton uiComponentsPulldownButton = panel.AddItem(uiComponentsPulldownButtonData) as PulldownButton;
-
+            
+            // Includes all components without UI
             PulldownButtonData miscComponentsPulldownButtonData = new PulldownButtonData("MiscComponentsPullDownButton", "Misc Tools");
             miscComponentsPulldownButtonData.ToolTip = "All tools without their own dedicated window or dockable pane.";
             miscComponentsPulldownButtonData.Image = Util.GetImage(assembly, "CarsonsAddins.Resources.blockA_16.png");
             miscComponentsPulldownButtonData.LargeImage = Util.GetImage(assembly, "CarsonsAddins.Resources.blockA_32.png");
             PulldownButton miscComponentsPulldownButton = panel.AddItem(miscComponentsPulldownButtonData) as PulldownButton;
+
+            // Get each ComponentState and if they are enabled, then attempts to generate a new instance of each component, registering them in the progress
             foreach (ComponentState state in componentStates)
             {
 
                 if (state == null) continue;
                 if (state.IsEnabled)
                 {
+                    //uses reflection to find each class by type and generate a new instance
                     ISettingsComponent component = (ISettingsComponent)state.ComponentType.GetConstructor(new Type[0]).Invoke(new object[0]);
 
                     settingsComponents.Add(component);
