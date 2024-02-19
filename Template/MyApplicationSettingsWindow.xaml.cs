@@ -24,13 +24,17 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using System.CodeDom;
 using System.Threading;
+using Autodesk.Revit.DB.ExtensibleStorage;
+using System.Net.NetworkInformation;
+using System.Windows.Forms;
 
 namespace CarsonsAddins
 {
-    /*
-     * Note: This class and command are always registered and active within the application. Also, I might should move the ISettingsComponent hierarchy to their own class to save space and increase readability.
-     * Purpose: To load, set, and save ComponentState information for each Command within a Window
-     */
+
+    /// <summary>
+    /// Controls the loading, setting, and saving of ComponentState information. There is one ComponentState per Command and each State can be enabled and disabled within the Window UI.
+    /// Note: This class and command are always registered and active within the application. Also, I might should move the ISettingsComponent hierarchy to their own class to save space and increase readability.
+    /// </summary>
     public partial class MyApplicationSettingsWindow : Window
     {
         public MyApplicationSettingsWindow()
@@ -55,9 +59,9 @@ namespace CarsonsAddins
 
         }
 
-        /*
-         * The ShowSettingsWindow class is needed so that the MyApplicationSettingsWindow doesn't need extend the ISettingsComponent to prevent feedback loops on register
-         */
+        /// <summary>
+        /// Shows the SettingsWindow. The ShowSettingsWindow class is needed so that the MyApplicationSettingsWindow doesn't need extend the ISettingsComponent to prevent feedback loops on register
+        /// </summary>
         [Transaction(TransactionMode.Manual)]
         public class ShowSettingsWindow : IExternalCommand
         {
@@ -84,7 +88,9 @@ namespace CarsonsAddins
         }
 
     }
-    //Stores the Settings state, either by loading it in from the user's preferences or setting the state to their default values
+    /// <summary>
+    /// Stores the Settings state, either by loading it in from the user's preferences or setting the state to their default values
+    /// </summary>
     public class MyApplicationSettings
     {
         public static MyApplicationSettings Instance;
@@ -118,11 +124,13 @@ namespace CarsonsAddins
 
             return componentTypes;
         }
-        /*
-         * - Uses reflection to determine which of the components found within the namespace should be enabled and loaded in by default ( determined by the field: "public const bool IsWIP" ) 
-         * - Unfortunately, this causes all ISettingsComponents to require the ISWIP field without it being stated in the inherited class
-         * - The IsWIP Field should be const such that the value is loaded and can be evaluated at compile time, this is also because the field never changes between sessions of Revit ( unless the user changes addin versions ).
-         */
+
+        /// <summary>
+        /// Uses reflection to determine which of the components found within the namespace should be enabled and loaded in by default ( determined by the field: "public const bool IsWIP" ).  
+        /// Unfortunately, this causes all ISettingsComponents to require the ISWIP field without it being stated in the inherited class.  
+        /// The IsWIP Field should be const such that the value is loaded and can be evaluated at compile time, this is also because the field never changes between sessions of Revit(unless the user changes addin versions).
+        /// </summary>
+        /// <param name="assembly">The current Addin Assembly</param>
         private void SetToDefault(Assembly assembly)
         {
             settingsState.Clear();
@@ -144,10 +152,10 @@ namespace CarsonsAddins
             if (!string.IsNullOrEmpty(log)) TaskDialog.Show("Types Missing IsWIP Check", log);
         }
 
-        /*
-         * Attempts to load the ComponentState preferences ( which store what commands are enabled and disabled at application start ),
-         * if it cannot, then set the settings to default ( based on the WIP or Work-in-Progress const in each class )
-         */
+        /// <summary>
+        /// Attempts to load the ComponentState preferences ( which store what commands are enabled and disabled at application start ), and if it cannot, it then sets the settings to default ( based on the WIP or Work-in-Progress const in each class ).
+        /// </summary>
+        /// <param name="assembly">The current Addin Assembly</param>
         public void LoadFromDB(Assembly assembly)
         {
             try
@@ -188,23 +196,38 @@ namespace CarsonsAddins
      * -Cons: 
      *  -> Now each command ( with a button ) must implement ISettingsComponent and have a const bool IsWIP to be loaded in properly. This is unless the command is just set to always be loaded in, such as the open settings window command.
      */
+
+    /// <summary>
+    /// All commands that require a button on the ribbon panel, and are created by this Addin should implement this interface.
+    /// </summary>
     public interface ISettingsComponent
     {
         PushButtonData RegisterButton(Assembly assembly);
     }
+
+    /// <summary>
+    /// All commands that require a button on the ribbon panel, are created by this Addin, and have dedicated XAML UI ( such as a Window or Dockable Pane ) should implement this interface.
+    /// </summary>
     public interface ISettingsUIComponent : ISettingsComponent 
     {
         void Init(UIDocument uidoc);
-        
-
     }
+    
+    /// <summary>
+    /// All commands that require a button on the ribbon panel, are created by this addin, and have their own corresponding Updater should implement this interface.
+    /// </summary>
     public interface ISettingUpdaterComponent : ISettingsComponent
     { 
         void RegisterUpdater(AddInId addinId);
         void UnregisterUpdater();
     }
 
-
+    /// <summary>
+    /// Stores information on all the classes that extend the ISettingsComponent interface and are located within the Assembly. 
+    /// In other words, all classes with commands and UI should have their type information stored here. 
+    /// The information stored is used with reflection to more easily register components to Revit. 
+    /// It is also used to set the default state on whether or not Revit will register and load each command as a button by checking whether or not it is WIP. 
+    /// </summary>
     public class ComponentState : INotifyPropertyChanged
 
     {
