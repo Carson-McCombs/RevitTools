@@ -19,10 +19,22 @@ using static CarsonsAddins.PipeEndPrepWindow;
 namespace CarsonsAddins
 {
     public enum BellOrSpigot { NONE, BELL, SPIGOT };
+
+    /*
+     * The Util class is an assortment of utility functions that are meant to be used and referenced in multiple commands and other parts of the addin.
+     * 
+     *  Note: In the future, this class should probably be split into seperate classes ( probably one class per region )
+     */
     public class Util
     {
         private static int minimumDiameterGauged = 14;
 
+        /// <summary>
+        /// Retrieves the image at the file location as a Resource Stream and converts it to a Bitmap. This is used to save images and icons to the compiled addin.
+        /// </summary>
+        /// <param name="assembly">The Addin Assembly</param>
+        /// <param name="imagePath">The filepath the image is located</param>
+        /// <returns>The image as a Bitmap</returns>
         public static BitmapSource GetImage(Assembly assembly, string imagePath)
         {
             try
@@ -37,35 +49,87 @@ namespace CarsonsAddins
         }
 
         #region PipingDBTools
-        public static List<Element> GetAllPipeTypes(Document doc)
+
+        /// <summary>
+        /// Retrieves all of the Elements with the ElementType of "PipeType" within the Revit DB
+        /// </summary>
+        /// <param name="doc">The active Revit Document</param>
+        /// <returns>a List containing all of the PipeType Families (i.e. Generic, Flanged, Victaulic, etc. )</returns>
+        public static List<Element> GetAllPipeTypeFamilies(Document doc)
         {
            return new FilteredElementCollector(doc).OfClass(typeof(PipeType)).ToElements() as List<Element>;
         }
-        public static List<string> GetAllPipeTypeNames(Document doc) { return (List<string>)GetAllPipeTypes(doc).Select(ps => ps.Name); }
+
+        /// <summary>
+        /// Calls the GetAllPipeTypeFamilies function and then returns a list of all the PipeType names
+        /// </summary>
+        /// <param name="doc">The active Revit Document</param>
+        /// <returns>a List containing all of the PipeType Family Names</returns>
+        public static List<string> GetAllPipeTypeNames(Document doc) 
+        { 
+            return (List<string>)GetAllPipeTypeFamilies(doc).Select(ps => ps.Name); 
+        }
+
+        /// <summary>
+        /// Retrieves all of the Elements within the PipingSystem category. This returns all of the instances of each Piping System 
+        /// </summary>
+        /// <param name="doc">The active Revit Document</param>
+        /// <returns>a List containing all of the Pipe System instances ( i.e. for the BYPASS Piping System, it would return BYP1, BYP2, BYP3, etc. )</returns>
         public static List<Element> GetAllPipeSystemInstances(Document doc)
         {
             return new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_PipingSystem).ToElements() as List<Element>;
         }
-        public static List<Element> GetAllPipeSystems(Document doc)
+
+        /// <summary>
+        /// Retrieves all of the ElementTypes within the PipingSystem category. This returns all of the Piping System ( i.e. AIR INTAKE, BYPASS, etc. )
+        /// </summary>
+        /// <param name="doc">The active Revit Document</param>
+        /// <returns>a List containing all of the Pipe System Families ( i.e. AIR INTAKE, BYPASS, etc. )</returns>
+        public static List<Element> GetAllPipeSystemFamilies(Document doc)
         {
             return new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_PipingSystem).WhereElementIsElementType().ToElements() as List<Element>;
         }
-        public static List<string> GetAllPipeSystemNames(Document doc) { return (List<string>)GetAllPipeSystems(doc).Select(ps => ps.Name);}
-        //public static List<string> GetAllPipeFamilyNames(Document doc) { return new List<string>(){ "FLG", "MJ", "CMJ", "TRF"}; }
 
-        public static List<Element> GetAllPipeFittings(Document doc)
+        /// <summary>
+        /// Calls the GetAllPipeSystemFamilies function and then returns a list of all the Pipe System names
+        /// </summary>
+        /// <param name="doc">The active Revit Document</param>
+        /// <returns>a List containing all of the Pipe System Family Names ( i.e. "AIR INTAKE", "BYPASS", etc. )</returns>
+        public static List<string> GetAllPipeSystemNames(Document doc) { return (List<string>)GetAllPipeSystemFamilies(doc).Select(ps => ps.Name);}
+
+        /// <summary>
+        /// Retrieves all list of all of the Pipe Fitting Families within the Revit DB
+        /// </summary>
+        /// <param name="doc">The active Revit Document</param>
+        /// <returns>a List containing all of the Pipe Fitting Families ( i.e. Flange, TR-Flex Bell, MJ Bell, etc. )</returns>
+        public static List<Element> GetAllPipeFittingFamilies(Document doc)
         {
             return new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_PipeFitting).WhereElementIsElementType().ToElements() as List<Element>;
         }
-        public static List<string> GetAllPipeFittingNames(Document doc) { return (List<string>)GetAllPipeFittings(doc).Select(ps => ps.Name); }
+
+        ///<summary>
+        ///Calls the GetAllPipeFittingFamilies function and then returns a list of all the Pipe Fitting Family Names
+        ///</summary>
+        public static List<string> GetAllPipeFittingFamilyNames(Document doc) 
+        { 
+            return (List<string>)GetAllPipeFittingFamilies(doc).Select(ps => ps.Name); 
+        }
+
         #endregion
 
 
         #region PipingConnectionTools
-        public static Connector TryGetConnection(FamilyInstance elemA, FamilyInstance elemB)
+
+        /// <summary>
+        /// Gets the connectors from elementA and elementB, then checks each combination of connectors to see if they are connected. 
+        /// </summary>
+        /// <param name="elementA">The primary element whose connectors is being checked to see if they connect to elementB.</param>
+        /// <param name="elementB">The secondary element which is being connected to.</param>
+        /// <returns>Returns the connector from elementA that connects to elementB. Returns null if there is no connection.</returns>
+        public static Connector TryGetConnection(FamilyInstance elementA, FamilyInstance elementB)
         {
-            List<Connector> connectorsA = GetConnectors(elemA.MEPModel.ConnectorManager);
-            List<Connector> connectorsB = GetConnectors(elemB.MEPModel.ConnectorManager);
+            List<Connector> connectorsA = GetConnectors(elementA.MEPModel.ConnectorManager);
+            List<Connector> connectorsB = GetConnectors(elementB.MEPModel.ConnectorManager);
             foreach (Connector conA in connectorsA)
             {
                 foreach (Connector conB in connectorsB)
@@ -78,24 +142,20 @@ namespace CarsonsAddins
             return null;
 
         }
-
-        public static XYZ GetDirectionOfConnection(FamilyInstance elemA, FamilyInstance elemB)
+        /// <summary>
+        /// Calls the TryGetConnection function to retrieve the connector from elementA that connects to elementB. Then getting the direction from the center of elementA to the connector.
+        /// </summary>
+        /// <param name="elementA">The primary element which the direction is centered on.</param>
+        /// <param name="elementB">The secondary element which is connected to the first.</param>
+        /// <returns>The direction from elementA's center to the connection. Returns null if there is not a connection between the two elements.</returns>
+        public static XYZ GetDirectionOfConnection(FamilyInstance elementA, FamilyInstance elementB)
         {
-            Connector connector = TryGetConnection(elemA, elemB);
+            Connector connector = TryGetConnection(elementA, elementB);
             if (connector == null) return null;
-            XYZ origin = (elemA.Location as LocationPoint).Point;
+            XYZ origin = (elementA.Location as LocationPoint).Point;
             return (Line.CreateBound(origin, connector.Origin).Direction);
         }
-        public static bool IsDirectionCloserThan(XYZ directionA, XYZ directionB, XYZ goal)
-        {
-            if (directionA.IsAlmostEqualTo(goal) || directionA.IsAlmostEqualTo(-goal)) return true;
-           
-            if (directionB.IsAlmostEqualTo(goal) || directionB.IsAlmostEqualTo(-goal)) return false;
-            return false;
-            //double distA = Math.Min(directionA.AngleTo(goal), directionA.AngleTo(-goal));
-            //double distB = Math.Min(directionB.AngleTo(goal), directionB.AngleTo(-goal));
-            //return (distA <= distB);
-        }
+
         public static List<Connector> GetConnectors(Pipe pipe) {return GetConnectors(pipe.ConnectorManager); }
 
         public static List<Connector> GetConnectors(FamilyInstance fitting) { return GetConnectors(fitting.MEPModel.ConnectorManager); }

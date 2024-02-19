@@ -112,7 +112,7 @@ namespace CarsonsAddins
         }
         private void LoadFromDB()
         {
-            List<Element> elems = Util.GetAllPipeSystems(doc);
+            List<Element> elems = Util.GetAllPipeSystemFamilies(doc);
             foreach (Element elem in elems)
             {
                 PipingSystemLC ps = new PipingSystemLC(elem.Name);

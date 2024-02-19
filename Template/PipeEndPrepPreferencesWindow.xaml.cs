@@ -114,7 +114,7 @@ namespace CarsonsAddins
         private void LoadFromDB()
         {
             preferences = new ObservableCollection<PipeEndPrepPreferences>();
-            List<Element> fittings = GetAllPipeFittings(doc);
+            List<Element> fittings = GetAllPipeFittingFamilies(doc);
             foreach (Element element in fittings)
             {
                 FamilySymbol familySymbol = element as FamilySymbol;

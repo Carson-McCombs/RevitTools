@@ -133,7 +133,7 @@ namespace CarsonsAddins
                         //XYZ direction = Line.CreateUnbound((elements[0].Location as LocationPoint).Point, (elements[elements.Count - 1].Location as LocationPoint).Point).Direction; //could cause issues depending on view orientation in relation to bend direction
                         XYZ direction = Util.GetDirectionOfConnection(elem as FamilyInstance, connected as FamilyInstance);
                         Line[] lines = Util.GetGeometryLinesOfBend(doc.ActiveView, elem);
-                        line = (Util.IsDirectionCloserThan(lines[0].Direction, lines[1].Direction, direction)) ? lines[0] : lines[1];
+                        //line = (Util.IsDirectionCloserThan(lines[0].Direction, lines[1].Direction, direction)) ? lines[0] : lines[1];
                         //line = (lines[0].Direction.IsAlmostEqualTo(direction) || lines[0].Direction.IsAlmostEqualTo(-direction)) ? lines[0] : lines[1];
                         //XYZ otherDirection = (Util.IsDirectionCloserThan(lines[0].Direction, lines[1].Direction, roughDirection.Direction)) ? lines[0].Direction: lines[1].Direction;
                         referenceArray.Append(line.GetEndPointReference(0));
