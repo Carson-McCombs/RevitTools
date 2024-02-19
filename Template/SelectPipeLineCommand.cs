@@ -20,6 +20,13 @@ namespace CarsonsAddins
     {
         public const bool IsWIP = false;
 
+        public PushButtonData RegisterButton(Assembly assembly)
+        {
+            PushButtonData pushbuttonData = new PushButtonData("SelectPipeLineCommand", "Select Elements in Pipe Line", assembly.Location, "CarsonsAddins.SelectPipeLineCommand");
+            pushbuttonData.ToolTip = "Selects all pipes connected to selected pipe.";
+            return pushbuttonData;
+        }
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             return Execute(commandData.Application);
@@ -30,7 +37,7 @@ namespace CarsonsAddins
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
             {
-                TaskDialog.Show("Question Mark Dimensions Command", "Command should not be used within a family document.");
+                TaskDialog.Show("Select Pipeline Command", "Command should not be used within a family document.");
                 return Result.Failed;
             }
             Transaction transaction = new Transaction(doc);
@@ -67,12 +74,7 @@ namespace CarsonsAddins
             //return Result.Succeeded;
         }
 
-        public PushButtonData RegisterButton(Assembly assembly)
-        {
-            PushButtonData pushbuttonData = new PushButtonData("SelectPipeLineCommand", "Select Elements in Pipe Line", assembly.Location, "CarsonsAddins.SelectPipeLineCommand");
-            pushbuttonData.ToolTip = "Selects all pipes connected to selected pipe.";
-            return pushbuttonData;
-        }
+        
     }
 
  

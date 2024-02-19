@@ -90,7 +90,6 @@
     <Compile Include="MyApplicationSettingsWindow.xaml.cs">
       <DependentUpon>MyApplicationSettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DimensionBendCommand.cs" />
     <Compile Include="DimensionPipeLineCommand.cs" />
     <Compile Include="FilterSelectionCommand.cs" />
     <Compile Include="GetTotalPipeLengthCommand.cs" />
