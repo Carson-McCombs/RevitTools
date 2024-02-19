@@ -273,14 +273,15 @@ namespace CarsonsAddins
             
             */
         }
-        
+        /* 
+         * Instead of unregistering all components updaters in the main ThisApplication class, each updater is instead subscribed to their own OnApplicationClosing event -when registered.
         private void UnregisterUpdaters()
         {
             foreach (ISettingsComponent component in settingsComponents)
             {
                 if (component is ISettingUpdaterComponent uiComponent) uiComponent.UnregisterUpdater();
             }
-        }
+        }*/
     }
     
     #region Window Setup
@@ -299,266 +300,36 @@ namespace CarsonsAddins
 
 
 
-    #region LCPreferenceWindow Setup
-    /*
-    [Transaction(TransactionMode.Manual)]
-    [Regeneration(RegenerationOption.Manual)]
-    public class RegisterPreferenceWindow : IExternalCommand
-    {
-        public PreferenceWindow windowInstance = null;
-        UIApplication uiapp = null;
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            return Execute(commandData.Application);
-            
-        }
-        
-        public Result Execute(UIApplication uiapp)
-        {
-            this.uiapp = uiapp;
-            DockablePaneProviderData data = new DockablePaneProviderData();
-            
-            windowInstance = new PreferenceWindow();
-            windowInstance.SetupDockablePane(data);
-
-            DockablePaneId id = new DockablePaneId(ApplicationIds.preferenceWindowId);
-            uiapp.RegisterDockablePane(id, "Dockable Preference Window", windowInstance as IDockablePaneProvider);
-            uiapp.Application.DocumentOpened += new EventHandler<DocumentOpenedEventArgs>(OnDocumentOpened);
-
-            return Result.Succeeded;
-        }
-
-        public void OnDocumentOpened(object sender, DocumentOpenedEventArgs e)
-        {
-            //TaskDialog.Show("OnViewActivated", "View has been activated.");
-            if (uiapp.ActiveUIDocument == null)
-            {
-                TaskDialog.Show("ERROR", "UIAPP IS NULL");
-                return;
-            }
-            windowInstance.Init(uiapp.ActiveUIDocument);
-        }
-
-    }
-    [Transaction(TransactionMode.Manual)]
-    public class ShowPreferenceWindow : IExternalCommand
-    {
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            try
-            {
-                DockablePaneId id = new DockablePaneId(ApplicationIds.preferenceWindowId);
-                DockablePane dockablePane = commandData.Application.GetDockablePane(id);
-                dockablePane.Show();
-            }
-            catch (Exception e)
-            {
-                TaskDialog.Show("Show Preference Window Error", e.Message);
-
-            }
-            return Result.Succeeded;
-        }
-    }*/
-    #endregion
-
-    #region PEP Window Setup
-    //[Transaction(TransactionMode.Manual)]
-    //[Regeneration(RegenerationOption.Manual)]
-    //public class RegisterPipeEndPrepWindow : IExternalCommand
-    //{
-    //    public PipeEndPrepWindow windowInstance = null;
-    //    UIApplication uiapp = null;
-    //    public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-    //    {
-    //        return Execute(commandData.Application);
-
-    //    }
-
-    //    public Result Execute(UIApplication uiapp)
-    //    {
-    //        this.uiapp = uiapp;
-    //        DockablePaneProviderData data = new DockablePaneProviderData();
-
-    //        windowInstance = new PipeEndPrepWindow();
-    //        windowInstance.SetupDockablePane(data);
-
-    //        DockablePaneId id = new DockablePaneId(ApplicationIds.pipeEndPrepWindowId);
-    //        uiapp.RegisterDockablePane(id, "Dockable Pipe End Prep Window", windowInstance as IDockablePaneProvider);
-    //        uiapp.Application.DocumentOpened += new EventHandler<DocumentOpenedEventArgs>(OnDocumentOpened);
-
-    //        return Result.Succeeded;
-    //    }
-
-    //    public void OnDocumentOpened(object sender, DocumentOpenedEventArgs e)
-    //    {
-    //        //TaskDialog.Show("OnViewActivated", "View has been activated.");
-    //        if (uiapp.ActiveUIDocument == null)
-    //        {
-    //            TaskDialog.Show("ERROR", "UIAPP IS NULL");
-    //            return;
-    //        }
-    //        windowInstance.Init(uiapp.ActiveUIDocument);
-    //    }
-
-    //}
-    //[Transaction(TransactionMode.Manual)]
-    //public class ShowPipeEndPrepWindow : IExternalCommand
-    //{
-    //    public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-    //    {
-    //        try
-    //        {
-    //            DockablePaneId id = new DockablePaneId(ApplicationIds.pipeEndPrepWindowId);
-    //            DockablePane dockablePane = commandData.Application.GetDockablePane(id);
-    //            dockablePane.Show();
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            TaskDialog.Show("Show Pipe End Prep Window Error", e.Message);
-
-    //        }
-    //        return Result.Succeeded;
-    //    }
-    //}
-    //#endregion
-
-    //#region SimpleFilter Window Setup
-    //[Transaction(TransactionMode.Manual)]
-    //[Regeneration(RegenerationOption.Manual)]
-    //public class RegisterSimpleFilterPane : IExternalCommand
-    //{
-    //    public SimpleFilterDockablePane windowInstance = null;
-    //    UIApplication uiapp = null;
-    //    public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-    //    {
-    //        return Execute(commandData.Application);
-
-    //    }
-
-    //    public Result Execute(UIApplication uiapp)
-    //    {
-    //        this.uiapp = uiapp;
-    //        DockablePaneProviderData data = new DockablePaneProviderData();
-
-    //        windowInstance = new SimpleFilterDockablePane();
-    //        windowInstance.SetupDockablePane(data);
-
-    //        DockablePaneId id = new DockablePaneId(ApplicationIds.simpleFilterPaneId);
-    //        uiapp.RegisterDockablePane(id, "Dockable Simple Filter Window", windowInstance as IDockablePaneProvider);
-    //        uiapp.Application.DocumentOpened += new EventHandler<DocumentOpenedEventArgs>(OnDocumentOpened);
-
-    //        return Result.Succeeded;
-    //    }
-
-    //    public void OnDocumentOpened(object sender, DocumentOpenedEventArgs e)
-    //    {
-    //        //TaskDialog.Show("OnViewActivated", "View has been activated.");
-    //        if (uiapp.ActiveUIDocument == null)
-    //        {
-    //            TaskDialog.Show("ERROR", "UIAPP IS NULL");
-    //            return;
-    //        }
-    //        windowInstance.Init(uiapp.ActiveUIDocument);
-    //    }
-    //}
-    //[Transaction(TransactionMode.Manual)]
-    //public class ShowSimpleFilterPane : IExternalCommand
-    //{
-    //    public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-    //    {
-    //        try
-    //        {
-    //            DockablePaneId id = new DockablePaneId(ApplicationIds.simpleFilterPaneId);
-    //            DockablePane dockablePane = commandData.Application.GetDockablePane(id);
-    //            dockablePane.Show();
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            TaskDialog.Show("Show Simple Filter Pane Error", e.Message);
-
-    //        }
-    //        return Result.Succeeded;
-    //    }
-    //}
-    //#endregion
-
-    //#region ComplexFilter Setup
-    //[Transaction(TransactionMode.Manual)]
-    //[Regeneration(RegenerationOption.Manual)]
-    //public class RegisterComplexFilterPane : IExternalCommand
-    //{
-    //    public ComplexFilterDockablePane windowInstance = null;
-    //    UIApplication uiapp = null;
-    //    public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-    //    {
-    //        return Execute(commandData.Application);
-
-    //    }
-
-    //    public Result Execute(UIApplication uiapp)
-    //    {
-    //        this.uiapp = uiapp;
-    //        DockablePaneProviderData data = new DockablePaneProviderData();
-
-    //        windowInstance = new ComplexFilterDockablePane();
-    //        windowInstance.SetupDockablePane(data);
-
-    //        DockablePaneId id = new DockablePaneId(ApplicationIds.complexFilterPaneId);
-    //        uiapp.RegisterDockablePane(id, "Dockable Simple Filter Window", windowInstance as IDockablePaneProvider);
-    //        uiapp.Application.DocumentOpened += new EventHandler<DocumentOpenedEventArgs>(OnDocumentOpened);
-
-    //        return Result.Succeeded;
-    //    }
-
-    //    public void OnDocumentOpened(object sender, DocumentOpenedEventArgs e)
-    //    {
-    //        //TaskDialog.Show("OnViewActivated", "View has been activated.");
-    //        if (uiapp.ActiveUIDocument == null)
-    //        {
-    //            TaskDialog.Show("ERROR", "UIAPP IS NULL");
-    //            return;
-    //        }
-    //        windowInstance.Init(uiapp.ActiveUIDocument);
-    //    }
-    //}
-    //[Transaction(TransactionMode.Manual)]
-    //public class ShowComplexFilterPane : IExternalCommand
-    //{
-    //    public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-    //    {
-    //        try
-    //        {
-    //            DockablePaneId id = new DockablePaneId(ApplicationIds.complexFilterPaneId);
-    //            DockablePane dockablePane = commandData.Application.GetDockablePane(id);
-    //            dockablePane.Show();
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            TaskDialog.Show("Show Simple Filter Pane Error", e.Message);
-
-    //        }
-    //        return Result.Succeeded;
-    //    }
-    //}
-
     interface IExecuteWithUIApplication
     {
         Result Execute(UIApplication uiapp);
     }
 
 
+
+    /*
+     * This class registers a dockable pane, with a generic type, to Revit
+     */
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class RegisterDockablePane<T> : IExternalCommand, IExecuteWithUIApplication where T : ISettingsUIComponent, IDockablePaneProvider, new()
     {
         public T windowInstance;
         UIApplication uiapp = null;
+
+        /*
+         * By passing the Execute function to one with only the UIApplication parameter, this allows for the extenal command to be called easier and less reliant on Revit
+         */
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             return Execute(commandData.Application);
 
         }
 
+
+        /*
+         * Registers the dockable pane of a generic type, along with any updaters
+         */
         public Result Execute(UIApplication uiapp)
         {
             this.uiapp = uiapp;
@@ -618,7 +389,7 @@ namespace CarsonsAddins
 
     #endregion
 
-    #endregion
+
 }
 
 
