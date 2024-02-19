@@ -35,7 +35,6 @@ namespace CarsonsAddins
         }
         public Result Execute(UIApplication uiapp)
         {
-            int flag = 0;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
@@ -70,7 +69,6 @@ namespace CarsonsAddins
                 
                 Reference pipeReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilter_Pipe(), "Please select a Pipe.");
                 Pipe pipe = doc.GetElement(pipeReference.ElementId) as Pipe;
-                flag++;
                 if (pipe == null)
                 {
                     transaction.RollBack();
@@ -79,15 +77,13 @@ namespace CarsonsAddins
                 }
                 PipeLine pipeLine = new PipeLine();
                 pipeLine.GetPipeLine(uidoc, pipe, new SelectionFilter_PipingElements(true, true, false, true));
-                flag++;
                 pipeLine.CreateDimensionLinesFromReferences(doc, 4);
-                flag++;
                 transaction.Commit();
                 return Result.Succeeded;
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("DPL Error " + flag, ex.Message);
+                TaskDialog.Show("Dimension Pipe Line Command Error ", ex.Message);
                
                 transaction.RollBack();
                 return Result.Failed;
