@@ -89,141 +89,10 @@ namespace CarsonsAddins
                     else miscComponentsPulldownButton.AddPushButton(buttonData);
                 }
             }
-            /* Below is the method I was originally using to load in external commands
-             * - Reason for changing to ComponentStates: 
-             *  -> I didn't like having to recompile everytime I wanted to enable or disable a command,
-             *  -> I didn't like having all of this information, specific to each command and window, all located in the main application class
-             *  
-            if (PreferenceWindow.LoadWindow || PipeEndPrepWindow.LoadWindow || SimpleFilterDockablePane.LoadWindow || ComplexFilterDockablePane.LoadWindow)
-            {
-                PulldownButtonData dockablesPulldownData = new PulldownButtonData("Open Dockable Panes", "Dockables");
-                dockablesPulldownData.Image = GetImage(assembly, "CarsonsAddins.Resources.blockA_16.png");
-                dockablesPulldownData.LargeImage = GetImage(assembly, "CarsonsAddins.Resources.blockA_32.png");
-                PulldownButton dockablesPulldown = panel.AddItem(dockablesPulldownData) as PulldownButton;
-
-                if (PreferenceWindow.LoadWindow)
-                {
-                    PushButtonData openPreferencesButton = new PushButtonData("OpenPreferencesWindow", "Open Preferences Window", assemblyPath, "CarsonsAddins.ShowPreferenceWindow");
-                    openPreferencesButton.ToolTip = "Opens Dockable Preference Window";
-                    dockablesPulldown.AddPushButton(openPreferencesButton);
-                }
-                if (PipeEndPrepWindow.LoadWindow)
-                {
-                    PushButtonData openPEP = new PushButtonData("OpenPipeEndPrepWindow", "Open Pipe End Prep Window", assemblyPath, "CarsonsAddins.ShowPipeEndPrepWindow");
-                    openPEP.ToolTip = "Opens Dockable Pipe End Prep Window";
-                    dockablesPulldown.AddPushButton(openPEP);
-                }
-                if (SimpleFilterDockablePane.LoadWindow)
-                {
-                    PushButtonData simpleFilterButton = new PushButtonData("ShowSimpleFilterPane", "Simple Element Filter Pane", assemblyPath, "CarsonsAddins.ShowSimpleFilterPane");
-                    simpleFilterButton.LargeImage = GetImage(assembly, "CarsonsAddins.Resources.cloud_32.png");
-                    simpleFilterButton.Image = GetImage(assembly, "CarsonsAddins.Resources.cloud_16.png");
-                    simpleFilterButton.ToolTip = "Simple Filter.";
-                    dockablesPulldown.AddPushButton(simpleFilterButton);
-                }
-                if (ComplexFilterDockablePane.LoadWindow)
-                {
-                    PushButtonData complexFilterButton = new PushButtonData("ShowFilterPane", "Element Filter Pane", assemblyPath, "CarsonsAddins.ShowComplexFilterPane");
-                    //complexFilterButton.LargeImage = GetImage(assembly, "CarsonsAddins.Resources.coin_32.png");
-                    //complexFilterButton.Image = GetImage(assembly, "CarsonsAddins.Resources.coin_16.png");
-                    complexFilterButton.ToolTip = "A Complex Filter which can be used to sort and set element parameter values.";
-                    dockablesPulldown.AddPushButton(complexFilterButton);
-                }
-
-                
-
-
-            }
-            
-            if (DimensionPipeLineCommand.LoadCommand || SelectPipeLineCommand.LoadCommand || DimensionBendCommand.LoadCommand)
-            {
-                PulldownButtonData pipeLinePulldownData = new PulldownButtonData("Pipe Line", "Pipe Line Tools");
-                pipeLinePulldownData.Image = GetImage(assembly, "CarsonsAddins.Resources.blockB_16.png");
-                pipeLinePulldownData.LargeImage = GetImage(assembly, "CarsonsAddins.Resources.blockB_32.png");
-                pipeLinePulldownData.ToolTip = "A pipe line is defined here as all elements connected to either side of a pipe until either a change in direction, size, or the line ends.";
-                PulldownButton pipeLinePulldown = panel.AddItem(pipeLinePulldownData) as PulldownButton;
-
-                if (DimensionPipeLineCommand.LoadCommand)
-                {
-                    PushButtonData dimensionPipeLineButton = new PushButtonData("DimensionPipeLineCommand (WIP)", "Dimensions Elements in Pipe Line (WIP)", assemblyPath, "CarsonsAddins.DimensionPipeLineCommand");
-                    dimensionPipeLineButton.ToolTip = "Gets the dimensions of all elements in pipe line.";
-                    pipeLinePulldown.AddPushButton(dimensionPipeLineButton);
-                }
-                if (SelectPipeLineCommand.LoadCommand)
-                {
-                    PushButtonData selectPipeLineButton = new PushButtonData("SelectPipeLineCommand", "Select Elements in Pipe Line", assemblyPath, "CarsonsAddins.SelectPipeLineCommand");
-                    selectPipeLineButton.ToolTip = "Selects all pipes connected to selected pipe.";
-                    pipeLinePulldown.AddPushButton(selectPipeLineButton);
-                }
-                if (DimensionBendCommand.LoadCommand)
-                {
-                    PushButtonData dimensionBendCommand = new PushButtonData("DimensionBendCommand (WIP)", "Dimension Bend (WIP)", assemblyPath, "CarsonsAddins.DimensionBendCommand");
-                    dimensionBendCommand.ToolTip = "Dimensions selected bend.";
-                    pipeLinePulldown.AddPushButton(dimensionBendCommand);
-                }
-
-            }
-            
-            if (GetTotalPipeLengthCommand.LoadCommand || SmartFlipCommand.LoadCommand || SelectAllElementsOfSystemCommand.LoadCommand || FilterSelectionCommand.LoadCommand || QuestionMarkDimensionsCommand.LoadCommand)
-            {
-                PulldownButtonData miscToolsPulldownData = new PulldownButtonData("Misc Tools", "Misc Tools");
-                miscToolsPulldownData.Image = GetImage(assembly, "CarsonsAddins.Resources.blockC_16.png");
-                miscToolsPulldownData.LargeImage = GetImage(assembly, "CarsonsAddins.Resources.blockC_32.png");
-                miscToolsPulldownData.ToolTip = "An Assortment of Utility Commands";
-                PulldownButton miscToolsButton = panel.AddItem(miscToolsPulldownData) as PulldownButton;
-
-                if (GetTotalPipeLengthCommand.LoadCommand)
-                {
-                    PushButtonData getTotalPipeLengthButton = new PushButtonData("GetTotalPipeLengthCommand", "Get Total Pipe Length", assemblyPath, "CarsonsAddins.GetTotalPipeLengthCommand");
-                    getTotalPipeLengthButton.ToolTip = "Gets the total length of all selected pipe.";
-                    miscToolsButton.AddPushButton(getTotalPipeLengthButton);
-                }
-                
-                if (SmartFlipCommand.LoadCommand)
-                {
-                    PushButtonData smartFlipButton = new PushButtonData("SmartFlipFittingCommand", "Smart Flip Pipe Fitting", assemblyPath, "CarsonsAddins.SmartFlipCommand");
-                    smartFlipButton.Image = GetImage(assembly, "CarsonsAddins.Resources.flip_32.png");
-                    smartFlipButton.LargeImage = GetImage(assembly, "CarsonsAddins.Resources.flip_32.png");
-                    smartFlipButton.ToolTip = "Disconnects Selected Fitting Before Flipping it and Reconnecting it";
-                    miscToolsButton.AddPushButton(smartFlipButton);
-                }
-                
-                if (FilterSelectionCommand.LoadCommand)
-                {
-                    PushButtonData filterSelectionButton = new PushButtonData("FilterSelectionCommand", "Filters Selection", assemblyPath, "CarsonsAddins.FilterSelectionCommand");
-                    filterSelectionButton.LargeImage = GetImage(assembly, "CarsonsAddins.Resources.coin_32.png");
-                    filterSelectionButton.Image = GetImage(assembly, "CarsonsAddins.Resources.coin_16.png");
-                    filterSelectionButton.ToolTip = "Filters Selection.";
-                    miscToolsButton.AddPushButton(filterSelectionButton);
-                }
-                
-                if (SelectAllElementsOfSystemCommand.LoadCommand)
-                {
-                    PushButtonData selectAllElementsInPipingSystemButton = new PushButtonData("SelectAllElementsOfSystemCommand", "Selects all Elements in Piping System", assemblyPath, "CarsonsAddins.SelectAllElementsOfSystemCommand");
-                    selectAllElementsInPipingSystemButton.ToolTip = "Selects all Elements in Piping System.";
-                    miscToolsButton.AddPushButton(selectAllElementsInPipingSystemButton);
-                }
-                
-                if (QuestionMarkDimensionsCommand.LoadCommand)
-                {
-                    PushButtonData questionMarkDimensionButton = new PushButtonData("QuestionMarkDimensionsCommand", "Question Mark Dimensions", assemblyPath, "CarsonsAddins.QuestionMarkDimensionsCommand");
-                    questionMarkDimensionButton.ToolTip = "Overrides selected dimensions' value with a question mark.";
-                    miscToolsButton.AddPushButton(questionMarkDimensionButton);
-                }
-                
-            }
-            RegisterUpdaters(app);
-            */
-
-
-
-
 
             app.ControlledApplication.ApplicationInitialized += RegisterDockablePanes;
             return Result.Succeeded;
         }
-
-
         
 
         public Result OnShutdown(UIControlledApplication app)
@@ -241,47 +110,11 @@ namespace CarsonsAddins
                 {
                     var registerCommandType = typeof( RegisterDockablePane<>).MakeGenericType(component.GetType());
                     var registerCommand = Activator.CreateInstance(registerCommandType);
-                    if (registerCommand is IExecuteWithUIApplication command) command.Execute(uiapp);
-                    //if (registerCommand is ISettingUpdaterComponent updaterComponent) updaterComponent.RegisterUpdater(ActiveAddInId); //updater is now registered on command register
 
                 }
             }
-            /* Registering logic now located and information located in each command's class and ComponentState respectively
-             * 
-            //if (PreferenceWindow.LoadWindow)
-            //{
-            //    RegisterPreferenceWindow registerPreferenceWindow = new RegisterPreferenceWindow();
-            //    registerPreferenceWindow.Execute(uiapp);
-            //    pipingLCUpdater.LinkToPreferenceWindow(registerPreferenceWindow.windowInstance);
-            //}
-            //if (PipeEndPrepWindow.LoadWindow)
-            //{
-            //    RegisterPipeEndPrepWindow registerPipeEndPrepWindow = new RegisterPipeEndPrepWindow();
-            //    registerPipeEndPrepWindow.Execute(uiapp);
-            //    pipingConnectionsUpdater.Link(registerPipeEndPrepWindow.windowInstance);
-            //}
-            //if (SimpleFilterDockablePane.LoadWindow)
-            //{
-            //    RegisterSimpleFilterPane registerSimpleFilterPane = new RegisterSimpleFilterPane();
-            //    registerSimpleFilterPane.Execute(uiapp);
-            //}
-            //if (ComplexFilterDockablePane.LoadWindow)
-            //{
-            //    RegisterComplexFilterPane registerComplexFilterPane = new RegisterComplexFilterPane();
-            //    registerComplexFilterPane.Execute(uiapp);
-            //}
-            
-            */
         }
-        /* 
-         * Instead of unregistering all components updaters in the main ThisApplication class, each updater is instead subscribed to their own OnApplicationClosing event -when registered.
-        private void UnregisterUpdaters()
-        {
-            foreach (ISettingsComponent component in settingsComponents)
-            {
-                if (component is ISettingUpdaterComponent uiComponent) uiComponent.UnregisterUpdater();
-            }
-        }*/
+
     }
     
     #region Window Setup
@@ -307,9 +140,8 @@ namespace CarsonsAddins
 
 
 
-    /*
-     * This class registers a dockable pane, with a generic type, to Revit
-     */
+    //Registers a Generic Dockable Pane to Revit
+     
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class RegisterDockablePane<T> : IExternalCommand, IExecuteWithUIApplication where T : ISettingsUIComponent, IDockablePaneProvider, new()
@@ -317,9 +149,8 @@ namespace CarsonsAddins
         public T windowInstance;
         UIApplication uiapp = null;
 
-        /*
-         * By passing the Execute function to one with only the UIApplication parameter, this allows for the extenal command to be called easier and less reliant on Revit
-         */
+        //By passing the Execute function to one with only the UIApplication parameter, this allows for the extenal command to be called easier and less reliant on Revit
+         
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             return Execute(commandData.Application);
@@ -327,9 +158,8 @@ namespace CarsonsAddins
         }
 
 
-        /*
-         * Registers the dockable pane of a generic type, along with any updaters
-         */
+        //Registers the dockable pane of a generic type, along with any updaters
+         
         public Result Execute(UIApplication uiapp)
         {
             this.uiapp = uiapp;
@@ -346,7 +176,7 @@ namespace CarsonsAddins
             uiapp.ApplicationClosing += new EventHandler<ApplicationClosingEventArgs>(OnApplicationClosing);
             return Result.Succeeded;
         }
-
+        // Makes sure that the Dockable pane instance is initialized each time a new document is opened.
         private void OnDocumentOpened(object sender, DocumentOpenedEventArgs e)
         {
             //TaskDialog.Show("OnViewActivated", "View has been activated.");
@@ -357,12 +187,14 @@ namespace CarsonsAddins
             }
             windowInstance.Init(uiapp.ActiveUIDocument);
         }
+        //If the Dockable Pane has an updater, unregister it on application closing
         private void OnApplicationClosing(object sender, ApplicationClosingEventArgs e)
         {
             if (windowInstance is ISettingUpdaterComponent updaterComponent) updaterComponent.UnregisterUpdater();
         }
     }
 
+    //Retrieves an instance of the generic dockable pane and shows it
     [Transaction(TransactionMode.Manual)]
     public class ShowDockablePane<T> : IExternalCommand where T : ISettingsUIComponent, IDockablePaneProvider
     {        
