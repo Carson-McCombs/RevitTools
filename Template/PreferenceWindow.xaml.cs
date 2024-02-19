@@ -71,7 +71,7 @@ namespace CarsonsAddins
             try
             {
                 PipingSystemLC.DefaultPipeTypeNames = new List<string>();
-                List<Element> fams = Util.GetAllPipeTypes(doc);
+                List<Element> fams = Util.GetAllPipeTypeFamilies(doc);
                 foreach (Element fam in fams)
                 {
                     PipingSystemLC.DefaultPipeTypeNames.Add(fam.Name);
