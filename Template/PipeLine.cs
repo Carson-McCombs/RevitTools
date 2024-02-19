@@ -11,6 +11,15 @@ using System.Windows;
 
 namespace CarsonsAddins
 {
+
+    /*
+     * I am defining a Pipe Line as all of the connected piping elements ( i.e. Pipes, Pipe Fittings, and Pipe Accessories ) between either a Pipe Junction ( i.e. a Bend, Tee, Wye, Cross, etc. ) or end of pipe ( an empty connection ).
+     * 
+     * This is meant to be a base class that will be called for actions such as movement and dimensioning of piping elements.
+     *
+     * Note: Currently dimensioning a any junction that is not a bend in Revit does not work. Lateral Tees and Crosses seem to work for dimensioning but not for Routing Preferences. 
+     *  Getting the programmatic dimensioning to work is put on delay until either the problem is solved within my current Revit setup or by Revit themselves.
+     */
     public class PipeLine
     {
         private ISelectionFilter filter = null;
@@ -19,7 +28,7 @@ namespace CarsonsAddins
         public List<Element> GetPipeLine(UIDocument uidoc, Pipe pipe)
         {
             elements = new List<Element>();
-            filter = null;
+            filter = new SelectionFilter_PipingElements(true, true, false, true);
             List<Connector> connectors = Util.GetConnectors(pipe);
             AddNextElement_Left(uidoc, connectors[0]);
             elements.Add(pipe);
@@ -37,6 +46,7 @@ namespace CarsonsAddins
             return elements;
         }
 
+        //Recursively adds all the connected piping elements on one side (arbitrarly called the "left" side) of an element
         private void AddNextElement_Left(UIDocument uidoc, Connector current)
         {
             Connector adjacent = Util.GetAdjacentConnector(current);
@@ -44,10 +54,9 @@ namespace CarsonsAddins
             Connector next = Util.TryGetConnected(adjacent);
             if (CanContinue(next)) AddNextElement_Left(uidoc, next);
             if (adjacent.IsConnected) elements.Add(next.Owner);
-
-
-
         }
+
+        //Recursively adds all the connected piping elements on one side (arbitrarly called the "right" side) of an element
         private void AddNextElement_Right(UIDocument uidoc, Connector current)
         {
             Connector adjacent = Util.GetAdjacentConnector(current);
@@ -58,6 +67,8 @@ namespace CarsonsAddins
             if (CanContinue(next)) AddNextElement_Right(uidoc, next);
             
         }
+
+        //Checks if the Pipe Line extends to the next element, or if the current element is the last one in the Pipe Line.
         private bool CanContinue(Connector next)
         {
             if (next == null) return false;
@@ -67,63 +78,8 @@ namespace CarsonsAddins
             if (!filter.AllowElement(next.Owner)) return false;
             return true;
         }
-        
-        //public void CreateDimensionLines(Document doc, double offset)
-        //{
-        //    List<XYZ> dimensionPoints = new List<XYZ>();
-        //    foreach (Element elem in elements)
-        //    {
-        //        //XYZ[] points = Util.GetDimensionPoints(elem);
-        //        if (points == null) continue;
-        //        foreach (XYZ point in points)
-        //        {
-        //            dimensionPoints.Add(point);
 
-        //        }
-        //    }
-        //    if (dimensionPoints.Count == 0) return;
-
-        //    int start = 0;
-        //    int end = dimensionPoints.Count;
-        //    if (!Util.IsPipeBend(elements[0]))
-        //    {
-        //        start++;
-        //    }
-        //    if (!Util.IsPipeBend(elements[elements.Count - 1]))
-        //    {
-        //        end--;
-        //    }
-        //    //List<Line> dimensionLines = new List<Line>();
-        //    //string s = "";
-        //    //List<DetailCurve> curves = new List<DetailCurve>();
-        //    string s = "";
-        //    string err = "";
-        //    for (int i = start; i < end - 1; i += 2)
-        //    {
-        //        SubTransaction trans = new SubTransaction(doc);
-
-        //        trans.Start();
-        //        try
-        //        {
-        //            Connector con;
-
-        //            CreateDimension(doc, dimensionPoints[i], dimensionPoints[i + 1], offset);
-        //            trans.Commit();
-        //        }
-
-        //        catch (Exception ex)
-        //        {
-        //            s = s + dimensionPoints[i] + " connecting to " + dimensionPoints[i + 1] + " \n";
-        //            err = ex.Message;
-        //            trans.RollBack();
-
-        //        }
-
-        //    }
-        //    TaskDialog.Show("ERROR CREATING DIMENSIONS", s + "\n\n" + err);
-
-
-        //}
+        //Below is an attempt at dimensioning Pipe Lines by retrieving the Geometry Objects of each piping element and compares their direction and endpoint positions to the connectors of their respective elements. Due to the current issues stated above, fixing the below function is put on pause.
         public void CreateDimensionLinesFromReferences(Document doc, double offset) //can only be called after GetPipeLine is called
         {
             if (elements == null) return;
@@ -132,7 +88,7 @@ namespace CarsonsAddins
             {
                 names = names + elem.Id.ToString() + '\n';  
             }
-            TaskDialog.Show("ELEM NAMES", names);
+            //TaskDialog.Show("ELEM NAMES", names);
             string log = "";
             List<Reference[]> dimensionReferences = new List<Reference[]>();
             for (int i = 0; i < elements.Count; i++)
@@ -140,7 +96,7 @@ namespace CarsonsAddins
                 Element elem = elements[i];
                 Line line = null;
                 int flag = 0;
-                Reference[] references = null;  
+                //Reference[] references = null;  
                 ReferenceArray referenceArray = new ReferenceArray();
                 Reference tmp = null;
                 try
@@ -218,26 +174,6 @@ namespace CarsonsAddins
 
         
         
-            //private void CreateDimension(Document doc, XYZ pointA, XYZ pointB, double offset)
-            //{
-            //    //Line line = Line.CreateBound(dimensionPoints[i], dimensionPoints[i + 1]);
-            //    //s = s + dimensionPoints[i].ToString() + '\n';
-            //    View activeView = doc.ActiveView;
-            //    //Plane.CreateByOriginAndBasis(activeView.Origin, activeView.ViewDirection);
-            //    //activeView.SketchPlane.GetPlane().projec
-            //    //doc.ActiveView.SketchPlane = SketchPlane.Create(doc, SketchPLan
-            //    //doc.ActiveView.ViewDirection,
-            //   // doc.ActiveView.Origin);
-            //    DetailCurve detailCurve = doc.Create.NewDetailCurve(doc.ActiveView, Util.GetParallelLine(pointA, pointB, offset));
-            //    Line line = detailCurve.GeometryCurve as Line;
-            //    DetailCurve dcurveA = doc.Create.NewDetailCurve(doc.ActiveView, Line.CreateBound(pointA, line.GetEndPoint(0)));
-            //    DetailCurve dcurveB = doc.Create.NewDetailCurve(doc.ActiveView, Line.CreateBound(pointB, line.GetEndPoint(1)));
-            //    ReferenceArray refArray = new ReferenceArray();
-            //    refArray.Append(dcurveA.GeometryCurve.Reference);
-            //    refArray.Append(dcurveB.GeometryCurve.Reference);
-            //    doc.Create.NewDimension()
-            //    doc.Create.NewDimension(doc.ActiveView, line, refArray);
-            //}
 
         }
 }
