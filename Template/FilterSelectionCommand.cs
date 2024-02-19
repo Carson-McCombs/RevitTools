@@ -11,6 +11,10 @@ using System.Threading.Tasks;
 
 namespace CarsonsAddins
 {
+
+    /// <summary>
+    /// Command that Filters the current selection to only allow Piping Elements ( i.e. Pipes, Pipe Flanges, Pipe Bends / Junctions, and Pipe Accessories ).
+    /// </summary>
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     class FilterSelectionCommand : IExternalCommand, ISettingsComponent
@@ -28,36 +32,31 @@ namespace CarsonsAddins
         }
         public Result Execute(UIApplication uiapp)
         {
-            int flag = 0;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
             {
-                TaskDialog.Show("Question Mark Dimensions Command", "Command should not be used within a family document.");
+                TaskDialog.Show("Filter Selection Command", "Command should not be used within a family document.");
                 return Result.Failed;
             }
             Transaction transaction = new Transaction(doc);
             transaction.Start("FilterSelectionCommand");
             try
             {
-                flag++;
-                SelectionFilter_PipingElements filter = new SelectionFilter_PipingElements(false, true, false, false);
-                flag++;
+                SelectionFilter_PipingElements filter = new SelectionFilter_PipingElements(true, true, true, true);
                 List<ElementId> selectedIds = uidoc.Selection.GetElementIds() as List<ElementId>;
-                flag++;
                 List<ElementId> filteredIds = new List<ElementId>();
                 foreach (ElementId id in selectedIds)
                 {
                     if (filter.AllowElement((doc.GetElement(id)))) filteredIds.Add(id);
                 }
-                flag++;
                 uidoc.Selection.SetElementIds(filteredIds);
                 transaction.Commit();
                 return Result.Succeeded;
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("Filter Selection Error " + flag.ToString(), ex.Message);
+                TaskDialog.Show("Filter Selection Error ", ex.Message);
                 transaction.RollBack();
                 return Result.Failed;
             }

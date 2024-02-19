@@ -36,7 +36,6 @@ namespace CarsonsAddins
 {
     [Regeneration(RegenerationOption.Manual)]
     [Transaction(TransactionMode.Manual)]
-    //[Autodesk.Revit.DB.Macros.AddInId("82283650-43D8-4B1F-ABAF-C8BDCF5EF3A3")]
     public partial class ThisApplication : IExternalApplication
     {
 
@@ -140,8 +139,10 @@ namespace CarsonsAddins
 
 
 
-    //Registers a Generic Dockable Pane to Revit
-     
+    /// <summary>
+    /// Registers a Generic Dockable Pane to Revit.
+    /// </summary>
+    /// <typeparam name="T">Generic Type for a Dockable Pane that also extends ISettingsUIComponent and has a parameterless constructor.</typeparam>
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class RegisterDockablePane<T> : IExternalCommand, IExecuteWithUIApplication where T : ISettingsUIComponent, IDockablePaneProvider, new()
@@ -149,8 +150,8 @@ namespace CarsonsAddins
         public T windowInstance;
         UIApplication uiapp = null;
 
+
         //By passing the Execute function to one with only the UIApplication parameter, this allows for the extenal command to be called easier and less reliant on Revit
-         
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             return Execute(commandData.Application);
@@ -158,8 +159,11 @@ namespace CarsonsAddins
         }
 
 
-        //Registers the dockable pane of a generic type, along with any updaters
-         
+        /// <summary>
+        /// Registers the dockable pane of a generic type, along with any updaters.
+        /// </summary>
+        /// <param name="uiapp">The UIApplication</param>
+        /// <returns>Always returns Result.Succeeded.</returns>
         public Result Execute(UIApplication uiapp)
         {
             this.uiapp = uiapp;
@@ -176,6 +180,7 @@ namespace CarsonsAddins
             uiapp.ApplicationClosing += new EventHandler<ApplicationClosingEventArgs>(OnApplicationClosing);
             return Result.Succeeded;
         }
+
         // Makes sure that the Dockable pane instance is initialized each time a new document is opened.
         private void OnDocumentOpened(object sender, DocumentOpenedEventArgs e)
         {
@@ -194,7 +199,10 @@ namespace CarsonsAddins
         }
     }
 
-    //Retrieves an instance of the generic dockable pane and shows it
+    /// <summary>
+    ///Retrieves an instance of the Dockable Pane of Type T and shows it.
+    /// </summary>
+    /// <typeparam name="T">Generic Type for Dockable Pane that also extends the ISettingsUIComponent ( most usecases will also have a parameterless constructor ).</typeparam>
     [Transaction(TransactionMode.Manual)]
     public class ShowDockablePane<T> : IExternalCommand where T : ISettingsUIComponent, IDockablePaneProvider
     {        
