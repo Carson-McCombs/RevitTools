@@ -18,7 +18,7 @@ using System.Windows.Shapes;
 namespace CarsonsAddins
 {
     /// <summary>
-    /// Interaction logic for PipingSystemSelectorControl.xaml
+    /// A WPF UserControl that lets the User select a Piping System
     /// </summary>
     public partial class PipingSystemSelectorControl : UserControl
     {
