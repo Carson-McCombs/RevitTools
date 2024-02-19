@@ -298,15 +298,15 @@ namespace CarsonsAddins
         #endregion
         
         
-        
+        //Will comment this region once the dimension issue is fixed.
         #region PipingElementDimensioning
-        public static Line GetParallelLine(XYZ pointA, XYZ pointB, double offset)
-        {
-            XYZ perpendicularVector = pointA.CrossProduct(pointB);
-            perpendicularVector = perpendicularVector.Normalize();
-            perpendicularVector.Multiply(offset);
-            return Line.CreateBound(pointA + perpendicularVector, pointB + perpendicularVector);
-        }
+        //public static Line GetParallelLine(XYZ pointA, XYZ pointB, double offset)
+        //{
+        //    XYZ perpendicularVector = pointA.CrossProduct(pointB);
+        //    perpendicularVector = perpendicularVector.Normalize();
+        //    perpendicularVector.Multiply(offset);
+        //    return Line.CreateBound(pointA + perpendicularVector, pointB + perpendicularVector);
+        //}
         //public static Reference[] GetDimensionReferences(View activeView, Element element, XYZ direction)
         //{
         //    if (IsPipe(element)) return GetDimensionReferencesOfPipe(activeView, element);
@@ -595,7 +595,15 @@ namespace CarsonsAddins
         //    return new XYZ[1] { point.Point };
         //}
         #endregion
+
+        //Checks to determine element type and element properties
         #region PipingElementCheck
+
+        /// <summary>
+        /// Gets the Part Type of the MEP Fitting
+        /// </summary>
+        /// <param name="fitting">Family Instance of a MEP Fitting</param>
+        /// <returns>Returns the Part Type of the MEP Fitting. Will return PartType Undefined if the Family Instance is null, the Family Instance Symbol, or Symbol Family is null.</returns>
         public static PartType GetPartType(FamilyInstance fitting)
         {
             if (fitting == null) return PartType.Undefined;
@@ -605,27 +613,61 @@ namespace CarsonsAddins
             if (param == null) return PartType.Undefined;
             return (PartType)param.AsInteger();
         }
+
+        /// <summary>
+        /// Checks if the Element provided is a Family Instance with the Pipe Fitting Category and the PartType Flange or Multiport.
+        /// </summary>
+        /// <param name="element">Element to be checked.</param>
+        /// <returns>Returns true if the element is an MEP Flange or Multiport. Returns false otherwise.</returns>
+
         public static bool IsPipeFlange(Element element)
         {
             if (element == null) return false;
             if (!(element is FamilyInstance)) return false;
+            if (!element.Category.Equals(BuiltInCategory.OST_PipeFitting)) return false;
             return FlangePartTypes.Contains(GetPartType(element as FamilyInstance));
         }
+
+        /// <summary>
+        /// Checks if the Element provided is a Family Instance with the PartType of a Pipe Bend or Junction (i.e. Tee, Wye, Cross, etc. )
+        /// </summary>
+        /// <param name="element">Element to be checked.</param>
+        /// <returns>Returns true if the element is a Family Instance with the PartType Elbow, Tee, Wye, Lateral Tee, Cross, or Lateral Cross. Returns false otherwise. </returns>
         public static bool IsPipeBend(Element element)
         {
             if (element == null) return false;
             if (!(element is FamilyInstance)) return false;
             return BendPartTypes.Contains(GetPartType(element as FamilyInstance));
         }
+
+        /// <summary>
+        /// Checks if the Element provided is a Pipe Accessory with the corresponding Category.
+        /// </summary>
+        /// <param name="element">Element to be checked.</param>
+        /// <returns>Returns true if the Element is a Pipe Accessory. Returns false otherwise.</returns>
         public static bool IsPipeAccessory(Element element)
         {
             return (BuiltInCategory.OST_PipeAccessory.Equals(element.Category.BuiltInCategory));
         }
+
+        /// <summary>
+        /// Checks if the Element provided is a Pipe with the corresponding Category.
+        /// </summary>
+        /// <param name="element">Element to be checked.</param>
+        /// <returns>Returns true if the Element is a Pipe. Returns false otherwise.</returns>
         public static bool IsPipe(Element element)
         {
             return (BuiltInCategory.OST_PipeCurves.Equals(element.Category.BuiltInCategory));
         }
+        
+        /// <summary>
+        /// Part Types that are considered a "Flange"
+        /// </summary>
         public static readonly List<PartType> FlangePartTypes = new List<PartType>() { PartType.PipeFlange, PartType.MultiPort };
+
+        /// <summary>
+        /// Part Types that are considered a "Bend" ( or junction )
+        /// </summary>
         public static readonly List<PartType> BendPartTypes = new List<PartType>() { PartType.Elbow, PartType.Cross, PartType.Tee, PartType.Wye, PartType.LateralTee, PartType.LateralCross };
 #endregion
         public static double GetPipeLength(Pipe pipe)
@@ -633,18 +675,30 @@ namespace CarsonsAddins
             return pipe.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble();
             
         }
+
+        /// <summary>
+        /// Returns the position of the ConnectorManager based on the average of all the Connector Elements' Origins. Not the same as the Element position / location.
+        /// </summary>
+        /// <param name="cm">A ConnectorManager Instance.</param>
+        /// <returns>Average position of all of the Connector Elements within the ConnectorManager.</returns>
         public static XYZ GetConnectorManagerCenter(ConnectorManager cm)
         {
             XYZ origin = XYZ.Zero;
-            foreach (Connector con in cm.Connectors)
+            List<Connector> connectors = GetConnectors(cm);
+            foreach (Connector con in connectors)
             {
                 origin += con.Origin;
             }
+            origin /= connectors.Count;
             return origin;
         }
     }
 
     #region Filters
+
+    /// <summary>
+    /// A Selection Filter that only allows a specific PartType
+    /// </summary>
     public class SelectionFilter_PipeFittingPartType : ISelectionFilter
     {
         private PartType partType = PartType.Undefined;
@@ -667,6 +721,10 @@ namespace CarsonsAddins
             return false;
         }
     }
+
+    /// <summary>
+    /// A Selection Filter that only allows Pipe Elements
+    /// </summary>
     public class SelectionFilter_Pipe : ISelectionFilter
     {
         public bool AllowElement(Element elem)
@@ -679,6 +737,11 @@ namespace CarsonsAddins
             return true;
         }
     }
+
+
+    /// <summary>
+    /// A Selection Filter that can be set to allow one, some, or all Piping Elements ( i.e. Pipes, Flanges, Bends/Junctions, and Accessories ).
+    /// </summary>
     public class SelectionFilter_PipingElements : ISelectionFilter 
     {
         private bool allowPipes = true;
@@ -733,73 +796,3 @@ namespace CarsonsAddins
 }
 #endregion
 
-
-
-#region OLDCODE
-//public static List<Connector> GetAllConnectorRefs(Pipe pipe)
-//{
-//    List<Connector> allConnectorsRefs = new List<Connector>();
-//    List<Connector> localConnectors = GetConnectors(pipe);
-//    foreach (Connector localConnector in localConnectors)
-//    {
-//        foreach (Connector con in localConnector.AllRefs)
-//        {
-//            if (con.ConnectorType != ConnectorType.End) continue;
-//            if (pipe.Id.Equals(con.Owner.Id)) continue;
-
-//            allConnectorsRefs.Add(con);
-//        }
-//    }
-
-//    return allConnectorsRefs;
-//}
-
-
-
-
-//public static List<Connector> GetAllConnectorRefs(FamilyInstance fitting)
-//{
-//    List<Connector> allConnectorsRefs = new List<Connector>();
-//    List<Connector> localConnectors = GetConnectors(fitting);
-//    foreach (Connector localConnector in localConnectors)
-//    {
-//        foreach (Connector con in localConnector.AllRefs)
-//        {
-//            if (con.ConnectorType != ConnectorType.End) continue;
-//            if (fitting.Id.Equals(con.Owner.Id)) continue;
-
-//            allConnectorsRefs.Add(con);
-//        }
-//    }
-
-//    return allConnectorsRefs;
-//}
-//public static Connector GetNextConnector(Connector connector)
-//{
-//    try
-//    {
-//        if (connector.ConnectorManager == null) return null;
-//        foreach (Connector nc in connector.ConnectorManager.Connectors)
-//        {
-
-//            foreach (Connector con in nc.AllRefs)
-//            {
-//                if (!con.IsConnected) continue;
-//                if (con.Owner == null) continue;
-//                if (!con.Owner.IsValidObject) continue;
-//                if (!connector.Owner.Id.Equals(con.Owner.Id))
-//                {
-//                    //TaskDialog.Show("NEXT CONNECTOR", connector.Owner.Name + " -> " + con.Owner.Name);
-//                    return con;
-//                }
-//            }
-//        }
-//    }
-//    catch
-//    {
-//        TaskDialog.Show("PEP", "GET NEXT CONNECTOR ERROR");
-//    }
-
-//    return null;
-//}
-#endregion
