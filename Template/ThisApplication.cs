@@ -103,19 +103,16 @@ namespace CarsonsAddins
         
         private void RegisterDockablePanes(object sender, ApplicationInitializedEventArgs e)
         {
-            string s = "";
             UIApplication uiapp = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
             foreach (ISettingsComponent component in settingsComponents)
             {
                 if (component is ISettingsUIComponent uiComponent) 
                 {
-                    s += uiComponent.GetType().Name + '\n';
                     var registerCommandType = typeof( RegisterDockablePane<>).MakeGenericType(uiComponent.GetType());
                     var registerCommand = Activator.CreateInstance(registerCommandType);
                     if (registerCommand is IExecuteWithUIApplication command) command.Execute(uiapp);
                 }
             }
-            TaskDialog.Show("RegisterDockablePanes", s);
         }
 
     }
