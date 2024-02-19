@@ -156,9 +156,12 @@ namespace CarsonsAddins
             return (Line.CreateBound(origin, connector.Origin).Direction);
         }
 
-        public static List<Connector> GetConnectors(Pipe pipe) {return GetConnectors(pipe.ConnectorManager); }
 
-        public static List<Connector> GetConnectors(FamilyInstance fitting) { return GetConnectors(fitting.MEPModel.ConnectorManager); }
+        /// <summary>
+        /// Gets all of the Connector Elements within the ConnectorManager.
+        /// </summary>
+        /// <param name="cm">The ConnectorManager whose connectors are being retrieved.</param>
+        /// <returns>a List containing all of the Connector Elements within the ConnectorManager.</returns>
         public static List<Connector> GetConnectors(ConnectorManager cm)
         {
             List<Connector> connectors = new List<Connector>();
@@ -168,7 +171,26 @@ namespace CarsonsAddins
             }
             return connectors;
         }
+
+        /// <summary>
+        /// Gets all of the Connector Elements from the Pipe's ConnectorManager.
+        /// </summary>
+        /// <param name="pipe"></param>
+        /// <returns>a List connecting all of the Connector Elements within the provided Pipe's ConnectorManager</returns>
+        public static List<Connector> GetConnectors(Pipe pipe) {return GetConnectors(pipe.ConnectorManager); }
+
+        /// <summary>
+        /// Gets all of the Connector Elements from the FamilyInstace's ConnectorManager.
+        /// </summary>
+        /// <param name="familyInstance">An MEP Family Instance (i.e. Pipe Fitting or Pipe Accessory).</param>
+        /// <returns>a List connecting all of the Connector Elements within the provided Family Instance's ConnectorManager</returns>
+        public static List<Connector> GetConnectors(FamilyInstance familyInstance) { return GetConnectors(familyInstance.MEPModel.ConnectorManager); }
         
+        /// <summary>
+        /// Attempts to find the Connector Element that is valid and has a physical connection to the connector passed as a parameter.
+        /// </summary>
+        /// <param name="connector">A Connector Element</param>
+        /// <returns>The physically "connected" Connector Element with a valid owner. Returns null if the connector is null or if there are no valid physically connected Connector Elements. </returns>
         public static Connector TryGetConnected(Connector connector)
         {
             if (!connector.IsConnected) return null;
@@ -182,6 +204,11 @@ namespace CarsonsAddins
 
             return null;
         }
+        /// <summary>
+        /// Attempts to find the Connected Family Instance. If there is a "Non-Connector" that is found, instead return the next Family Instance that is connected.
+        /// </summary>
+        /// <param name="connector">A Connector Element</param>
+        /// <returns>A Family Instance that is connected to the connector.</returns>
         public static FamilyInstance GetConnectedFamilyInstance(Connector connector)
         {
             if (connector == null) return null; 
@@ -190,13 +217,18 @@ namespace CarsonsAddins
             if (connected.Owner == null) return null;
             FamilyInstance familyInstance = connected.Owner as FamilyInstance;
             if (familyInstance == null) return null;
-            if (familyInstance.Symbol.Family.Id.IntegerValue == 4584135)
+            if (familyInstance.Symbol.Family.Id.IntegerValue == 4584135) //Non-Connector Pipe Fitting Element
             {
                 return GetConnectedFamilyInstance(GetAdjacentConnector(connected));
             };
             return connected.Owner as FamilyInstance;
         }
         
+        /// <summary>
+        /// Attempts to find an "adjacent" Connector Element. In other words, it finds another Connector Element that shares the same ConnectorManager and Owner.
+        /// </summary>
+        /// <param name="connector">A Connector Element</param>
+        /// <returns>A Connector Element that shares the same ConnectorManager and Owner.</returns>
         public static Connector GetAdjacentConnector(Connector connector)
         {
             try
@@ -211,11 +243,17 @@ namespace CarsonsAddins
             }
             catch
             {
-                TaskDialog.Show("PEP", "GET ADJACENT CONNECTOR ERROR");
+                TaskDialog.Show("MEP CONNECTOR ELEMENT ERROR", "ERROR GETTING ADJACENT CONNECTOR.");
             }
 
             return null;
         }
+
+        /// <summary>
+        /// Checks to see if the connector's "adjacent" Connector Element is connected to an MEP Junction (i.e. a Bend, Tee, Wye, Cross, etc. ).
+        /// </summary>
+        /// <param name="connector">A Connector Element</param>
+        /// <returns>Returns true if the adjacent Connector Element is connected to an MEP Junction, and otherwise false. Returns false also if there is not an adjacent connector, if that adjacent connector is not connected to anything, or if that "next" connector's owner is not a FamilyInstance or is not a valid MEP Junction PartType.</returns>
         public static bool IsConnectedToBend(Connector connector)
         {
             Connector adjacent = GetAdjacentConnector(connector);
@@ -228,6 +266,16 @@ namespace CarsonsAddins
             if (!BendPartTypes.Contains(GetPartType(next.Owner as FamilyInstance))) return false;
             return true;
         }
+
+
+        /// <summary>
+        /// Gets the direction from the Pipe to the connected Pipe Fitting and checks to see if it lines up with the Pipe Fitting's "Hand Orientation" to determine if the pipe end is a Spigot-End or a Bell-End.
+        /// Spigot-End: Pipe end acts as a "male" connector.
+        /// Bell-End: Pipe end acts as a "female" connector.
+        /// </summary>
+        /// <param name="pipe">A Pipe Element connected to the fitting.</param>
+        /// <param name="fitting">A Pipe Fitting Family Instance that is connected to the pipe.</param>
+        /// <returns></returns>
         public static BellOrSpigot GetPipeEnd(Pipe pipe, FamilyInstance fitting)
         {
             XYZ offset = GetConnectorManagerCenter(pipe.ConnectorManager) - GetConnectorManagerCenter(fitting.MEPModel.ConnectorManager);
@@ -235,6 +283,7 @@ namespace CarsonsAddins
             return (fitting.HandOrientation.IsAlmostEqualTo(direction)) ? BellOrSpigot.SPIGOT : BellOrSpigot.BELL;
 
         }
+
         public static bool IsGaugedPE(Pipe pipe, Connector connector, string endPrep)
         {
             if (endPrep != "PE") return false;
