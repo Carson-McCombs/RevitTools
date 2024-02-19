@@ -12,6 +12,12 @@ using System.Threading.Tasks;
 
 namespace CarsonsAddins
 {
+
+
+    /// <summary>
+    /// Gets all the Pipe Elements from the User's current selection and shows the Sum of all of their lengths.  
+    /// Note: Nominal Lengths were used at one point for the additional purpose of calculating "closure" pieces. Will revert at some point after adding a popup Window or Dockable Pane.
+    /// </summary>
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     class GetTotalPipeLengthCommand : IExternalCommand, ISettingsComponent
@@ -42,6 +48,7 @@ namespace CarsonsAddins
             try
             {
                 transaction.Start("GetTotalPipeLengthCommand");
+                uint count = 0;
                 double totalLength = 0;
                 List<ElementId> currentSelection = uidoc.Selection.GetElementIds() as List<ElementId>;
                 foreach (ElementId elementId in currentSelection)
@@ -51,6 +58,7 @@ namespace CarsonsAddins
                     if (pipe == null) continue;
                     double? length = Util.GetPipeLength(pipe);
                     if (length == null) continue;
+                    count ++;
                     totalLength += (double)length;
                 }
                 int totalFeet = (int)totalLength;
@@ -58,7 +66,7 @@ namespace CarsonsAddins
                 double closureLength = totalLength % nominalLength;
                 int closureFeet = (int)closureLength;
                 double closureInches = (closureLength - closureFeet) * 12;
-                TaskDialog.Show("Total Pipe Length", "Total Pipe Length:\n" + totalFeet + "\'- " + totalInches + "\"");
+                TaskDialog.Show("Total Pipe Length ( " + count + " )", "Total Pipe Length:\n" + totalFeet + "\'- " + totalInches + "\"");
 
                 //TaskDialog.Show("Total Pipe Length", "Total Pipe Length:\n" + totalFeet + "\'- " + totalInches + "\"\n\n Closure Piece:\n " + closureFeet + "\'- " + closureInches + "\"");
                 transaction.Commit();
