@@ -99,10 +99,8 @@ namespace CarsonsAddins
 
         public List<ComponentState> InitComponentStates(Assembly assembly)
         {
-            //List<ComponentState> states;
-            SetToDefault(assembly);
-            //if (!string.IsNullOrEmpty(MySettings.Default.ComponentState_Preferences)) LoadFromDB(assembly);
-            //else SetToDefault(assembly);
+            if (!string.IsNullOrEmpty(MySettings.Default.ComponentState_Preferences)) LoadFromDB(assembly);
+            else SetToDefault(assembly);
             return settingsState.ToList();
         }
         public void SaveToDB()

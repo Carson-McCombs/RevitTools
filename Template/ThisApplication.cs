@@ -38,7 +38,7 @@ namespace CarsonsAddins
     [Transaction(TransactionMode.Manual)]
     public partial class ThisApplication : IExternalApplication
     {
-
+        public static string tmplog = string.Empty;
         private List<ComponentState> componentStates = new List<ComponentState>();
         private List<ISettingsComponent> settingsComponents = new List<ISettingsComponent>();
         public static ThisApplication instance {  get; private set; }
@@ -103,17 +103,19 @@ namespace CarsonsAddins
         
         private void RegisterDockablePanes(object sender, ApplicationInitializedEventArgs e)
         {
+            string s = "";
             UIApplication uiapp = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
             foreach (ISettingsComponent component in settingsComponents)
             {
                 if (component is ISettingsUIComponent uiComponent) 
                 {
-                    
-                    var registerCommandType = typeof( RegisterDockablePane<>).MakeGenericType(component.GetType());
+                    s += uiComponent.GetType().Name + '\n';
+                    var registerCommandType = typeof( RegisterDockablePane<>).MakeGenericType(uiComponent.GetType());
                     var registerCommand = Activator.CreateInstance(registerCommandType);
-
+                    if (registerCommand is IExecuteWithUIApplication command) command.Execute(uiapp);
                 }
             }
+            TaskDialog.Show("RegisterDockablePanes", s);
         }
 
     }
@@ -152,7 +154,6 @@ namespace CarsonsAddins
         public T windowInstance;
         UIApplication uiapp = null;
 
-
         //By passing the Execute function to one with only the UIApplication parameter, this allows for the extenal command to be called easier and less reliant on Revit
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -170,15 +171,10 @@ namespace CarsonsAddins
         {
             this.uiapp = uiapp;
             DockablePaneProviderData data = new DockablePaneProviderData();
-
             windowInstance = new T();
             windowInstance.SetupDockablePane(data);
             if (windowInstance is ISettingUpdaterComponent updaterComponent) updaterComponent.RegisterUpdater(uiapp.ActiveAddInId);
-            Guid guid = ApplicationIds.GetId(typeof(T));
-            if (guid == Guid.Empty) TaskDialog.Show("GUID Empty for " + typeof(T).Name, "");
-            DockablePaneId id = new DockablePaneId(guid);
-
-            //DockablePaneId id = new DockablePaneId(ApplicationIds.GetId<T>());
+            DockablePaneId id = new DockablePaneId(ApplicationIds.GetId(typeof(T)));
             uiapp.RegisterDockablePane(id, typeof(T).Name, windowInstance as IDockablePaneProvider);
             uiapp.Application.DocumentOpened += new EventHandler<DocumentOpenedEventArgs>(OnDocumentOpened);
             uiapp.ApplicationClosing += new EventHandler<ApplicationClosingEventArgs>(OnApplicationClosing);
@@ -223,7 +219,6 @@ namespace CarsonsAddins
             }
             catch (Exception e)
             {
-                
                 TaskDialog.Show("Error Showing " + typeof(T).Name, ApplicationIds.GetId(typeof(T)).ToString() + '\n' + e.Message);
                 return Result.Failed;
             }
