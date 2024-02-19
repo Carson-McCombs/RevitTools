@@ -19,7 +19,7 @@ namespace CarsonsAddins
         private PreferenceWindow preferenceWindow;
         public PipingLCUpdater(AddInId addinId)
         {
-            updaterId = new UpdaterId(addinId, ApplicationIds.GetId<PipingLCUpdater>());
+            updaterId = new UpdaterId(addinId, ApplicationIds.GetId(typeof(PipingLCUpdater)));
             RegisterUpdater();
             RegisterTriggers();
         }

@@ -90,7 +90,6 @@
     <Compile Include="MyApplicationSettingsWindow.xaml.cs">
       <DependentUpon>MyApplicationSettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DimensionPipeLineCommand.cs" />
     <Compile Include="FilterSelectionCommand.cs" />
     <Compile Include="GetTotalPipeLengthCommand.cs" />
     <Compile Include="PipeEndPrepPreferencesWindow.xaml.cs">
@@ -168,6 +167,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <Compile Include="DimensionBendCommand.cs" />
+    <Compile Include="DimensionPipeLineCommand.cs" />
     <None Include="packages.config" />
     <None Include="Properties\MySettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

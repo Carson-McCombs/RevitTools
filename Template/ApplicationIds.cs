@@ -27,24 +27,25 @@ namespace CarsonsAddins
                 { typeof(SimpleFilterDockablePane), new Guid("{5539CADC-1545-4427-9495-3E74FAB6071C}") },
                 { typeof(ComplexFilterDockablePane), new Guid("{DEF29C25-F7BA-4BE6-A9CD-B1702328043E}") }
             };
-
+            
         }
-        public static Guid GetId<T>()
+        /*public static Guid GetId<T>() where T : Type
         {
             Type t = typeof(T);
             if (guidsTypeMap.ContainsKey(t)) return guidsTypeMap[t];
-            return AddNewGuidForType(t);
-        }
+            return Guid.Empty;//AddNewGuidForType(t);
+        }*/
         public static Guid GetId(Type t)
         {
             if (guidsTypeMap.ContainsKey(t)) return guidsTypeMap[t];
-            return AddNewGuidForType(t);
+            return Guid.Empty;//AddNewGuidForType(t);
 
         }
         private static Guid AddNewGuidForType(Type t)
         {
             Guid guid = Guid.NewGuid();
             guidsTypeMap.Add(t, guid);
+            TaskDialog.Show("issue", guidsTypeMap.ToString());
             TaskDialog.Show("Unable to Find GUID for " + t.Name + ", generating new ID.", "Please add a GUID for the specified type within the guidsTypeMap in the ApplicationIds class.");
             return guid;
         }

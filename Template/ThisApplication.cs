@@ -80,7 +80,8 @@ namespace CarsonsAddins
                 if (state.IsEnabled)
                 {
                     //uses reflection to find each class by type and generate a new instance
-                    ISettingsComponent component = (ISettingsComponent)state.ComponentType.GetConstructor(new Type[0]).Invoke(new object[0]);
+                    ConstructorInfo constructor = state.ComponentType.GetConstructor(new Type[0]);
+                    ISettingsComponent component = (ISettingsComponent)constructor.Invoke(new object[0]);
 
                     settingsComponents.Add(component);
                     PushButtonData buttonData = component.RegisterButton(assembly);
@@ -107,6 +108,7 @@ namespace CarsonsAddins
             {
                 if (component is ISettingsUIComponent uiComponent) 
                 {
+                    
                     var registerCommandType = typeof( RegisterDockablePane<>).MakeGenericType(component.GetType());
                     var registerCommand = Activator.CreateInstance(registerCommandType);
 
@@ -172,7 +174,9 @@ namespace CarsonsAddins
             windowInstance = new T();
             windowInstance.SetupDockablePane(data);
             if (windowInstance is ISettingUpdaterComponent updaterComponent) updaterComponent.RegisterUpdater(uiapp.ActiveAddInId);
-            DockablePaneId id = new DockablePaneId(ApplicationIds.GetId(typeof(T)));
+            Guid guid = ApplicationIds.GetId(typeof(T));
+            if (guid == Guid.Empty) TaskDialog.Show("GUID Empty for " + typeof(T).Name, "");
+            DockablePaneId id = new DockablePaneId(guid);
 
             //DockablePaneId id = new DockablePaneId(ApplicationIds.GetId<T>());
             uiapp.RegisterDockablePane(id, typeof(T).Name, windowInstance as IDockablePaneProvider);
@@ -210,7 +214,7 @@ namespace CarsonsAddins
         {
             try
             {
-                DockablePaneId id = new DockablePaneId(ApplicationIds.GetId<T>());
+                DockablePaneId id = new DockablePaneId(ApplicationIds.GetId(typeof(T)));
                 DockablePane dockablePane = commandData.Application.GetDockablePane(id);
                 dockablePane.Show();
 
@@ -219,7 +223,8 @@ namespace CarsonsAddins
             }
             catch (Exception e)
             {
-                TaskDialog.Show("Error Showing " + typeof(T).Name, ApplicationIds.GetId<T>().ToString() + '\n' + e.Message);
+                
+                TaskDialog.Show("Error Showing " + typeof(T).Name, ApplicationIds.GetId(typeof(T)).ToString() + '\n' + e.Message);
                 return Result.Failed;
             }
 

@@ -17,7 +17,7 @@ namespace CarsonsAddins
         public PipingEndPrepUpdater(AddInId addinId)
         {
             //updaterId = new UpdaterId(addinId, ApplicationIds.pipingConnectionsUpdaterId);
-            updaterId = new UpdaterId(addinId, ApplicationIds.GetId<PipingEndPrepUpdater>());
+            updaterId = new UpdaterId(addinId, ApplicationIds.GetId(typeof(PipingEndPrepUpdater)));
             
             RegisterUpdater();
             RegisterTriggers();

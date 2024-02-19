@@ -377,7 +377,11 @@ namespace CarsonsAddins
         #endregion
         
         
-        //Will comment this region once the dimension issue is fixed.
+        //Will comment this region once the
+        //
+        //
+        //
+        //issue is fixed.
         #region PipingElementDimensioning
         //public static Line GetParallelLine(XYZ pointA, XYZ pointB, double offset)
         //{
