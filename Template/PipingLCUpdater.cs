@@ -9,17 +9,17 @@ using System.Windows.Controls;
 
 namespace CarsonsAddins
 {
+    /// <summary>
+    /// WIP - 
+    /// Updater in charge of communicating with the Linings & Coatings Preference Window
+    /// </summary>
     class PipingLCUpdater : IUpdater
     {
         private UpdaterId updaterId;
         private PreferenceWindow preferenceWindow;
-        //Document doc;
         public PipingLCUpdater(AddInId addinId)
         {
             updaterId = new UpdaterId(addinId, ApplicationIds.GetId<PipingLCUpdater>());
-            //updaterId = new UpdaterId(addinId, ApplicationIds.pipingUpdaterId);
-            //id = new UpdaterId(addinId, new Guid("{BD82E5B2-D984-49F9-8442-ED572680656D}"));
-
             RegisterUpdater();
             RegisterTriggers();
         }
@@ -30,9 +30,7 @@ namespace CarsonsAddins
         public void RegisterUpdater()
         {
             if (UpdaterRegistry.IsUpdaterRegistered(updaterId)) Unregister();
-
             UpdaterRegistry.RegisterUpdater(this);
-            //TaskDialog.Show("REGISTERING UPDATER", id.ToString());
         }
         public void Unregister()
         {
@@ -44,14 +42,13 @@ namespace CarsonsAddins
             if (updaterId == null) return;
             if (!UpdaterRegistry.IsUpdaterRegistered(updaterId)) return;
             UpdaterRegistry.RemoveAllTriggers(updaterId);
-            ElementFilter elementFilter = new ElementCategoryFilter(BuiltInCategory.OST_PipeCurves);//new ElementMulticategoryFilter(new List<BuiltInCategory>() { BuiltInCategory.OST_PipeCurves, BuiltInCategory.OST_PipeFitting });
+            ElementFilter elementFilter = new ElementMulticategoryFilter(new List<BuiltInCategory>() { BuiltInCategory.OST_PipeCurves, BuiltInCategory.OST_PipeFitting }); //new ElementCategoryFilter(BuiltInCategory.OST_PipeCurves);//
             UpdaterRegistry.AddTrigger(updaterId, elementFilter, Element.GetChangeTypeElementAddition());
 
         }
 
         public void Execute(UpdaterData data)
         {
-            //Document doc = data.GetDocument();
             List<ElementId> elemIds = data.GetAddedElementIds() as List<ElementId>;
             if (preferenceWindow == null)
             {
