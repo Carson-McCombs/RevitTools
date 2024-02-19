@@ -29,7 +29,7 @@ using static CarsonsAddins.Util;
 namespace CarsonsAddins
 {
     /// <summary>
-    /// A simple attempt to mimic Revit's built in filter system as a Dockable Pane. Not really WIP.
+    /// Interaction logic for SimpleFilterDockablePane.xaml
     /// </summary>
     public partial class SimpleFilterDockablePane : Page, IDockablePaneProvider
     {
