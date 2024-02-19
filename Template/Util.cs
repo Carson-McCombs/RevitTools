@@ -18,6 +18,11 @@ using static CarsonsAddins.PipeEndPrepWindow;
 
 namespace CarsonsAddins
 {
+    /// <summary>
+    ///  Default: None,
+    ///  Bell: Female end of the Pipe.
+    ///  Spigot: Male end of the Pipe.
+    /// </summary>
     public enum BellOrSpigot { NONE, BELL, SPIGOT };
 
     /*

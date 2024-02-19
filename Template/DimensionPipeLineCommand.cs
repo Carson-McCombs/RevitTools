@@ -14,6 +14,10 @@ using System.Threading.Tasks;
 
 namespace CarsonsAddins
 {
+    /// <summary>
+    /// WIP ( until issue with dimensioning Junctions gets fixed ) - 
+    /// Command that dimensions a group of Piping Elements within a "Pipe Line".
+    /// </summary>
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     class DimensionPipeLineCommand : IExternalCommand, ISettingsComponent
