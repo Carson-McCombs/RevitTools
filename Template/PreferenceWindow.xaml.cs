@@ -26,7 +26,7 @@ using System.Windows.Shapes;
 namespace CarsonsAddins
 {
     /// <summary>
-    /// Interaction logic for UserControl1.xaml
+    /// Interaction logic for TextBoxWithLabel.xaml
     /// </summary>
     public partial class PreferenceWindow : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingUpdaterComponent
     {

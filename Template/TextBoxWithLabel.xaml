@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="CarsonsAddins.TextBoxWithLabel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             x:Name="root">
+    <Grid Height="48" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="24"/>
+            <RowDefinition Height="24"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="0" Grid.Column="0" Name="TextBoxLabel" Content="{Binding Path=labelText, ElementName=root}" FontFamily="Arial"/>
+        <TextBox Grid.Row="1" Grid.Column="0" Name="TextBoxControl" Text="{Binding Path=text, ElementName=root}" IsEnabled="{Binding Path=canEdit, ElementName=root}" FontFamily="Arial" VerticalContentAlignment="Center" />
+    </Grid>
+</UserControl>

@@ -87,6 +87,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationIds.cs" />
+    <Compile Include="DimensionTextWindow.xaml.cs">
+      <DependentUpon>DimensionTextWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MyApplicationSettingsWindow.xaml.cs">
       <DependentUpon>MyApplicationSettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -130,9 +133,16 @@
     <Compile Include="PreferenceWindow.xaml.cs">
       <DependentUpon>PreferenceWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="TextBoxWithLabel.xaml.cs">
+      <DependentUpon>TextBoxWithLabel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="DimensionTextWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MyApplicationSettingsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -154,6 +164,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="SimpleFilterDockablePane.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TextBoxWithLabel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
