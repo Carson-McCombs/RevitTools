@@ -18,20 +18,23 @@ Dockable Automatic Pipe End Prep Updater:
 
 ![PEP Updater Example](https://github.com/Carson-McCombs/RevitTools/assets/130939367/d6bf510a-9a95-49ba-8702-2946d2ad39ec)
 
-
 Select Pipe "Line"
+
 -Ending at a change in direction ( i.e. at an bend of any angle, a tee/wye, a cross, etc. )
 
 ![Select Pipe Line](https://github.com/Carson-McCombs/RevitTools/assets/130939367/28848fa8-09a6-4e93-9c48-3387d19c7800)
 
--Ending at a Reducer or Accessory ( i.e. a valve, pressure gauge, etc. )
-![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/08e1f2b6-e592-45ad-845e-0bc348d54580)
+-Ending at a Reducer or Transition piece
+
+![Select Pipe Line to a Reducer](https://github.com/Carson-McCombs/RevitTools/assets/130939367/3f7fe241-68aa-4c85-94a7-342ec9cc0b01)
 
 -Or just at an open connection where a pipe ends
-![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/e3012140-a72b-4d57-b903-b531286b157d)
+
+![Select Pipe Line to end of Line](https://github.com/Carson-McCombs/RevitTools/assets/130939367/7a14ef49-39fd-485a-8970-e498a4e20b78)
 
 Measure the total length of selected pipe
-![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/d631649e-f590-478b-b195-45eeaea7824d)
+
+![Total Pipe Length](https://github.com/Carson-McCombs/RevitTools/assets/130939367/c4853da2-6940-4477-a0d8-b9b185f22c1f)
 
 Revit Issue of not being able to flip a flange without breaking connections
 ![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/e8d9c1b8-2c78-44ac-8638-0233fbb70b25)
