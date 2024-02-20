@@ -46,7 +46,7 @@
                         <RowDefinition Height="48"/>
                         <RowDefinition Height="48"/>
                     </Grid.RowDefinitions>
-                    <local:TextBoxWithLabel Grid.Row="0" labelText="Above:" text="Text" Width="248" HorizontalAlignment="Center"/>
+                    <local:TextBoxWithLabel Grid.Row="0" labelText="Above:" text="" Width="248" HorizontalAlignment="Center"/>
                     <StackPanel Grid.Row="1" Orientation="Horizontal">
                         <local:TextBoxWithLabel labelText="Prefix:" text="" Width="112" />
                         <local:TextBoxWithLabel labelText="Value:" text="" canEdit="False" Width="112" Margin="16,0"/>
