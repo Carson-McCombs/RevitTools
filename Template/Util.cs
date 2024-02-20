@@ -256,14 +256,20 @@ namespace CarsonsAddins
         /// </summary>
         /// <param name="pipe"></param>
         /// <returns>a List connecting all of the Connector Elements within the provided Pipe's ConnectorManager</returns>
-        public static List<Connector> GetConnectors(Pipe pipe) {return GetConnectors(pipe.ConnectorManager); }
+        public static List<Connector> GetConnectors(Pipe pipe) 
+        {
+            return GetConnectors(pipe.ConnectorManager); 
+        }
 
         /// <summary>
         /// Gets all of the Connector Elements from the FamilyInstace's ConnectorManager.
         /// </summary>
         /// <param name="familyInstance">An MEP Family Instance (i.e. Pipe Fitting or Pipe Accessory).</param>
         /// <returns>a List connecting all of the Connector Elements within the provided Family Instance's ConnectorManager</returns>
-        public static List<Connector> GetConnectors(FamilyInstance familyInstance) { return GetConnectors(familyInstance.MEPModel.ConnectorManager); }
+        public static List<Connector> GetConnectors(FamilyInstance familyInstance) 
+        { 
+            return GetConnectors(familyInstance.MEPModel.ConnectorManager); 
+        }
         
         /// <summary>
         /// Attempts to find the Connector Element that is valid and has a physical connection to the connector passed as a parameter.
@@ -283,6 +289,7 @@ namespace CarsonsAddins
 
             return null;
         }
+
         /// <summary>
         /// Attempts to find the Connected Family Instance. If there is a "Non-Connector" that is found, instead return the next Family Instance that is connected.
         /// </summary>
@@ -296,7 +303,7 @@ namespace CarsonsAddins
             if (connected.Owner == null) return null;
             FamilyInstance familyInstance = connected.Owner as FamilyInstance;
             if (familyInstance == null) return null;
-            if (familyInstance.Symbol.Family.Id.IntegerValue == 4584135) //Non-Connector Pipe Fitting Element
+            if (familyInstance.Name.Equals("Non-Connector")) //Non-Connector Pipe Fitting Element - originally called by the ID for the Non-Connector fitting, but it changes from project to project, so using name as a quick fix
             {
                 return GetConnectedFamilyInstance(GetAdjacentConnector(connected));
             };
@@ -377,11 +384,8 @@ namespace CarsonsAddins
         #endregion
         
         
-        //Will comment this region once the
-        //
-        //
-        //
-        //issue is fixed.
+        //Will comment this region once the dimensioning issue is fixed.
+
         #region PipingElementDimensioning
         //public static Line GetParallelLine(XYZ pointA, XYZ pointB, double offset)
         //{
