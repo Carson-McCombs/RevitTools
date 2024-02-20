@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 namespace CarsonsAddins
 {
     /// <summary>
-    /// Interaction logic for TextBoxWithLabel.xaml
+    /// A simple WPF User Control meant to allow the user to toggle and set the text override settings within the Dimension Text Window
     /// </summary>
     public partial class TextBoxWithLabel : UserControl
     {

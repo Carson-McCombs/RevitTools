@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 namespace CarsonsAddins
 {
     /// <summary>
-    /// Interaction logic for DimensionTextWindow.xaml
+    /// Remade Revit's Dimension Text tool. Meant to be incorporated with the QuestionMarkDimensionsCommand for more options.
     /// </summary>
     public partial class DimensionTextWindow : Window
     {
