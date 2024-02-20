@@ -40,7 +40,7 @@ namespace CarsonsAddins
     /// <summary>
     /// Interaction logic for SimpleFilterDockablePane.xaml
     /// </summary>
-    public partial class ComplexFilterDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent
+    public partial class ParameterManagerDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent
     {
         public const bool IsWIP = false;
 
@@ -49,7 +49,7 @@ namespace CarsonsAddins
         private ParameterTable table;
 
         //public string TotalSelectedCount { get => "Total Selected Items:            "  + totalSelectedCount.ToString(); }
-        public ComplexFilterDockablePane()
+        public ParameterManagerDockablePane()
         {
             InitializeComponent();
             table = new ParameterTable(SelectionDataGrid);
@@ -81,7 +81,7 @@ namespace CarsonsAddins
         }
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("Parameter Manager", "Parameter Manager", assembly.Location, typeof(ShowDockablePane<ComplexFilterDockablePane>).FullName);
+            PushButtonData pushButtonData = new PushButtonData("Parameter Manager", "Parameter Manager", assembly.Location, typeof(ShowDockablePane<ParameterManagerDockablePane>).FullName);
             pushButtonData.ToolTip = "An element parameter manager which can be used to sort and set element parameter values.";
             return pushButtonData;
         }

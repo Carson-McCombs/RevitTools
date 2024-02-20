@@ -25,7 +25,7 @@ namespace CarsonsAddins
                 { typeof(PipingEndPrepUpdater), new Guid("{892AC63B-A827-466F-A8EA-F4418C27B7C2}") },
                 { typeof(PipeEndPrepWindow), new Guid("{7FAA23DB-AAFD-4F47-857E-C06D21B2717E}") },
                 { typeof(SimpleFilterDockablePane), new Guid("{5539CADC-1545-4427-9495-3E74FAB6071C}") },
-                { typeof(ComplexFilterDockablePane), new Guid("{DEF29C25-F7BA-4BE6-A9CD-B1702328043E}") }
+                { typeof(ParameterManagerDockablePane), new Guid("{DEF29C25-F7BA-4BE6-A9CD-B1702328043E}") }
             };
             
         }

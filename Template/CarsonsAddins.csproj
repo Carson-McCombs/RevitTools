@@ -116,8 +116,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
-    <Compile Include="ComplexFilterDockablePane.xaml.cs">
-      <DependentUpon>ComplexFilterDockablePane.xaml</DependentUpon>
+    <Compile Include="ParameterManagerDockablePane.xaml.cs">
+      <DependentUpon>ParameterManagerDockablePane.xaml</DependentUpon>
     </Compile>
     <Compile Include="SimpleFilterDockablePane.xaml.cs">
       <DependentUpon>SimpleFilterDockablePane.xaml</DependentUpon>
@@ -149,7 +149,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ComplexFilterDockablePane.xaml">
+    <Page Include="ParameterManagerDockablePane.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
