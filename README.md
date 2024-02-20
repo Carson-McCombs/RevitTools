@@ -3,13 +3,26 @@
 Current Placeholder Toolbar UI:
 ![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/f59fc2a6-92f0-4d1c-9fb9-af06a11d68f8)
 
+Settings Manager:
+-Enable/Disable which components you want to be registered on and off. Mainly useful for debugging and turning on and off Work In Progress components.
+![SettingsManager](https://github.com/Carson-McCombs/RevitTools/assets/130939367/0e5d50e2-d34f-4cd6-8ddf-b287e1d2d2a2)
+
 Dockable Automatic Pipe End Prep Updater:
 -Dynamically adds all possible fitting flanges and labels each end
-![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/61988ced-9f8f-4b6a-b149-fcffba86d3c0)
+
+-> Setting Up Pipe End Prep Updater
+
+![Opening PEP Window](https://github.com/Carson-McCombs/RevitTools/assets/130939367/590bbbad-0296-4225-9af9-22b3bae1afed)
+
+-> Simple Example
+
+![PEP Updater Example](https://github.com/Carson-McCombs/RevitTools/assets/130939367/d6bf510a-9a95-49ba-8702-2946d2ad39ec)
+
 
 Select Pipe "Line"
 -Ending at a change in direction ( i.e. at an bend of any angle, a tee/wye, a cross, etc. )
-![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/5e493076-2aa7-4847-bca0-37eb8f91da96)
+
+![Select Pipe Line](https://github.com/Carson-McCombs/RevitTools/assets/130939367/28848fa8-09a6-4e93-9c48-3387d19c7800)
 
 -Ending at a Reducer or Accessory ( i.e. a valve, pressure gauge, etc. )
 ![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/08e1f2b6-e592-45ad-845e-0bc348d54580)
