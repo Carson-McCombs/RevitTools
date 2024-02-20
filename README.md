@@ -1,8 +1,5 @@
-# RevitTools
+# CarsonsAddins User Guide
 
-Current Placeholder Toolbar UI:
-
-![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/e6ac7358-52b9-4bd7-8029-8bf7668c9e3c)
 
 
 ***Settings Manager:***
