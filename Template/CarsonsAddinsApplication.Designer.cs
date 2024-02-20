@@ -8,7 +8,7 @@
  */
 namespace CarsonsAddins {
 
-    public sealed partial class ThisApplication : Autodesk.Revit.UI.Macros.ApplicationEntryPoint {
+    public sealed partial class CarsonsAddinsApplication : Autodesk.Revit.UI.Macros.ApplicationEntryPoint {
         
         public event System.EventHandler Startup;
         

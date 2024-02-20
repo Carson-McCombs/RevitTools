@@ -113,7 +113,7 @@ namespace CarsonsAddins
         {
             List<Type> componentTypes = new List<Type>();
             Type componentBaseType = typeof(ISettingsComponent);
-            string namespaceString = typeof(ThisApplication).Namespace;
+            string namespaceString = typeof(CarsonsAddinsApplication).Namespace;
             foreach (Type type in assembly.GetTypes())
             {
                 if (type.Namespace != namespaceString) continue;

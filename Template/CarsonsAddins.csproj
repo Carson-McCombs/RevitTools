@@ -123,9 +123,9 @@
       <DependentUpon>SimpleFilterDockablePane.xaml</DependentUpon>
     </Compile>
     <Compile Include="SmartFlipCommand.cs" />
-    <Compile Include="ThisApplication.cs" />
-    <Compile Include="ThisApplication.Designer.cs">
-      <DependentUpon>ThisApplication.cs</DependentUpon>
+    <Compile Include="CarsonsAddinsApplication.cs" />
+    <Compile Include="CarsonsAddinsApplication.Designer.cs">
+      <DependentUpon>CarsonsAddinsApplication.cs</DependentUpon>
     </Compile>
     <Compile Include="PreferenceWindow.xaml.cs">
       <DependentUpon>PreferenceWindow.xaml</DependentUpon>

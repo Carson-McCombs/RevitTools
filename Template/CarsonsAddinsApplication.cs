@@ -36,13 +36,13 @@ namespace CarsonsAddins
 {
     [Regeneration(RegenerationOption.Manual)]
     [Transaction(TransactionMode.Manual)]
-    public partial class ThisApplication : IExternalApplication
+    public partial class CarsonsAddinsApplication : IExternalApplication
     {
         public static string tmplog = string.Empty;
         private List<ComponentState> componentStates = new List<ComponentState>();
         private List<ISettingsComponent> settingsComponents = new List<ISettingsComponent>();
-        public static ThisApplication instance {  get; private set; }
-        public ThisApplication() { instance = this; }
+        public static CarsonsAddinsApplication instance {  get; private set; }
+        public CarsonsAddinsApplication() { instance = this; }
         public Result OnStartup(UIControlledApplication app)
         {
             ApplicationIds.Init();
