@@ -13,7 +13,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Label Grid.Row="0" Grid.Column="0" Name="TextBoxLabel" Content="{Binding Path=labelText, ElementName=root}" FontFamily="Arial"/>
-        <TextBox Grid.Row="1" Grid.Column="0" Name="TextBoxControl" Text="{Binding Path=text, ElementName=root}" IsEnabled="{Binding Path=canEdit, ElementName=root}" FontFamily="Arial" VerticalContentAlignment="Center" />
+        <Label Grid.Row="0" Grid.Column="0" Name="TextBoxLabel" Content="{Binding Path=LabelText, ElementName=root}" FontFamily="Arial"/>
+        <TextBox Grid.Row="1" Grid.Column="0" Name="TextBoxControl" Text="{Binding Path=Text, ElementName=root}" IsEnabled="{Binding Path=IsTextEditable, ElementName=root}" FontFamily="Arial" VerticalContentAlignment="Center" />
     </Grid>
 </UserControl>

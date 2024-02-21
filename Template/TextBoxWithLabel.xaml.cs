@@ -20,41 +20,41 @@ namespace CarsonsAddins
     /// </summary>
     public partial class TextBoxWithLabel : UserControl
     {
-        public static readonly DependencyProperty labelTextProperty =
+        public static readonly DependencyProperty LabelTextProperty =
         DependencyProperty.Register(
-            name: "labelText",
+            name: "LabelText",
             propertyType: typeof(string),
             ownerType: typeof(UserControl),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: "Label"));
-        public static readonly DependencyProperty textProperty =
+        public static readonly DependencyProperty TextProperty =
         DependencyProperty.Register(
-            name: "text",
+            name: "Text",
             propertyType: typeof(string),
             ownerType: typeof(UserControl),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: "TextField"));
 
-        public static readonly DependencyProperty canEditProperty =
+        public static readonly DependencyProperty IsEditableProperty =
         DependencyProperty.Register(
-            name: "canEdit",
+            name: "IsEditable",
             propertyType: typeof(bool),
             ownerType: typeof(UserControl),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: true));
 
-        public string labelText 
+        public string LabelText 
         {
-            get => (string)GetValue(labelTextProperty);
-            set => SetValue(labelTextProperty, value);
+            get => (string)GetValue(LabelTextProperty);
+            set => SetValue(LabelTextProperty, value);
         }
 
-        public string text
+        public string Text
         {
-            get => (string)GetValue(textProperty);
-            set => SetValue(textProperty, value);
+            get => (string)GetValue(TextProperty);
+            set => SetValue(TextProperty, value);
         }
-        public bool canEdit
+        public bool IsEditable
         {
-            get => (bool)GetValue(canEditProperty);
-            set => SetValue(canEditProperty, value);
+            get => (bool)GetValue(IsEditableProperty);
+            set => SetValue(IsEditableProperty, value);
         }
 
 
