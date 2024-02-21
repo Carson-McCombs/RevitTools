@@ -24,20 +24,20 @@ namespace CarsonsAddins
         DependencyProperty.Register(
             name: "LabelText",
             propertyType: typeof(string),
-            ownerType: typeof(UserControl),
+            ownerType: typeof(TextBoxWithLabel),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: "Label"));
         public static readonly DependencyProperty TextProperty =
         DependencyProperty.Register(
             name: "Text",
             propertyType: typeof(string),
-            ownerType: typeof(UserControl),
+            ownerType: typeof(TextBoxWithLabel),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: "TextField"));
 
         public static readonly DependencyProperty IsEditableProperty =
         DependencyProperty.Register(
             name: "IsEditable",
             propertyType: typeof(bool),
-            ownerType: typeof(UserControl),
+            ownerType: typeof(TextBoxWithLabel),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: true));
 
         public string LabelText 

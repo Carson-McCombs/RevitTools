@@ -26,16 +26,14 @@
                         <RowDefinition Height="32"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="142"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Content="Use Actual Value" UseLayoutRounding="False" />
-                    <TextBox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Stretch" Margin="4"/>
-                    <CheckBox Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Content="Replace With Text" />
-                    <TextBox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" Margin="4"/>
-                    <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Content="Show Label in View" />
-                    <TextBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" Margin="4"/>
+                    <local:ToggleableCheckBox Grid.Row="0" IsChecked="True" LabelText="Use Actual Value" IsTextEditable="False" />
+                    <local:ToggleableCheckBox Grid.Row="1" IsChecked="False" LabelText="Replace With Text" />
+                    <local:ToggleableCheckBox Grid.Row="2" IsChecked="False" LabelText="Show Label in View" IsTextEditable="False" />
+
+
                 </Grid>
             </GroupBox>
 
@@ -46,19 +44,19 @@
                         <RowDefinition Height="48"/>
                         <RowDefinition Height="48"/>
                     </Grid.RowDefinitions>
-                    <local:TextBoxWithLabel Grid.Row="0" labelText="Above:" text="" Width="248" HorizontalAlignment="Center"/>
+                    <local:TextBoxWithLabel Grid.Row="0" LabelText="Above:" Text="" Width="248" HorizontalAlignment="Center"/>
                     <StackPanel Grid.Row="1" Orientation="Horizontal">
-                        <local:TextBoxWithLabel labelText="Prefix:" text="" Width="112" />
-                        <local:TextBoxWithLabel labelText="Value:" text="" canEdit="False" Width="112" Margin="16,0"/>
-                        <local:TextBoxWithLabel labelText="Suffix:" text="" Width="112" />
+                        <local:TextBoxWithLabel LabelText="Prefix:" Text="" Width="112" />
+                        <local:TextBoxWithLabel LabelText="Value:" Text="" IsEditable="False" Width="112" Margin="16,0"/>
+                        <local:TextBoxWithLabel LabelText="Suffix:" Text="" Width="112" />
                     </StackPanel>
-                    <local:TextBoxWithLabel labelText="Prefix:" text="" Grid.Row="2"  Width="248" HorizontalAlignment="Center"/>
+                    <local:TextBoxWithLabel LabelText="Prefix:" Text="" Grid.Row="2"  Width="248" HorizontalAlignment="Center"/>
                 </Grid>
             </GroupBox>
             <StackPanel Grid.Row="3" Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Height="30">
                     <Label Content="Segment Dimension Leader Visibility:"/>
-                    <ComboBox HorizontalAlignment="Right" Width="112" Margin="16,4" FontFamily="Arial">
+                    <ComboBox HorizontalAlignment="Right" Width="112" Margin="16,4" FontFamily="Arial" SelectionChanged="LeaderVisibility_Selected">
                         <ComboBoxItem Content="By Element" IsSelected="True"/>
                         <ComboBoxItem Content="Always On" FontFamily="Arial"/>
                         <ComboBoxItem Content="Always Off"/>

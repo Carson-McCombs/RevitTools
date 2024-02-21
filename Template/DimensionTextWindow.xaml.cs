@@ -24,5 +24,25 @@ namespace CarsonsAddins
         {
             InitializeComponent();
         }
+
+        
+
+        private void UseActualValue_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void ReplaceWithText_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+        private void ShowLabelInView_Checked(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void LeaderVisibility_Selected(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
