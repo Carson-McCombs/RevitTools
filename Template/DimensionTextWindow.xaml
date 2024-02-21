@@ -5,20 +5,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CarsonsAddins"
              mc:Ignorable="d" 
-             d:DesignHeight="448" d:DesignWidth="420" ResizeMode="NoResize">
+             d:DesignWidth="420" d:DesignHeight="480" Width="420" Height="480" ResizeMode="NoResize" x:Name="root">
     <Window.Resources>
 
     </Window.Resources>
     <Grid Background="#FFF0F0F0">
         <Grid Margin="12">
             <Grid.RowDefinitions>
-                <RowDefinition Height="40" />
+                <RowDefinition Height="48" />
                 <RowDefinition Height="120"/>
-                <RowDefinition Height="180"/>
-                <RowDefinition Height="72"/>
+                <RowDefinition Height="188"/>
+                <RowDefinition Height="64"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="Note: this tool replaces or appends dimensions values with text and has no effect on model geometry." TextWrapping="Wrap" FontFamily="Arial"/>
-            <GroupBox Grid.Row="1" Header="Dimension Value" BorderBrush="#FF545454" BorderThickness="0.5" FontFamily="Arial">
+            <TextBlock Grid.Row="0" Text="Note: this tool replaces or appends dimensions values with text and has no effect on model geometry." TextWrapping="Wrap" FontFamily="Arial" FontSize="11"/>
+            <GroupBox Grid.Row="1" Header="Dimension Value" BorderBrush="#FF545454" BorderThickness="0.5" FontFamily="Arial" >
                 <Grid  Margin="16,2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="32"/>
@@ -29,28 +29,28 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <local:ToggleableTextBox x:Name="UseActualValueControl" Grid.Row="0" IsChecked="True" LabelText="Use Actual Value" IsTextEditable="False" />
-                    <local:ToggleableTextBox x:Name="ReplaceWithTextControl" Grid.Row="1" IsChecked="False" LabelText="Replace With Text" />
-                    <local:ToggleableTextBox x:Name="ShowLabelInViewControl" Grid.Row="2" IsChecked="False" LabelText="Show Label in View" IsTextEditable="False" />
+                    <local:ToggleableTextBox x:Name="UseActualValueControl" Grid.Row="0" IsChecked="True" OnChecked="UseActualValueControl_OnChecked"  LabelText="Use Actual Value" Text="{Binding Path=ValueText, Mode=TwoWay, ElementName=root}" IsTextEditable="False"/>
+                    <local:ToggleableTextBox x:Name="ReplaceWithTextControl" Grid.Row="1" IsChecked="False" OnChecked="ReplaceWithTextControl_OnChecked"  LabelText="Replace With Text" Text="{Binding Path=ValueOverrideText, Mode=TwoWay, ElementName=root}" />
+                    <local:ToggleableTextBox x:Name="ShowLabelInViewControl" Grid.Row="2" IsChecked="False" OnChecked="ShowLabelInViewControl_OnChecked"  LabelText="Show Label in View" Text="{Binding Path=LabelText, Mode=TwoWay, ElementName=root}" IsTextEditable="False" />
 
 
                 </Grid>
             </GroupBox>
 
-            <GroupBox Grid.Row="2" Header="Text Fields" BorderBrush="#FF545454" BorderThickness="0.5" FontFamily="Arial">
+            <GroupBox Grid.Row="2" Header="Text Fields" BorderBrush="#FF545454" BorderThickness="0.5" FontFamily="Arial" Margin="0,12,0,8">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="48"/>
                         <RowDefinition Height="48"/>
                         <RowDefinition Height="48"/>
                     </Grid.RowDefinitions>
-                    <local:TextBoxWithLabel Grid.Row="0" LabelText="Above:" Text="" Width="248" HorizontalAlignment="Center"/>
+                    <local:TextBoxWithLabel x:Name="AboveControl" Grid.Row="0" LabelText="Above:" Text="{Binding Path=AboveText, Mode=TwoWay, ElementName=root}" Width="248" HorizontalAlignment="Center"/>
                     <StackPanel Grid.Row="1" Orientation="Horizontal">
-                        <local:TextBoxWithLabel LabelText="Prefix:" Text="" Width="112" />
-                        <local:TextBoxWithLabel LabelText="Value:" Text="" IsEditable="False" Width="112" Margin="16,0"/>
-                        <local:TextBoxWithLabel LabelText="Suffix:" Text="" Width="112" />
+                        <local:TextBoxWithLabel x:Name="PrefixControl" LabelText="Prefix:" Text="{Binding Path=PrefixText, Mode=TwoWay, ElementName=root}" Width="112" />
+                        <local:TextBoxWithLabel x:Name="ValueControl" LabelText="Value:" Text="{Binding Path=ValueText, Mode=TwoWay, ElementName=root}" IsEditable="False" Width="112" Margin="16,0"/>
+                        <local:TextBoxWithLabel x:Name="SuffixControl" LabelText="Suffix:" Text="{Binding Path=SuffixText, Mode=TwoWay, ElementName=root}" Width="112" />
                     </StackPanel>
-                    <local:TextBoxWithLabel LabelText="Prefix:" Text="" Grid.Row="2"  Width="248" HorizontalAlignment="Center"/>
+                    <local:TextBoxWithLabel x:Name="BelowControl" LabelText="Below:" Text="{Binding Path=BelowText, Mode=TwoWay, ElementName=root}" Grid.Row="2"  Width="248" HorizontalAlignment="Center"/>
                 </Grid>
             </GroupBox>
             <StackPanel Grid.Row="3" Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
@@ -63,9 +63,9 @@
                     </ComboBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Height="36"  >
-                    <Button Width="88" Height="24" Margin="4" Content="OK" FontFamily="Arial"/>
-                    <Button Width="88" Height="24" Margin="4" Content="Cancel" FontFamily="Arial"/>
-                    <Button Width="88" Height="24" Margin="4" Content="Apply" FontFamily="Arial"/>
+                    <Button Width="88" Height="24" Margin="4" Content="OK" Click="OKButton_Click"  FontFamily="Arial" FontSize="11"/>
+                    <Button Width="88" Height="24" Margin="4" Content="Cancel" Click="CancelButton_Click" FontFamily="Arial" FontSize="11"/>
+                    <Button Width="88" Height="24" Margin="4" Content="Apply" Click="ApplyButton_Click" FontFamily="Arial" FontSize="11"/>
                 </StackPanel>
 
 

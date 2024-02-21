@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.Revit.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,70 +24,101 @@ namespace CarsonsAddins
     public partial class ToggleableTextBox : UserControl
     {
         public static readonly DependencyProperty IsClickableProperty =
-        DependencyProperty.Register(
+            DependencyProperty.Register(
             name: "IsClickable",
             propertyType: typeof(bool),
             ownerType: typeof(ToggleableTextBox),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: true));
 
         public static readonly DependencyProperty IsTextEditableProperty =
-        DependencyProperty.Register(
+            DependencyProperty.Register(
             name: "IsTextEditable",
             propertyType: typeof(bool),
             ownerType: typeof(ToggleableTextBox),
-            typeMetadata: new FrameworkPropertyMetadata(defaultValue: true));
+            typeMetadata: new FrameworkPropertyMetadata( defaultValue: true));
 
         public static readonly DependencyProperty IsCheckedProperty =
-        DependencyProperty.Register(
+            DependencyProperty.Register(
             name: "IsChecked",
             propertyType: typeof(bool),
             ownerType: typeof(ToggleableTextBox),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
 
+        public static readonly RoutedEvent OnCheckedEvent = EventManager.RegisterRoutedEvent(
+            name: "OnChecked",
+            routingStrategy: RoutingStrategy.Bubble,
+            handlerType: typeof(RoutedEventHandler),
+            ownerType: typeof(ToggleableTextBox));
+
         public static readonly DependencyProperty LabelTextProperty =
-        DependencyProperty.Register(
+            DependencyProperty.Register(
             name: "LabelText",
             propertyType: typeof(string),
             ownerType: typeof(ToggleableTextBox),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: "Label"));
 
         public static readonly DependencyProperty TextProperty =
-        DependencyProperty.Register(
+            DependencyProperty.Register(
             name: "Text",
             propertyType: typeof(string),
             ownerType: typeof(ToggleableTextBox),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: ""));
 
+
+        public event RoutedEventHandler OnChecked
+        {
+            add { 
+                AddHandler(OnCheckedEvent, value);
+                TaskDialog.Show("ToggleableTextBox - Added to handler","");
+            }
+            remove { RemoveHandler(OnCheckedEvent, value); }
+        }
+
         public bool IsClickable
         {
             get => (bool)GetValue(IsClickableProperty);
-            set => SetValue(IsClickableProperty, value);
+            set => SetValue(IsClickableProperty, value);    
         }
+
         public bool IsTextEditable
         {
             get => (bool)GetValue(IsTextEditableProperty);
             set => SetValue(IsTextEditableProperty, value);
         }
+
         public bool IsChecked
         {
             get => (bool)GetValue(IsCheckedProperty);
             set => SetValue(IsCheckedProperty, value);
         }
+
+
         public string LabelText
         {
             get => (string) GetValue(LabelTextProperty);
             set => SetValue(LabelTextProperty, value);
         }
+
         public string Text
         {
             get => (string)GetValue(TextProperty);
             set => SetValue(TextProperty, value);
         }
-        
+
+
 
         public ToggleableTextBox()
         {
             InitializeComponent();
+        }
+
+        private void CheckBoxControl_Click(object sender, RoutedEventArgs e)
+        {
+            if (IsChecked) 
+            {
+                RoutedEventArgs args = new RoutedEventArgs(ToggleableTextBox.OnCheckedEvent);
+                RaiseEvent(args);
+            }
         }
     }
 }

@@ -11,7 +11,7 @@
             <ColumnDefinition Width="142"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <CheckBox Grid.Column="0" Content="{Binding Path=LabelText, ElementName=root}" IsChecked="{Binding Path=IsChecked, ElementName=root}" IsEnabled="{Binding Path=IsClickable, ElementName=root}" VerticalAlignment="Center" VerticalContentAlignment="Center" FontFamily="Arial"/>
-        <TextBox Grid.Column="1" Text="{Binding Path=Text, ElementName=root}" Margin="4" FontFamily="Arial"/>
-    </Grid>
+        <CheckBox Grid.Column="0" Name="CheckBoxControl" Content="{Binding Path=LabelText, Mode=TwoWay,ElementName=root}" IsChecked="{Binding Path=IsChecked, Mode=TwoWay,ElementName=root}" Click="CheckBoxControl_Click" IsEnabled="{Binding Path=IsClickable, Mode=TwoWay, ElementName=root}" VerticalAlignment="Center" VerticalContentAlignment="Center" FontFamily="Arial"/>
+        <TextBox Grid.Column="1" Name="TextBoxControl" Text="{Binding Path=Text, Mode=TwoWay,ElementName=root}" Margin="4" FontFamily="Arial" IsEnabled="{Binding Path=IsTextEditable, Mode=TwoWay,ElementName=root}"/>
+    </Grid> 
 </UserControl>
