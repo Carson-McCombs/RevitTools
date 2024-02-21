@@ -87,8 +87,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationIds.cs" />
-    <Compile Include="ToggleableCheckBox.xaml.cs">
-      <DependentUpon>ToggleableCheckBox.xaml</DependentUpon>
+    <Compile Include="ToggleableTextBox.xaml.cs">
+      <DependentUpon>ToggleableTextBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="DimensionTextWindow.xaml.cs">
       <DependentUpon>DimensionTextWindow.xaml</DependentUpon>
@@ -142,7 +142,7 @@
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="ToggleableCheckBox.xaml">
+    <Page Include="ToggleableTextBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

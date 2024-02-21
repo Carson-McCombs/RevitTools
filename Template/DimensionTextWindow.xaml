@@ -29,9 +29,9 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <local:ToggleableCheckBox Grid.Row="0" IsChecked="True" LabelText="Use Actual Value" IsTextEditable="False" />
-                    <local:ToggleableCheckBox Grid.Row="1" IsChecked="False" LabelText="Replace With Text" />
-                    <local:ToggleableCheckBox Grid.Row="2" IsChecked="False" LabelText="Show Label in View" IsTextEditable="False" />
+                    <local:ToggleableTextBox x:Name="UseActualValueControl" Grid.Row="0" IsChecked="True" LabelText="Use Actual Value" IsTextEditable="False" />
+                    <local:ToggleableTextBox x:Name="ReplaceWithTextControl" Grid.Row="1" IsChecked="False" LabelText="Replace With Text" />
+                    <local:ToggleableTextBox x:Name="ShowLabelInViewControl" Grid.Row="2" IsChecked="False" LabelText="Show Label in View" IsTextEditable="False" />
 
 
                 </Grid>

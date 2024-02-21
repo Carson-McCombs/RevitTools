@@ -20,41 +20,41 @@ namespace CarsonsAddins
     /// 
     /// Less necessary than, but made to be consistent with the TextboxWithLabel class
     /// </summary>
-    public partial class ToggleableCheckBox : UserControl
+    public partial class ToggleableTextBox : UserControl
     {
         public static readonly DependencyProperty IsClickableProperty =
         DependencyProperty.Register(
             name: "IsClickable",
             propertyType: typeof(bool),
-            ownerType: typeof(ToggleableCheckBox),
+            ownerType: typeof(ToggleableTextBox),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: true));
 
         public static readonly DependencyProperty IsTextEditableProperty =
         DependencyProperty.Register(
             name: "IsTextEditable",
             propertyType: typeof(bool),
-            ownerType: typeof(ToggleableCheckBox),
+            ownerType: typeof(ToggleableTextBox),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: true));
 
         public static readonly DependencyProperty IsCheckedProperty =
         DependencyProperty.Register(
             name: "IsChecked",
             propertyType: typeof(bool),
-            ownerType: typeof(ToggleableCheckBox),
+            ownerType: typeof(ToggleableTextBox),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
 
         public static readonly DependencyProperty LabelTextProperty =
         DependencyProperty.Register(
             name: "LabelText",
             propertyType: typeof(string),
-            ownerType: typeof(ToggleableCheckBox),
+            ownerType: typeof(ToggleableTextBox),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: "Label"));
 
         public static readonly DependencyProperty TextProperty =
         DependencyProperty.Register(
             name: "Text",
             propertyType: typeof(string),
-            ownerType: typeof(ToggleableCheckBox),
+            ownerType: typeof(ToggleableTextBox),
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: ""));
 
         public bool IsClickable
@@ -84,7 +84,7 @@ namespace CarsonsAddins
         }
         
 
-        public ToggleableCheckBox()
+        public ToggleableTextBox()
         {
             InitializeComponent();
         }
