@@ -683,6 +683,45 @@ namespace CarsonsAddins
         //}
         #endregion
 
+        #region GeneralDimensioning
+        public static Line GetDimensionSegmentLine(DimensionSegment segment, XYZ direction)
+        {
+            if (segment.Value == null) return null;
+            XYZ offset = direction.Multiply((double)segment.Value / 2);
+            return Line.CreateBound(segment.Origin - offset, segment.Origin + offset); ;
+        }
+
+        public static Dictionary<XYZ, (Dimension, DimensionSegment)> ExtractPseudoDimensions(Document doc, Dimension dimension)
+        {
+            Dictionary<XYZ, (Dimension, DimensionSegment)> dimensionSegmentsByOrigin = new Dictionary<XYZ, (Dimension, DimensionSegment)>();
+            XYZ direction = (dimension.Curve as Line).Direction;
+            for (int i = 0; i < dimension.Segments.Size; i++)
+            {
+                DimensionSegment segment = dimension.Segments.get_Item(i);
+                dimensionSegmentsByOrigin.Add(segment.Origin, (null, segment));
+                Line line = GetDimensionSegmentLine(segment, direction);
+
+                ReferenceArray ary = GetDetailReference(doc, line);
+                Dimension dim = doc.Create.NewDimension(doc.ActiveView, line, ary);
+                dim.ValueOverride = segment.ValueOverride;
+            }
+            return dimensionSegmentsByOrigin;
+        }
+
+        public static ReferenceArray GetDetailReference(Document doc, Line dimensionLine)
+        {
+            ReferenceArray rf = new ReferenceArray();
+            View activeView = doc.ActiveView;
+
+            XYZ perp = Line.CreateBound(dimensionLine.GetEndPoint(0), dimensionLine.GetEndPoint(1)).Direction.CrossProduct(activeView.UpDirection);
+
+            DetailCurve line = doc.Create.NewDetailCurve(activeView, dimensionLine.CreateOffset(0.00000001d, perp));
+
+            rf.Append(line.GeometryCurve.GetEndPointReference(0));
+            rf.Append(line.GeometryCurve.GetEndPointReference(1));
+            return rf;
+        }
+        #endregion
 
         public static double GetPipeLength(Pipe pipe)
         {

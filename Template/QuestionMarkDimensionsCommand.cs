@@ -55,7 +55,7 @@ namespace CarsonsAddins
                         continue;
                     }
                     multiSegmentDimensions.Add(id);
-                    Dictionary<XYZ, (Dimension, DimensionSegment)> tmp = ExtractPseudoDimensions(doc, dimension);
+                    Dictionary<XYZ, (Dimension, DimensionSegment)> tmp = Util.ExtractPseudoDimensions(doc, dimension);
                     foreach (XYZ origin in tmp.Keys)
                     {
                         dimensionSegmentsByOrigin.Add(origin, tmp[origin]);
@@ -129,22 +129,7 @@ namespace CarsonsAddins
             return Result.Succeeded;
         }
 
-        private Dictionary<XYZ, (Dimension, DimensionSegment)> ExtractPseudoDimensions(Document doc, Dimension dimension)
-        {
-            Dictionary<XYZ, (Dimension, DimensionSegment)> dimensionSegmentsByOrigin = new Dictionary<XYZ, (Dimension, DimensionSegment)>();
-            XYZ direction = (dimension.Curve as Line).Direction;
-            for (int i = 0; i < dimension.Segments.Size; i++)
-            {
-                DimensionSegment segment = dimension.Segments.get_Item(i);
-                dimensionSegmentsByOrigin.Add(segment.Origin, (null, segment));
-                Line line = GetDimensionSegmentLine(segment, direction);
-
-                ReferenceArray ary = GetDetailReference(doc, line);
-                Dimension dim = doc.Create.NewDimension(doc.ActiveView, line, ary);
-                dim.ValueOverride = segment.ValueOverride;
-            }
-            return dimensionSegmentsByOrigin;
-        }
+        
 
 
         private void SetDimensionOrSegmentQuestionMark((Dimension, DimensionSegment) dimensionOrSegment)
@@ -153,30 +138,9 @@ namespace CarsonsAddins
             if (dimensionOrSegment.Item2 != null) dimensionOrSegment.Item2.ValueOverride = "?";
 
         }
-        private Line GetDimensionSegmentLine(DimensionSegment segment, XYZ direction)
-        {
-            if (segment.Value == null) return null;
-            XYZ offset = direction.Multiply((double)segment.Value / 2);
-            return Line.CreateBound(segment.Origin - offset, segment.Origin + offset); ;
-        }
+        
 
-        private ReferenceArray GetDetailReference(Document doc, Line dimensionLine)
-        {
-            ReferenceArray rf = new ReferenceArray();
-            
-            //SketchPlane sketchPlane = SketchPlane.Create()
-            //Plane plane = sketchPlane.GetPlane();
-            View activeView = doc.ActiveView;
-            //Plane plane = Plane.CreateByNormalAndOrigin(activeView.ViewDirection, activeView.Origin);
-
-            XYZ perp = Line.CreateBound(dimensionLine.GetEndPoint(0), dimensionLine.GetEndPoint(1)).Direction.CrossProduct(activeView.UpDirection);
-            
-            DetailCurve line = doc.Create.NewDetailCurve(activeView, dimensionLine.CreateOffset(0.00000001d, perp));
-            
-            rf.Append(line.GeometryCurve.GetEndPointReference(0));
-            rf.Append(line.GeometryCurve.GetEndPointReference(1));
-            return rf;
-        }
+        
 
         
     }
