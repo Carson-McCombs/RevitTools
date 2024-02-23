@@ -89,7 +89,7 @@ namespace CarsonsAddins
 
             }
             //PipeSystemControl.ItemsSource = pipingSystemLCs.FirstOrDefault().PipeTypeLCs;
-            //PSSelectorControl.Init(pipingSystemLCs);
+            //PSSelectorControl.Inject(pipingSystemLCs);
             PipingSystemSelectorControl.SelectPipingSystemEvent += OnSelectPipingSystem;
             //pipingSystemLCUpdater = new PipingLCUpdater(this, doc);
         }

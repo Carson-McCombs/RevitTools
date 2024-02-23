@@ -109,7 +109,7 @@ namespace CarsonsAddins
                 if (!(component is IDockablePaneProvider))  continue;
                 if (component is ISettingsUIComponent uiComponent) 
                 {
-                    var registerCommandType = typeof( RegisterDockablePane<>).MakeGenericType(uiComponent.GetType());
+                    Type registerCommandType = typeof( RegisterDockablePane<>).MakeGenericType(uiComponent.GetType());
                     var registerCommand = Activator.CreateInstance(registerCommandType);
                     if (registerCommand is IExecuteWithUIApplication command) command.Execute(uiapp);
                 }
@@ -224,37 +224,34 @@ namespace CarsonsAddins
 
         }
     }
+    
 
     [Transaction(TransactionMode.Manual)]
     public class ShowWindow<T> : IExternalCommand where T : Window, ISettingsUIComponent, new()
     {
-        private static Dictionary<Type,Window> instances = new Dictionary<Type, Window> ();
+        private static T instance;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             try
             {
-                if (instances.ContainsKey(typeof(T))) 
-                {
-                    (instances[typeof(T)] as ISettingsUIComponent).Init(commandData.Application.ActiveUIDocument);
-                    instances[typeof(T)].Show();
-                }
-                else
-                {
-                    T instance = new T();
-                    instance.Init(commandData.Application.ActiveUIDocument);
-                    instance.Show();
-                }
-
+                instance = new T();
+                instance.Init(commandData.Application.ActiveUIDocument);
+                instance.ShowDialog();
+                
                 return Result.Succeeded;
 
             }
             catch (Exception e)
             {
-                TaskDialog.Show("Error Showing Window " + typeof(T).Name, e.Message);
                 return Result.Failed;
             }
 
         }
+
+
+
+
+        
     }
 
     #endregion
