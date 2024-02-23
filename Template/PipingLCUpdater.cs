@@ -16,14 +16,14 @@ namespace CarsonsAddins
     class PipingLCUpdater : IUpdater
     {
         private UpdaterId updaterId;
-        private PreferenceWindow preferenceWindow;
+        private PipingLCDockablePane preferenceWindow;
         public PipingLCUpdater(AddInId addinId)
         {
             updaterId = new UpdaterId(addinId, ApplicationIds.GetId(typeof(PipingLCUpdater)));
             RegisterUpdater();
             RegisterTriggers();
         }
-        public void LinkToPreferenceWindow(PreferenceWindow preferenceWindow)
+        public void LinkToPreferenceWindow(PipingLCDockablePane preferenceWindow)
         {
             this.preferenceWindow = preferenceWindow;
         }

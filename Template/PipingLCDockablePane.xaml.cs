@@ -28,7 +28,7 @@ namespace CarsonsAddins
     /// <summary>
     /// Interaction logic for TextBoxWithLabel.xaml
     /// </summary>
-    public partial class PreferenceWindow : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingUpdaterComponent
+    public partial class PipingLCDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingUpdaterComponent
     {
         public const bool IsWIP = true;
         private PipingLCUpdater updater;
@@ -38,7 +38,7 @@ namespace CarsonsAddins
         Document doc = null;
         //PipingSystemLC selectedSystem = null;
         ObservableCollection<PipingSystemLC> pipingSystemLCs;
-        public PreferenceWindow()
+        public PipingLCDockablePane()
         {
             InitializeComponent();
         }
