@@ -106,6 +106,7 @@ namespace CarsonsAddins
             UIApplication uiapp = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
             foreach (ISettingsComponent component in settingsComponents)
             {
+                if (!(component is IDockablePaneProvider))  continue;
                 if (component is ISettingsUIComponent uiComponent) 
                 {
                     var registerCommandType = typeof( RegisterDockablePane<>).MakeGenericType(uiComponent.GetType());
