@@ -63,7 +63,7 @@
                     </ComboBox>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Height="36"  >
-                    <Button Width="88" Height="24" Margin="4" Content="OK" Click="OKButton_Click"  FontFamily="Arial" FontSize="11"/>
+                    <Button Width="88" Height="24" Margin="4" Content="Reselect" Click="ReselectButton_Click"  FontFamily="Arial" FontSize="11"/>
                     <Button Width="88" Height="24" Margin="4" Content="Cancel" Click="CancelButton_Click" FontFamily="Arial" FontSize="11"/>
                     <Button Width="88" Height="24" Margin="4" Content="Apply" Click="ApplyButton_Click" FontFamily="Arial" FontSize="11"/>
                 </StackPanel>

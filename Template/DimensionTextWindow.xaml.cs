@@ -19,6 +19,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static CarsonsAddins.Util;
 
 namespace CarsonsAddins
 {
@@ -84,7 +85,6 @@ namespace CarsonsAddins
             typeMetadata: new FrameworkPropertyMetadata(defaultValue: ""));
 
         private UIDocument uidoc;
-        private List<Dimension> selectedDimensions = new List<Dimension>();
         private DimensionTextOptions selectedTextOption
         {
             get => (DimensionTextOptions) GetValue( DimensionTextOptionsProperty );
@@ -129,29 +129,33 @@ namespace CarsonsAddins
             get => (string)GetValue(SuffixTextProperty);
             set => SetValue(SuffixTextProperty, value);
         }
+        SelectIndividualDimensionsEventHandler selectDimensionsHandler;
+        SetDimensionsTextEventHandler setDimensionsTextHandler;
+        
+        ExternalEvent selectDimensionsEvent;
+        ExternalEvent setDimensionsTextEvent;
 
-        UpdateDimensionTextEventHandler handler;
-        ExternalEvent externalEvent;
+        List<(Dimension, DimensionSegment)> dimensionsAndSegments;
+
         public DimensionTextWindow()
         {
             InitializeComponent();
-            handler = new UpdateDimensionTextEventHandler();
-            externalEvent = ExternalEvent.Create(handler);
+            selectDimensionsHandler = new SelectIndividualDimensionsEventHandler();
+            setDimensionsTextHandler = new SetDimensionsTextEventHandler();
+            selectDimensionsEvent = ExternalEvent.Create(selectDimensionsHandler);
+            setDimensionsTextEvent = ExternalEvent.Create(setDimensionsTextHandler);
+
         }
 
         public void Init(UIDocument uidoc)
         {
             this.uidoc = uidoc;
-            List<Element> dimensionElements = new FilteredElementCollector(uidoc.Document, uidoc.Selection.GetElementIds()).OfCategory(BuiltInCategory.OST_Dimensions).ToElements() as List<Element>;
-            selectedDimensions = new List<Dimension>();
-            foreach (Element element in dimensionElements)
-            {
-                if (element is Dimension dimension )selectedDimensions.Add(dimension);
-            }
-            
-            SetDefaultTextsBySelected(selectedDimensions);
         }
-
+        public void Init(UIDocument uidoc, List<(Dimension, DimensionSegment)> dimensionsAndSegments)
+        {
+            this.uidoc = uidoc;
+            this.dimensionsAndSegments = dimensionsAndSegments;
+        }
         public PushButtonData RegisterButton(Assembly assembly)
         {
             PushButtonData pushButtonData = new PushButtonData("DimensionsTextWindow", "Dimensions Text Window", assembly.Location, typeof(ShowWindow<DimensionTextWindow>).FullName);
@@ -194,7 +198,7 @@ namespace CarsonsAddins
             //nothing for now
         }
 
-        private void SetDefaultTextsBySelected(List<Dimension> dimensions)
+        private void SetDefaultTextsBySelected(List<(Dimension, DimensionSegment)> dimensions)
         {
             if (dimensions == null || dimensions.Count == 0) return;
 
@@ -209,47 +213,59 @@ namespace CarsonsAddins
             bool similarPrefixText = true;
             bool similarSuffixText = true;
 
+            DimensionAndSegment current;
+            DimensionAndSegment next = new DimensionAndSegment(dimensions[0]);
             if (dimensions.Count > 1)
             {
-                Dimension current;
-                Dimension next;
+                
+
+                //(Dimension, DimensionSegment) current;
+                //(Dimension, DimensionSegment) next;
                 for (int i = 0; i < dimensions.Count - 1; i++)
                 {
-                    current = dimensions[i];
-                    next = dimensions[i + 1];
+                    current = next;
+                    next = new DimensionAndSegment(dimensions[i]);
+                    //var current = dimensions[i];
+                    //var = dimensions[i + 1];
                     if (similarAboveText && current.Above == next.Above) similarAboveText = false;
                     if (similarBelowText && current.Below == next.Below) similarBelowText = false;
 
                     if (similarValueText && current.ValueString != next.ValueString) similarValueText = false;
                     if (similarValueOverrideText && current.ValueOverride !=next.ValueOverride) similarValueOverrideText = false;
-                    if (similarLabelText && current.get_Parameter(BuiltInParameter.DIM_LABEL).AsValueString() !=next.get_Parameter(BuiltInParameter.DIM_LABEL).AsValueString()) similarLabelText = false;
+                    if (similarLabelText && current.LabelText != next.LabelText) similarLabelText = false;
 
                     if (similarPrefixText && current.Prefix != next.Prefix) similarPrefixText = false;
                     if (similarSuffixText && current.Suffix != next.Suffix) similarSuffixText = false;
 
                 }
             }
-            AboveText = similarAboveText ? EmptyIfNull(dimensions[0].Above) : "";
-            BelowText = similarBelowText ? EmptyIfNull(dimensions[0].Below) : "";
+            AboveText = similarAboveText ? EmptyIfNull(next.Above) : "";
+            BelowText = similarBelowText ? EmptyIfNull(next.Below) : "";
 
-            ValueText = similarValueText ? EmptyIfNull(dimensions[0].ValueString) : "";
-            ValueOverrideText = similarValueOverrideText ? EmptyIfNull(dimensions[0].ValueOverride) : "";
-            LabelText = similarLabelText ? EmptyIfNull(dimensions[0].get_Parameter(BuiltInParameter.DIM_LABEL).AsValueString()) : "";
+            ValueText = similarValueText ? EmptyIfNull(next.ValueString) : "";
+            ValueOverrideText = similarValueOverrideText ? EmptyIfNull(next.ValueOverride) : "";
+            LabelText = similarLabelText ? EmptyIfNull(next.LabelText) : "";
 
-            PrefixText = similarPrefixText ? EmptyIfNull(dimensions[0].Prefix) : "";
-            SuffixText = similarSuffixText ? EmptyIfNull(dimensions[0].Suffix) : "";
+            PrefixText = similarPrefixText ? EmptyIfNull(next.Prefix) : "";
+            SuffixText = similarAboveText ? EmptyIfNull(next.Suffix) : "";
 
 
         
         }
 
         private string EmptyIfNull(string value) => (value == null) ? "": value;
-
-        private void OKButton_Click(object sender, RoutedEventArgs e)
+        
+        private void ReselectButton_Click(object sender, RoutedEventArgs e)
         {
-            handler.Inject(selectedDimensions, AboveText, BelowText, ValueOverrideText, PrefixText, SuffixText);
-            externalEvent.Raise();
+            
+            selectDimensionsEvent.Raise();
+            dimensionsAndSegments = selectDimensionsHandler.DimensionsAndSegments;
+            
+            SetDefaultTextsBySelected(dimensionsAndSegments);
+            DimensionTextWindow instance = new DimensionTextWindow();
+            instance.Init(uidoc, dimensionsAndSegments);
             Close();
+            instance.Show();
         }
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
@@ -258,9 +274,11 @@ namespace CarsonsAddins
         }
         private void ApplyButton_Click(object sender, RoutedEventArgs e)
         {
-
-            handler.Inject(selectedDimensions, AboveText, BelowText, ValueOverrideText, PrefixText, SuffixText);
-            externalEvent.Raise();
+            setDimensionsTextHandler.Inject(dimensionsAndSegments);
+            setDimensionsTextHandler.Inject(AboveText, BelowText, ValueOverrideText, PrefixText, SuffixText);
+            setDimensionsTextEvent.Raise();
+            //handler.Inject(selectedDimensions, AboveText, BelowText, ValueOverrideText, PrefixText, SuffixText);
+            //externalEvent.Raise();
             Close();
         }
     }
@@ -284,27 +302,28 @@ namespace CarsonsAddins
         {
             if (selectedDimensions == null) return;
             if (selectedDimensions.Count == 0) return;
+            Transaction transaction = new Transaction(app.ActiveUIDocument.Document);
 
+            transaction.Start("Update Dimensions Text");
             try
             {
 
-                using (Transaction transaction = new Transaction(app.ActiveUIDocument.Document))
+                
+                for (int i = 0; i < selectedDimensions.Count; i++)
                 {
-                    transaction.Start("Update Dimensions Text");
-                    for (int i = 0; i < selectedDimensions.Count; i++)
-                    {
                         
-                        selectedDimensions[i].Above = above;
-                        selectedDimensions[i].Below = below;
-                        selectedDimensions[i].ValueOverride = valueOverride;
-                        selectedDimensions[i].Prefix = prefix;
-                        selectedDimensions[i].Suffix = suffix;
-                    }
-                    transaction.Commit();
+                    selectedDimensions[i].Above = above;
+                    selectedDimensions[i].Below = below;
+                    selectedDimensions[i].ValueOverride = valueOverride;
+                    selectedDimensions[i].Prefix = prefix;
+                    selectedDimensions[i].Suffix = suffix;
                 }
+                transaction.Commit();
+                
             }
             catch (Exception ex)
             {
+                transaction.RollBack();
             }
         }
 

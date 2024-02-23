@@ -36,93 +36,18 @@ namespace CarsonsAddins
                 TaskDialog.Show("Question Mark Dimensions Command", "Command should not be used within a family document.");
                 return Result.Failed;
             }
-            List<ElementId> allDimensionReferences = new FilteredElementCollector(doc, doc.ActiveView.Id).OfCategory(BuiltInCategory.OST_Dimensions).ToElementIds() as List<ElementId>;
-            Dictionary<XYZ, (Dimension, DimensionSegment)> dimensionSegmentsByOrigin = new Dictionary<XYZ, (Dimension, DimensionSegment)>();
-            Transaction dummyTransaction = new Transaction(doc);
-            dummyTransaction.Start("DummySeperateDimensionSegments");
-            string errorLog = "";
-            List<ElementId> multiSegmentDimensions = new List<ElementId>();
-            foreach (ElementId id in allDimensionReferences) 
-            {
-                try
-                {
-                    Dimension dimension = doc.GetElement(id) as Dimension;
-                    if (dimension == null) continue;
-                    if (!DimensionShape.Linear.Equals(dimension.DimensionShape)) continue;
-                    if (dimension.HasOneSegment())
-                    {
-                        dimensionSegmentsByOrigin.Add(dimension.Origin, (dimension, null));
-                        continue;
-                    }
-                    multiSegmentDimensions.Add(id);
-                    Dictionary<XYZ, (Dimension, DimensionSegment)> tmp = Util.ExtractPseudoDimensions(doc, dimension);
-                    foreach (XYZ origin in tmp.Keys)
-                    {
-                        dimensionSegmentsByOrigin.Add(origin, tmp[origin]);
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    errorLog = errorLog + ex.Message + "\n";
-                }
-                
-            }
-            doc.Delete(multiSegmentDimensions);
-            //doc.acti(multiSegmentDimensions);
-            if (errorLog != "") TaskDialog.Show("Dummy Seperate Dimensions Error", errorLog);
-            List<Reference > selectedDimensionReferences;
-            try
-            {
-                selectedDimensionReferences = uidoc.Selection.PickObjects(ObjectType.Element, new SelectionFilter_LinearDimension(), "Please select dimensions to question mark.") as List<Reference>;
-
-            }
-            catch
-            {
-                dummyTransaction.RollBack();
-                return Result.Cancelled;
-            }
-            List<XYZ> selectedDimensionOrigins = new List<XYZ>();
             
-            foreach (Reference reference in selectedDimensionReferences)
-            {
-                Dimension dimension = doc.GetElement(reference.ElementId) as Dimension;
-                if (dimension == null) continue;
-                //selectedDimensionOrigins.Add(SetByBasis(dimension.Origin, viewOrigin, viewDirection));
-                selectedDimensionOrigins.Add(dimension.Origin);
-                
-                
-            }
-            dummyTransaction.RollBack();
-            if (selectedDimensionOrigins == null || selectedDimensionOrigins.Count == 0) return Result.Cancelled;
 
             Transaction questionMarkTransaction = new Transaction(doc);
             questionMarkTransaction.Start("QuestionMarkTransaction");
             //List<XYZ> leftoverKeys = dimensionSegmentsByOrigin.Keys.ToList();
             //List<XYZ> leftoverSelected = new List<XYZ>();
-            foreach(XYZ origin in selectedDimensionOrigins)
+            SelectIndividualDimensionsCommand selectCommand = new SelectIndividualDimensionsCommand();
+            selectCommand.Execute(commandData, ref message, elements);
+            List<(Dimension, DimensionSegment)> dimensionsAndSegments = selectCommand.DimensionsAndSegments;
+            foreach ((Dimension, DimensionSegment) dimensionOrSegment in dimensionsAndSegments)
             {
-                if (origin == null) continue;
-                if (dimensionSegmentsByOrigin.ContainsKey(origin)) 
-                {
-                    //dimensionSegmentsByOrigin[origin].ValueOverride = "?";
-                    SetDimensionOrSegmentQuestionMark(dimensionSegmentsByOrigin[origin]);
-                    //leftoverKeys.Remove(origin);
-                }
-                else
-                {
-                   // bool found = false;
-                    foreach (XYZ key in dimensionSegmentsByOrigin.Keys)
-                    {
-                        if (!origin.IsAlmostEqualTo(key)) continue;
-                        //found = true;
-                        SetDimensionOrSegmentQuestionMark(dimensionSegmentsByOrigin[key]);
-                        //dimensionSegmentsByOrigin[key].ValueOverride = "?";
-                        //leftoverKeys.Remove(key);
-                        break;
-                    }
-                    //if (!found) leftoverSelected.Add(origin);
-                }
+                SetDimensionOrSegmentQuestionMark(dimensionOrSegment);
             }
             
             questionMarkTransaction.Commit();

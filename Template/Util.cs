@@ -3,6 +3,7 @@ using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -704,6 +705,12 @@ namespace CarsonsAddins
                 ReferenceArray ary = GetDetailReference(doc, line);
                 Dimension dim = doc.Create.NewDimension(doc.ActiveView, line, ary);
                 dim.ValueOverride = segment.ValueOverride;
+                dim.Above = segment.Above;
+                dim.Below = segment.Below;
+                dim.Prefix = segment.Prefix;
+                dim.Suffix = segment.Suffix;
+                dim.TextPosition = segment.TextPosition;
+                dim.LeaderEndPosition = segment.LeaderEndPosition;
             }
             return dimensionSegmentsByOrigin;
         }
@@ -715,12 +722,191 @@ namespace CarsonsAddins
 
             XYZ perp = Line.CreateBound(dimensionLine.GetEndPoint(0), dimensionLine.GetEndPoint(1)).Direction.CrossProduct(activeView.UpDirection);
 
-            DetailCurve line = doc.Create.NewDetailCurve(activeView, dimensionLine.CreateOffset(0.00000001d, perp));
+            DetailCurve line = doc.Create.NewDetailCurve(activeView, dimensionLine.CreateOffset(0.000001d, perp));
 
             rf.Append(line.GeometryCurve.GetEndPointReference(0));
             rf.Append(line.GeometryCurve.GetEndPointReference(1));
             return rf;
         }
+
+
+        public class DimensionAndSegment
+        {
+            private Dimension dimension = null;
+            private DimensionSegment dimensionSegment = null;
+            private enum DimensionOrSegmentState { None, Dimension, DimensionSegment }
+            private DimensionOrSegmentState state = DimensionOrSegmentState.None;
+            
+            public string Above
+            {
+                get
+                {
+                    switch (state)
+                    {
+                        
+                        case (DimensionOrSegmentState.Dimension): return dimension.Above;
+                        case (DimensionOrSegmentState.DimensionSegment): return dimensionSegment.Above;
+                        default: return null;
+                    }
+                }
+                set
+                {
+                    switch (state)
+                    {
+                        case (DimensionOrSegmentState.Dimension): dimension.Above = value; break;
+                        case (DimensionOrSegmentState.DimensionSegment): dimensionSegment.Above = value; break;
+                        default: break;
+                    }
+                }
+            }
+
+            public string Below
+            {
+                get
+                {
+                    switch (state)
+                    {
+
+                        case (DimensionOrSegmentState.Dimension): return dimension.Below;
+                        case (DimensionOrSegmentState.DimensionSegment): return dimensionSegment.Below;
+                        default: return null;
+                    }
+                }
+                set
+                {
+                    switch (state)
+                    {
+                        case (DimensionOrSegmentState.Dimension): dimension.Below = value; break;
+                        case (DimensionOrSegmentState.DimensionSegment): dimensionSegment.Below = value; break;
+                        default: break;
+                    }
+                }
+            }
+            public string ValueString
+            {
+                get
+                {
+                    switch (state)
+                    {
+
+                        case (DimensionOrSegmentState.Dimension): return dimension.ValueString;
+                        case (DimensionOrSegmentState.DimensionSegment): return dimensionSegment.ValueString;
+                        default: return null;
+                    }
+                }
+            }
+
+            public string ValueOverride
+            {
+                get
+                {
+                    switch (state)
+                    {
+
+                        case (DimensionOrSegmentState.Dimension): return dimension.ValueOverride;
+                        case (DimensionOrSegmentState.DimensionSegment): return dimensionSegment.ValueOverride;
+                        default: return null;
+                    }
+                }
+                set
+                {
+                    switch (state)
+                    {
+                        case (DimensionOrSegmentState.Dimension): dimension.ValueOverride = value; break;
+                        case (DimensionOrSegmentState.DimensionSegment): dimensionSegment.ValueOverride = value; break;
+                        default: break;
+                    }
+                }
+            }
+            public string Prefix
+            {
+                get
+                {
+                    switch (state)
+                    {
+
+                        case (DimensionOrSegmentState.Dimension): return dimension.Prefix;
+                        case (DimensionOrSegmentState.DimensionSegment): return dimensionSegment.Prefix;
+                        default: return null;
+                    }
+                }
+                set
+                {
+                    switch (state)
+                    {
+                        case (DimensionOrSegmentState.Dimension): dimension.Prefix = value; break;
+                        case (DimensionOrSegmentState.DimensionSegment): dimensionSegment.Prefix = value; break;
+                        default: break;
+                    }
+                }
+            }
+            public string Suffix
+            {
+                get
+                {
+                    switch (state)
+                    {
+
+                        case (DimensionOrSegmentState.Dimension): return dimension.Suffix;
+                        case (DimensionOrSegmentState.DimensionSegment): return dimensionSegment.Suffix;
+                        default: return null;
+                    }
+                }
+                set
+                {
+                    switch (state)
+                    {
+                        case (DimensionOrSegmentState.Dimension): dimension.Suffix = value; break;
+                        case (DimensionOrSegmentState.DimensionSegment): dimensionSegment.Suffix = value; break;
+                        default: break;
+                    }
+                }
+            }
+            public string LabelText
+            {
+                get
+                {
+                    switch (state)
+                    {
+
+                        case (DimensionOrSegmentState.Dimension): return dimension.get_Parameter(BuiltInParameter.DIM_LABEL).AsValueString();
+                        case (DimensionOrSegmentState.DimensionSegment): return "";
+                        default: return null;
+                    }
+                }
+            }
+            public DimensionAndSegment(Dimension dimension) 
+            {
+                this.dimension = dimension; 
+                state = (dimension == null) ? DimensionOrSegmentState.None : DimensionOrSegmentState.Dimension;
+            }
+
+            public DimensionAndSegment(DimensionSegment dimensionSegment)
+            {
+                this.dimensionSegment = dimensionSegment;
+                state = (dimensionSegment == null) ? DimensionOrSegmentState.None : DimensionOrSegmentState.DimensionSegment;
+
+            }
+            public DimensionAndSegment((Dimension, DimensionSegment) pair)
+            {
+                dimension = pair.Item1;
+                dimensionSegment = pair.Item2;
+                state = GetState();
+            }
+
+
+            private DimensionOrSegmentState GetState()
+            {
+                bool dimensionIsNull = dimension == null;
+                bool dimensionSegmentIsNull = dimensionSegment == null;
+                if (dimensionIsNull && dimensionSegmentIsNull) return DimensionOrSegmentState.None;
+                else if (dimensionIsNull) return DimensionOrSegmentState.DimensionSegment;
+                else if (dimensionSegmentIsNull) return DimensionOrSegmentState.Dimension;
+                else return DimensionOrSegmentState.None;
+            }
+        }
+
+
         #endregion
 
         public static double GetPipeLength(Pipe pipe)

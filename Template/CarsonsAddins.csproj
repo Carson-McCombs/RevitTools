@@ -87,6 +87,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationIds.cs" />
+    <Compile Include="SelectDimensionsIndividuallyCommand.cs" />
+    <Compile Include="SetDimensionTextEventHandler.cs" />
     <Compile Include="ToggleableTextBox.xaml.cs">
       <DependentUpon>ToggleableTextBox.xaml</DependentUpon>
     </Compile>
@@ -133,8 +135,8 @@
     <Compile Include="CarsonsAddinsApplication.Designer.cs">
       <DependentUpon>CarsonsAddinsApplication.cs</DependentUpon>
     </Compile>
-    <Compile Include="PreferenceWindow.xaml.cs">
-      <DependentUpon>PreferenceWindow.xaml</DependentUpon>
+    <Compile Include="PipingLCDockablePane.xaml.cs">
+      <DependentUpon>PipingLCDockablePane.xaml</DependentUpon>
     </Compile>
     <Compile Include="TextBoxWithLabel.xaml.cs">
       <DependentUpon>TextBoxWithLabel.xaml</DependentUpon>
@@ -162,7 +164,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PreferenceWindow.xaml">
+    <Page Include="PipingLCDockablePane.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
