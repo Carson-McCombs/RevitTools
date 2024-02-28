@@ -89,6 +89,7 @@
     <Compile Include="ApplicationIds.cs" />
     <Compile Include="SelectDimensionsIndividuallyCommand.cs" />
     <Compile Include="SetDimensionTextEventHandler.cs" />
+    <Compile Include="StaleReferenceUpdater.cs" />
     <Compile Include="ToggleableTextBox.xaml.cs">
       <DependentUpon>ToggleableTextBox.xaml</DependentUpon>
     </Compile>

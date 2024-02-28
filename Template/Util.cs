@@ -1017,6 +1017,29 @@ namespace CarsonsAddins
         }
     }
 
+
+    /// <summary>
+    /// A Selection Filter that is set to only allow those elements that are contained within it ( meant to be used for updaters ).
+    /// </summary>
+    public class SelectionFilter_IsWithinList : ElementFilter
+    {
+        private List<ElementId> elementIds = new List<ElementId>();
+        public SelectionFilter_IsWithinList(ref List<ElementId> elementIds) => this.elementIds = elementIds;
+        public bool AllowElement(Element elem)
+        {
+            if (elem == null || ElementId.InvalidElementId.Equals(elem.Id)) return false;
+            return elementIds.Contains(elem.Id);
+        }
+
+        public bool AllowReference(Reference reference, XYZ position)
+        {
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// A Selection Filter that only allows linear dimensions to be selected.
+    /// </summary>
     public class SelectionFilter_LinearDimension : ISelectionFilter
     {
         public bool AllowElement(Element elem)
