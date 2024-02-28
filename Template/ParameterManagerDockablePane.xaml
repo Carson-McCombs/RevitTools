@@ -89,8 +89,8 @@
             </Grid.RowDefinitions>
             <!--Label Visibility="Hidden" Grid.Row="0" Content="Category:        Count:" VerticalAlignment="Bottom" FontFamily="Arial"/-->
             <Border Grid.Row="1" BorderBrush="DarkGray" BorderThickness="1">
-                <ScrollViewer >
-                    <DataGrid Name="SelectionDataGrid" Background="White" AutoGenerateColumns="False" GridLinesVisibility="None">
+                <ScrollViewer  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <DataGrid Name="SelectionDataGrid" Background="White" AutoGenerateColumns="False" GridLinesVisibility="None" CanUserResizeRows="False">
                         
                         <DataGrid.GroupStyle>
                             <GroupStyle ContainerStyle="{StaticResource DataGridGroupHeaderStyle}">
