@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationIds.cs" />
+    <Compile Include="ISelectionFilter_IsWithinList.cs" />
     <Compile Include="SelectDimensionsIndividuallyCommand.cs" />
     <Compile Include="SetDimensionTextEventHandler.cs" />
     <Compile Include="StaleReferenceUpdater.cs" />

@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,6 @@ namespace CarsonsAddins
         private UpdaterId updaterId;
         private List<ElementId> elementIds;
         private ParameterManagerDockablePane parameterManager = null;
-        private Document doc = null;
         public StaleReferenceUpdater(AddInId addinId, ref List<ElementId> elementIds)
         {
             updaterId = new UpdaterId(addinId, ApplicationIds.GetId(GetType()));
@@ -23,10 +23,7 @@ namespace CarsonsAddins
 
         }
 
-        public void Init(Document doc) 
-        {
-            this.doc = doc;
-        }
+
         public void UpdateElementList()
         {
             RegisterTriggers();
@@ -50,15 +47,15 @@ namespace CarsonsAddins
             if (updaterId == null) return;
             if (!UpdaterRegistry.IsUpdaterRegistered(updaterId)) return;
             UpdaterRegistry.RemoveAllTriggers(updaterId);
-            //UpdaterRegistry.AddTrigger(updaterId, doc,elementIds, Element.GetChangeTypeElementDeletion());
-            ElementFilter filter = new ElementIdSetFilter(elementIds); //new SelectionFilter_IsWithinList(ref elementIds);
-            UpdaterRegistry.AddTrigger(updaterId, filter, Element.GetChangeTypeElementDeletion() );
+            ElementFilter filter = new ElementIsElementTypeFilter(true);
+            UpdaterRegistry.AddTrigger(updaterId, filter, Element.GetChangeTypeElementDeletion()); //unfortunately until I figure out how to extend an ElementFilter to track a dynamic set of ElementIds, this is what I will be using (it is slow).
         }
         public void Execute(UpdaterData data)
         {
             if (parameterManager == null) return;
             List<ElementId> deletedElementIds = data.GetDeletedElementIds() as List<ElementId>;
-            parameterManager.RemoveStaleReference(deletedElementIds.ToArray());
+            ElementId[] filteredDeletedElementIds = deletedElementIds.Where(id => elementIds.Contains(id)).ToArray();
+            parameterManager.RemoveStaleReference(filteredDeletedElementIds);
         }
 
         public string GetAdditionalInformation()

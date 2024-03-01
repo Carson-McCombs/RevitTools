@@ -40,11 +40,11 @@ namespace CarsonsAddins
     /// <summary>
     /// Interaction logic for SimpleFilterDockablePane.xaml
     /// </summary>
-    public partial class ParameterManagerDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent
+    public partial class ParameterManagerDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingUpdaterComponent
     {
         public const bool IsWIP = false;
 
-        UIDocument uidoc;
+        private UIDocument uidoc;
         
         private ParameterTable table;
         private StaleReferenceUpdater updater;
@@ -60,12 +60,6 @@ namespace CarsonsAddins
         {
             table.Clear();
             this.uidoc = uidoc;
-            if (updater == null) 
-            {
-                updater = new StaleReferenceUpdater(uidoc.Application.ActiveAddInId, ref table.ids);
-                updater.Link(this);
-            }
-            updater.Init(uidoc.Document);
             new ParametersByTypeId(uidoc);
         }
         public PushButtonData RegisterButton(Assembly assembly)
@@ -74,7 +68,16 @@ namespace CarsonsAddins
             pushButtonData.ToolTip = "An element parameter manager which can be used to sort and set element parameter values.";
             return pushButtonData;
         }
+        public void RegisterUpdater(AddInId addinId)
+        {
+            updater = new StaleReferenceUpdater(addinId, ref table.ids);
+            updater.Link(this);
+        }
 
+        public void UnregisterUpdater()
+        {
+            updater.Unregister();
+        }
         private void LoadSelectionButtonPress(object sender, RoutedEventArgs e)
         {
             LoadSelection();
@@ -96,7 +99,7 @@ namespace CarsonsAddins
                 if (elem == null) continue;
                 table.AddElement(elem);
             }
-
+            
         }
 
         public void SetupDockablePane(DockablePaneProviderData data)
