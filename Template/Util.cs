@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
@@ -53,6 +54,25 @@ namespace CarsonsAddins
                 return null;
             }
         }
+
+
+        /// <summary>
+        /// Used to get a reference to the active Foreground Window for actions such as setting window focus to trigger Revit's ExternalEvents.
+        /// </summary>
+        /// <returns>Pointer referencing the active Foregound Window</returns>
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
+        /// <summary>
+        /// Used to set the active Foreground Window for actions such as immediately triggering Revit's ExternalEvents
+        /// </summary>
+        /// <param name="Pointer to the Window that will be set as the active Foreground Window"></param>
+        /// <returns>Pointer referenceing the Window that focus will shift to</returns>
+        [DllImport("user32.dll")]
+        public static extern bool SetForegroundWindow(
+          IntPtr hWnd);
+
+
 
         #region PipingDBTools
 
@@ -692,17 +712,22 @@ namespace CarsonsAddins
             return Line.CreateBound(segment.Origin - offset, segment.Origin + offset); ;
         }
 
+
         public static Dictionary<XYZ, (Dimension, DimensionSegment)> ExtractPseudoDimensions(Document doc, Dimension dimension)
         {
             Dictionary<XYZ, (Dimension, DimensionSegment)> dimensionSegmentsByOrigin = new Dictionary<XYZ, (Dimension, DimensionSegment)>();
+            List<Reference> refList = ReferenceArrayToList(dimension.References);
             XYZ direction = (dimension.Curve as Line).Direction;
             for (int i = 0; i < dimension.Segments.Size; i++)
             {
                 DimensionSegment segment = dimension.Segments.get_Item(i);
                 dimensionSegmentsByOrigin.Add(segment.Origin, (null, segment));
                 Line line = GetDimensionSegmentLine(segment, direction);
-
-                ReferenceArray ary = GetDetailReference(doc, line);
+                
+                ReferenceArray ary = new ReferenceArray();
+                
+                ary.Append(refList[i]);
+                ary.Append(refList[i + 1]);
                 Dimension dim = doc.Create.NewDimension(doc.ActiveView, line, ary);
                 dim.ValueOverride = segment.ValueOverride;
                 dim.Above = segment.Above;
@@ -711,24 +736,19 @@ namespace CarsonsAddins
                 dim.Suffix = segment.Suffix;
                 dim.TextPosition = segment.TextPosition;
                 dim.LeaderEndPosition = segment.LeaderEndPosition;
+
             }
             return dimensionSegmentsByOrigin;
         }
-
-        public static ReferenceArray GetDetailReference(Document doc, Line dimensionLine)
+        public static List<Reference> ReferenceArrayToList(ReferenceArray referenceArray)
         {
-            ReferenceArray rf = new ReferenceArray();
-            View activeView = doc.ActiveView;
-
-            XYZ perp = Line.CreateBound(dimensionLine.GetEndPoint(0), dimensionLine.GetEndPoint(1)).Direction.CrossProduct(activeView.UpDirection);
-
-            DetailCurve line = doc.Create.NewDetailCurve(activeView, dimensionLine.CreateOffset(0.000001d, perp));
-
-            rf.Append(line.GeometryCurve.GetEndPointReference(0));
-            rf.Append(line.GeometryCurve.GetEndPointReference(1));
-            return rf;
+            List<Reference> references = new List<Reference>();
+            foreach (Reference reference in referenceArray)
+            {
+                references.Add(reference);
+            }
+            return references;
         }
-
 
         public class DimensionAndSegment
         {
