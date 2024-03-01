@@ -28,7 +28,7 @@ namespace CarsonsAddins
         public List<Element> GetPipeLine(UIDocument uidoc, Pipe pipe)
         {
             elements = new List<Element>();
-            filter = new SelectionFilter_PipingElements(true, true, false, true);
+            filter = new SelectionFilter_PipingElements(true, true, false, true, true);
             List<Connector> connectors = Util.GetConnectors(pipe);
             AddNextElement_Left(uidoc, connectors[0]);
             elements.Add(pipe);

@@ -76,7 +76,7 @@ namespace CarsonsAddins
                     return Result.Cancelled;
                 }
                 PipeLine pipeLine = new PipeLine();
-                pipeLine.GetPipeLine(uidoc, pipe, new SelectionFilter_PipingElements(true, true, false, true));
+                pipeLine.GetPipeLine(uidoc, pipe);
                 pipeLine.CreateDimensionLinesFromReferences(doc, 4);
                 transaction.Commit();
                 return Result.Succeeded;

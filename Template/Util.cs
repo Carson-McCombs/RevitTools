@@ -986,12 +986,15 @@ namespace CarsonsAddins
         private bool allowPipes = true;
         private bool allowFlanges = true;
         private bool allowBends = true;
+        private bool allowOtherFittings = true;
+
         private bool allowAccessories = true;
-        public SelectionFilter_PipingElements(bool allowPipes, bool allowFlanges, bool allowBends, bool allowAccessories)
+        public SelectionFilter_PipingElements(bool allowPipes, bool allowFlanges, bool allowBends, bool allowOtherFittings, bool allowAccessories)
         {
             this.allowPipes = allowPipes;
             this.allowFlanges = allowFlanges;
             this.allowBends = allowBends;
+            this.allowOtherFittings = allowOtherFittings;
             this.allowAccessories = allowAccessories;
         }
 
@@ -1004,8 +1007,9 @@ namespace CarsonsAddins
                 if (!(elem is FamilyInstance)) return false;
                 FamilyInstance familyInstance = elem as FamilyInstance;
                 PartType partType = Util.GetPartType(familyInstance);
-                if (allowFlanges && Util.FlangePartTypes.Contains(partType)) return true;
-                if (allowBends && Util.BendPartTypes.Contains(partType)) return true;
+                if (Util.FlangePartTypes.Contains(partType)) return allowFlanges;
+                else if (Util.BendPartTypes.Contains(partType)) return allowBends;
+                else return allowOtherFittings;
 
             }
             return false;

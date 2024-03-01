@@ -52,7 +52,7 @@ namespace CarsonsAddins
                     return Result.Cancelled;
                 }
                 PipeLine pipeLine = new PipeLine();
-                List<Element> elements = pipeLine.GetPipeLine(uidoc, pipe, new SelectionFilter_PipingElements(true, true, false, true));
+                List<Element> elements = pipeLine.GetPipeLine(uidoc, pipe);
                 List<ElementId> elementIds = new List<ElementId>();
                 foreach (Element element in elements)
                 {

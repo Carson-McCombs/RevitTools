@@ -43,7 +43,7 @@ namespace CarsonsAddins
             {
                 double offset = 4;
                 transaction.Start("DimensionBendCommand");
-                Reference elementReference = uidoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element, new SelectionFilter_PipingElements(false, false, true, false), "Please Pick a Bend, Tee, Wye, or Cross.");
+                Reference elementReference = uidoc.Selection.PickObject(Autodesk.Revit.UI.Selection.ObjectType.Element, new SelectionFilter_PipingElements(false, false, false, true, false), "Please Pick a Bend, Tee, Wye, or Cross.");
                 Element element = doc.GetElement(elementReference);
                 //Dictionary<XYZ, (PlanarFace,Line)> dimensionDictionaryByDirection = new Dictionary<XYZ, (PlanarFace, Line)>();
                 //PlanarFace[] faces = Util.GetPlanarFacesOfBend(doc.ActiveView, element);
