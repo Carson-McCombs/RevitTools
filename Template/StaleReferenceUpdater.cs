@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace CarsonsAddins
 {
+    /// <summary>
+    /// Used to track elements being used to avoid stale reference errors. Currently filtering within the updater instead of with an ElementFilter. 
+    /// This is because I currently can not find documentation or know if it is possible to extend the ElementFilter, QuickElementFilter, or ElementSetIdFilter classes. 
+    /// Ideally an ElementSetIdFilter with a dynamic set of ElementIds would be used.
+    /// </summary>
     class StaleReferenceUpdater : IUpdater
     {
         private UpdaterId updaterId;
