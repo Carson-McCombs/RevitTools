@@ -17,12 +17,12 @@ namespace CarsonsAddins
     /// </summary>
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
-    class FilterSelectionCommand : IExternalCommand, ISettingsComponent
+    class FilterPipingElementsCommand : IExternalCommand, ISettingsComponent
     {
         public const bool IsWIP = false;
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("FilterSelectionCommand", "Filters Selection", assembly.Location, "CarsonsAddins.FilterSelectionCommand");
+            PushButtonData pushButtonData = new PushButtonData("FilterPipingElementsCommand", "Filters Piping Elements", assembly.Location, "CarsonsAddins.FilterPipingElementsCommand");
             pushButtonData.ToolTip = "Filters Selection.";
             return pushButtonData;
         }
@@ -36,14 +36,14 @@ namespace CarsonsAddins
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
             {
-                TaskDialog.Show("Filter Selection Command", "Command should not be used within a family document.");
+                TaskDialog.Show("Filter Piping Elements Command", "Command should not be used within a family document.");
                 return Result.Failed;
             }
             Transaction transaction = new Transaction(doc);
-            transaction.Start("FilterSelectionCommand");
+            transaction.Start("FilterPipingElementsCommand");
             try
             {
-                SelectionFilter_PipingElements filter = new SelectionFilter_PipingElements(true, true, true, true);
+                SelectionFilter_PipingElements filter = new SelectionFilter_PipingElements(true, true, true, true, true);
                 List<ElementId> selectedIds = uidoc.Selection.GetElementIds() as List<ElementId>;
                 List<ElementId> filteredIds = new List<ElementId>();
                 foreach (ElementId id in selectedIds)
@@ -56,7 +56,7 @@ namespace CarsonsAddins
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("Filter Selection Error ", ex.Message);
+                TaskDialog.Show("Filter Piping Elements Error ", ex.Message);
                 transaction.RollBack();
                 return Result.Failed;
             }
