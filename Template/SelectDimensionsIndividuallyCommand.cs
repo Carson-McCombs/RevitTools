@@ -69,44 +69,57 @@ namespace CarsonsAddins
             try
             {
                 selectedDimensionReferences = uidoc.Selection.PickObjects(ObjectType.Element, new SelectionFilter_LinearDimension(), "Please select dimensions to question mark.") as List<Reference>;
-
             }
             catch
             {
                 dummyTransaction.RollBack();
                 return Result.Failed;
             }
-            List<XYZ> selectedDimensionOrigins = new List<XYZ>();
+            List<XYZ> selectedDimensionOrigins = GetOriginsOfSelectedReferences(doc, selectedDimensionReferences);
 
+            dimensionsAndSegments = GetSelectedDimensionsAndSegments(dimensionSegmentsByOrigin, selectedDimensionOrigins); ;
+
+
+            dummyTransaction.RollBack();
+            return Result.Succeeded;
+        }
+
+
+        private static List<XYZ> GetOriginsOfSelectedReferences(Document doc, List<Reference> selectedDimensionReferences)
+        {
+            List<XYZ> origins = new List<XYZ>();    
             foreach (Reference reference in selectedDimensionReferences)
             {
                 Dimension dimension = doc.GetElement(reference.ElementId) as Dimension;
                 if (dimension == null) continue;
-                selectedDimensionOrigins.Add(dimension.Origin);
+                origins.Add(dimension.Origin);
 
 
             }
-            dimensionsAndSegments = new List<(Dimension, DimensionSegment)>();
+            return origins;
+        }
+
+        private List<(Dimension, DimensionSegment)> GetSelectedDimensionsAndSegments(Dictionary<XYZ, (Dimension, DimensionSegment)> dimensionSegmentsByOrigin, List<XYZ> selectedDimensionOrigins)
+        {
+            List<(Dimension, DimensionSegment)> selected = new List<(Dimension, DimensionSegment)>();
             foreach (XYZ origin in selectedDimensionOrigins)
             {
                 if (origin == null) continue;
                 if (dimensionSegmentsByOrigin.ContainsKey(origin))
                 {
-                    dimensionsAndSegments.Add(dimensionSegmentsByOrigin[origin]);
+                    selected.Add(dimensionSegmentsByOrigin[origin]);
                 }
                 else
                 {
                     foreach (XYZ key in dimensionSegmentsByOrigin.Keys)
                     {
                         if (!origin.IsAlmostEqualTo(key)) continue;
-                        dimensionsAndSegments.Add(dimensionSegmentsByOrigin[key]);
+                        selected.Add(dimensionSegmentsByOrigin[key]);
                         break;
                     }
                 }
             }
-
-            dummyTransaction.RollBack();
-            return Result.Succeeded;
+            return selected;
         }
     }
 
