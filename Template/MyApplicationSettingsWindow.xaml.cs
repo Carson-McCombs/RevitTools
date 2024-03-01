@@ -215,11 +215,13 @@ namespace CarsonsAddins
     /// <summary>
     /// All commands that require a button on the ribbon panel, are created by this addin, and have their own corresponding Updater should implement this interface.
     /// </summary>
-    public interface ISettingUpdaterComponent : ISettingsComponent
+    public interface ISettingsUpdaterComponent
     { 
         void RegisterUpdater(AddInId addinId);
         void UnregisterUpdater();
     }
+
+
 
     /// <summary>
     /// Stores information on all the classes that extend the ISettingsComponent interface and are located within the Assembly. 
