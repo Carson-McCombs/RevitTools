@@ -129,6 +129,9 @@ namespace CarsonsAddins
             get => (string)GetValue(SuffixTextProperty);
             set => SetValue(SuffixTextProperty, value);
         }
+
+        
+
         private static SelectIndividualDimensionsEventHandler selectDimensionsHandler;
         private static SetDimensionsTextEventHandler setDimensionsTextHandler;
         
@@ -137,25 +140,24 @@ namespace CarsonsAddins
 
         private List<(Dimension, DimensionSegment)> dimensionsAndSegments;
 
+        private IntPtr windowHandle;
+
         public DimensionTextWindow()
         {
             InitializeComponent();
-            selectDimensionsHandler = new SelectIndividualDimensionsEventHandler(ref dimensionsAndSegments);
+            ShowInTaskbar = false;
+            selectDimensionsHandler = new SelectIndividualDimensionsEventHandler();
             setDimensionsTextHandler = new SetDimensionsTextEventHandler();
             selectDimensionsEvent = ExternalEvent.Create(selectDimensionsHandler);
             setDimensionsTextEvent = ExternalEvent.Create(setDimensionsTextHandler);
-
+            selectDimensionsHandler.SelectionUpdatedEvent += UpdateSelection;
         }
 
         public void Init(UIDocument uidoc)
         {
             this.uidoc = uidoc;
         }
-        //public void Init(UIDocument uidoc, List<(Dimension, DimensionSegment)> dimensionsAndSegments)
-        //{
-        //    this.uidoc = uidoc;
-        //    this.dimensionsAndSegments = dimensionsAndSegments;
-        //}
+
         public PushButtonData RegisterButton(Assembly assembly)
         {
             PushButtonData pushButtonData = new PushButtonData("DimensionsTextWindow", "Dimensions Text Window", assembly.Location, typeof(ShowWindow<DimensionTextWindow>).FullName);
@@ -197,9 +199,9 @@ namespace CarsonsAddins
             //nothing for now
         }
 
-        private void SetDefaultTextsBySelected(List<(Dimension, DimensionSegment)> dimensions)
+        private void SetDefaultTextsBySelected(List<(Dimension, DimensionSegment)> selected)
         {
-            if (dimensions == null || dimensions.Count == 0) return;
+            if (selected == null || selected.Count == 0) return;
 
             bool similarAboveText = true;
             bool similarBelowText = true;
@@ -213,13 +215,13 @@ namespace CarsonsAddins
             bool similarSuffixText = true;
 
             DimensionAndSegment current;
-            DimensionAndSegment next = new DimensionAndSegment(dimensions[0]);
-            if (dimensions.Count > 1)
+            DimensionAndSegment next = new DimensionAndSegment(selected[0]);
+            if (selected.Count > 1)
             {
-                for (int i = 0; i < dimensions.Count - 1; i++)
+                for (int i = 0; i < selected.Count - 1; i++)
                 {
                     current = next;
-                    next = new DimensionAndSegment(dimensions[i]);
+                    next = new DimensionAndSegment(selected[i]);
                     if (similarAboveText && current.Above == next.Above) similarAboveText = false;
                     if (similarBelowText && current.Below == next.Below) similarBelowText = false;
 
@@ -247,14 +249,28 @@ namespace CarsonsAddins
         }
 
         private string EmptyIfNull(string value) => (value == null) ? "": value;
-        
+
+        /// <summary>
+        /// Called when the SelectDimensionEvent finished executing. The current default texts within the UserControl are then updated to match the new selection.
+        /// </summary>
+        /// <param name="selection">List of Dimension/DimensionSegments that are selected</param>
+        public void UpdateSelection(List<(Dimension,DimensionSegment)> selection)
+        {
+            dimensionsAndSegments = selection;
+            SetDefaultTextsBySelected(dimensionsAndSegments);
+            if (windowHandle != null ) SetForegroundWindow(windowHandle);
+            ShowDialog();
+            
+        }
         private void ReselectButton_Click(object sender, RoutedEventArgs e)
         {
             selectDimensionsEvent.Raise();
-            IntPtr dimensionTextWindow = GetForegroundWindow();
+            windowHandle = GetForegroundWindow();
+            Hide();
             SetForegroundWindow(uidoc.Application.MainWindowHandle);
-            SetForegroundWindow(dimensionTextWindow);
+
         }
+        
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
 
