@@ -31,7 +31,7 @@ namespace CarsonsAddins
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
             {
-                TaskDialog.Show("Question Mark Dimensions Command", "Command should not be used within a family document.");
+                TaskDialog.Show("Set Dimensions Text EventHandler", "Command should not be used within a family document.");
                 return;
             }
             if (dimensionsAndSegments == null || dimensionsAndSegments.Count == 0)
