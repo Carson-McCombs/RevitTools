@@ -172,7 +172,7 @@ namespace CarsonsAddins
             DockablePaneProviderData data = new DockablePaneProviderData();
             windowInstance = new T();
             windowInstance.SetupDockablePane(data);
-            if (windowInstance is ISettingUpdaterComponent updaterComponent) updaterComponent.RegisterUpdater(uiapp.ActiveAddInId);
+            if (windowInstance is ISettingsUpdaterComponent updaterComponent) updaterComponent.RegisterUpdater(uiapp.ActiveAddInId);
             DockablePaneId id = new DockablePaneId(ApplicationIds.GetId(typeof(T)));
             uiapp.RegisterDockablePane(id, typeof(T).Name, windowInstance as IDockablePaneProvider);
             uiapp.Application.DocumentOpened += new EventHandler<DocumentOpenedEventArgs>(OnDocumentOpened);
@@ -194,7 +194,7 @@ namespace CarsonsAddins
         //If the Dockable Pane has an updater, unregister it on application closing
         private void OnApplicationClosing(object sender, ApplicationClosingEventArgs e)
         {
-            if (windowInstance is ISettingUpdaterComponent updaterComponent) updaterComponent.UnregisterUpdater();
+            if (windowInstance is ISettingsUpdaterComponent updaterComponent) updaterComponent.UnregisterUpdater();
         }
     }
 

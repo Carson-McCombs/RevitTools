@@ -129,18 +129,18 @@ namespace CarsonsAddins
             get => (string)GetValue(SuffixTextProperty);
             set => SetValue(SuffixTextProperty, value);
         }
-        SelectIndividualDimensionsEventHandler selectDimensionsHandler;
-        SetDimensionsTextEventHandler setDimensionsTextHandler;
+        private static SelectIndividualDimensionsEventHandler selectDimensionsHandler;
+        private static SetDimensionsTextEventHandler setDimensionsTextHandler;
         
-        ExternalEvent selectDimensionsEvent;
-        ExternalEvent setDimensionsTextEvent;
+        private static ExternalEvent selectDimensionsEvent;
+        private static ExternalEvent setDimensionsTextEvent;
 
-        List<(Dimension, DimensionSegment)> dimensionsAndSegments;
+        private List<(Dimension, DimensionSegment)> dimensionsAndSegments;
 
         public DimensionTextWindow()
         {
             InitializeComponent();
-            selectDimensionsHandler = new SelectIndividualDimensionsEventHandler();
+            selectDimensionsHandler = new SelectIndividualDimensionsEventHandler(ref dimensionsAndSegments);
             setDimensionsTextHandler = new SetDimensionsTextEventHandler();
             selectDimensionsEvent = ExternalEvent.Create(selectDimensionsHandler);
             setDimensionsTextEvent = ExternalEvent.Create(setDimensionsTextHandler);
@@ -151,18 +151,17 @@ namespace CarsonsAddins
         {
             this.uidoc = uidoc;
         }
-        public void Init(UIDocument uidoc, List<(Dimension, DimensionSegment)> dimensionsAndSegments)
-        {
-            this.uidoc = uidoc;
-            this.dimensionsAndSegments = dimensionsAndSegments;
-        }
+        //public void Init(UIDocument uidoc, List<(Dimension, DimensionSegment)> dimensionsAndSegments)
+        //{
+        //    this.uidoc = uidoc;
+        //    this.dimensionsAndSegments = dimensionsAndSegments;
+        //}
         public PushButtonData RegisterButton(Assembly assembly)
         {
             PushButtonData pushButtonData = new PushButtonData("DimensionsTextWindow", "Dimensions Text Window", assembly.Location, typeof(ShowWindow<DimensionTextWindow>).FullName);
             pushButtonData.ToolTip = "Dimension Text Window";
             return pushButtonData;
         }
-
         private void UseActualValueControl_OnChecked(object sender, RoutedEventArgs e)
         {
             selectedTextOption = DimensionTextOptions.UseActualValue;
@@ -217,16 +216,10 @@ namespace CarsonsAddins
             DimensionAndSegment next = new DimensionAndSegment(dimensions[0]);
             if (dimensions.Count > 1)
             {
-                
-
-                //(Dimension, DimensionSegment) current;
-                //(Dimension, DimensionSegment) next;
                 for (int i = 0; i < dimensions.Count - 1; i++)
                 {
                     current = next;
                     next = new DimensionAndSegment(dimensions[i]);
-                    //var current = dimensions[i];
-                    //var = dimensions[i + 1];
                     if (similarAboveText && current.Above == next.Above) similarAboveText = false;
                     if (similarBelowText && current.Below == next.Below) similarBelowText = false;
 
@@ -257,15 +250,10 @@ namespace CarsonsAddins
         
         private void ReselectButton_Click(object sender, RoutedEventArgs e)
         {
-            
             selectDimensionsEvent.Raise();
-            dimensionsAndSegments = selectDimensionsHandler.DimensionsAndSegments;
-            
-            SetDefaultTextsBySelected(dimensionsAndSegments);
-            DimensionTextWindow instance = new DimensionTextWindow();
-            instance.Init(uidoc, dimensionsAndSegments);
-            Close();
-            instance.Show();
+            IntPtr dimensionTextWindow = GetForegroundWindow();
+            SetForegroundWindow(uidoc.Application.MainWindowHandle);
+            SetForegroundWindow(dimensionTextWindow);
         }
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
@@ -277,10 +265,10 @@ namespace CarsonsAddins
             setDimensionsTextHandler.Inject(dimensionsAndSegments);
             setDimensionsTextHandler.Inject(AboveText, BelowText, ValueOverrideText, PrefixText, SuffixText);
             setDimensionsTextEvent.Raise();
-            //handler.Inject(selectedDimensions, AboveText, BelowText, ValueOverrideText, PrefixText, SuffixText);
-            //externalEvent.Raise();
             Close();
         }
+
+        
     }
 
     class UpdateDimensionTextEventHandler : IExternalEventHandler
