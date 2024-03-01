@@ -13,15 +13,24 @@ namespace CarsonsAddins
         private List<ElementId> elementIds;
         private ParameterManagerDockablePane parameterManager = null;
         private Document doc = null;
-        public StaleReferenceUpdater(AddInId addinId)
+        public StaleReferenceUpdater(AddInId addinId, ref List<ElementId> elementIds)
         {
             updaterId = new UpdaterId(addinId, ApplicationIds.GetId(GetType()));
+            this.elementIds = elementIds;
 
             RegisterUpdater();
             RegisterTriggers();
+
         }
 
-        public void Init(Document doc) => this.doc = doc;
+        public void Init(Document doc) 
+        {
+            this.doc = doc;
+        }
+        public void UpdateElementList()
+        {
+            RegisterTriggers();
+        }
         public void Link(ParameterManagerDockablePane parameterManager)
         {
             this.parameterManager = parameterManager;

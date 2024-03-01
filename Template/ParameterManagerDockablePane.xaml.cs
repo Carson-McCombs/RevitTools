@@ -45,39 +45,28 @@ namespace CarsonsAddins
         public const bool IsWIP = false;
 
         UIDocument uidoc;
-        //private ObservableCollection<FilterableElement> filterableElements = new ObservableCollection<FilterableElement>();
+        
         private ParameterTable table;
-
-        //public string TotalSelectedCount { get => "Total Selected Items:            "  + totalSelectedCount.ToString(); }
+        private StaleReferenceUpdater updater;
+        
         public ParameterManagerDockablePane()
         {
             InitializeComponent();
             table = new ParameterTable(SelectionDataGrid);
             ParameterGroupComboBox.ItemsSource = table.columnNames;
-            //SelectionDataGrid.ItemsSource = categorySelectionItems;
-            //AddParameter("Name");
-            //TotalSelectedLabel.DataContext = TotalSelectedCount;
-            //SelectionDataGrid.ItemsSource = filterableElements;
-            //categorySelectionItems.CollectionChanged += RefreshSelectedCount;
-
-
         }
         
         public void Init(UIDocument uidoc)
         {
             table.Clear();
             this.uidoc = uidoc;
+            if (updater == null) 
+            {
+                updater = new StaleReferenceUpdater(uidoc.Application.ActiveAddInId, ref table.ids);
+                updater.Link(this);
+            }
+            updater.Init(uidoc.Document);
             new ParametersByTypeId(uidoc);
-
-            //Definition definition;
-            //Transaction transaction = new Transaction(uidoc.Document);
-            //transaction.Start("DummyGetParameterDefinition");
-
-            //Pipe pipe = Pipe.Create(uidoc.Document, ElementId.InvalidElementId, new ElementId(4646900), ElementId.InvalidElementId, new XYZ(0,0,0), new XYZ(5,5,5));
-            //definition = pipe.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).Definition;
-            //transaction.RollBack();
-            
-            //table.AddParameter(definition);
         }
         public PushButtonData RegisterButton(Assembly assembly)
         {
@@ -97,11 +86,8 @@ namespace CarsonsAddins
             ParameterGroupComboBox.SelectedItem = null;
             ParameterNameControl.Text = "";
             List<ElementId> elementIds = uidoc.Selection.GetElementIds() as List<ElementId>;
-            if (elementIds.Count == 0)
-            {
-                return;
-
-            }
+            if (elementIds.Count == 0) return;
+        
 
 
             foreach (ElementId id in elementIds)
@@ -110,6 +96,7 @@ namespace CarsonsAddins
                 if (elem == null) continue;
                 table.AddElement(elem);
             }
+
         }
 
         public void SetupDockablePane(DockablePaneProviderData data)
@@ -236,7 +223,7 @@ namespace CarsonsAddins
     /// </summary>
     class ParameterTable
     {
-        List<ElementId> ids = new List<ElementId>();
+        public List<ElementId> ids = new List<ElementId>();
         public ParameterRowsCollection rows = new ParameterRowsCollection();
         public ObservableCollection<string> columnNames = new ObservableCollection<string>();
         List<Definition> parameterDefinitions = new List<Definition>();
