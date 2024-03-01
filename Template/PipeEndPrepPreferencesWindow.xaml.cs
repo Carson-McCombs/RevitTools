@@ -31,9 +31,9 @@ using static CarsonsAddins.Util;
 namespace CarsonsAddins
 {
     /// <summary>
-    /// Interaction logic for PipeEndPrepPreferencesWindow.xaml
+    /// Tracks Pipes and their connections, allowing their "Pipe End Prep" Parameter to be filled automatically. The "Pipe End Prep" is based on the connecting flanges/unions, but only tested in a flanged environment.
     /// </summary>
-    public partial class PipeEndPrepWindow : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingUpdaterComponent
+    public partial class PipeEndPrepWindow : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingsUpdaterComponent
     {
         public const bool IsWIP = false;
 

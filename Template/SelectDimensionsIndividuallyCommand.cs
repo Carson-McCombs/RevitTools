@@ -14,8 +14,9 @@ namespace CarsonsAddins
     public class SelectIndividualDimensionsCommand : IExternalCommand
     {
         private List<(Dimension, DimensionSegment)> dimensionsAndSegments = new List<(Dimension, DimensionSegment)>();
-
         public List<(Dimension, DimensionSegment)> DimensionsAndSegments { get => dimensionsAndSegments; }
+
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             return Execute(commandData.Application);
@@ -99,7 +100,7 @@ namespace CarsonsAddins
             return origins;
         }
 
-        private List<(Dimension, DimensionSegment)> GetSelectedDimensionsAndSegments(Dictionary<XYZ, (Dimension, DimensionSegment)> dimensionSegmentsByOrigin, List<XYZ> selectedDimensionOrigins)
+        private static List<(Dimension, DimensionSegment)> GetSelectedDimensionsAndSegments(Dictionary<XYZ, (Dimension, DimensionSegment)> dimensionSegmentsByOrigin, List<XYZ> selectedDimensionOrigins)
         {
             List<(Dimension, DimensionSegment)> selected = new List<(Dimension, DimensionSegment)>();
             foreach (XYZ origin in selectedDimensionOrigins)
@@ -126,14 +127,15 @@ namespace CarsonsAddins
 
     public class SelectIndividualDimensionsEventHandler : IExternalEventHandler
     {
-        private List<(Dimension, DimensionSegment)> dimensionsAndSegments = new List<(Dimension, DimensionSegment)>();
-
-        public List<(Dimension, DimensionSegment)> DimensionsAndSegments { get => dimensionsAndSegments; }
+        public delegate void UpdateSelection(List<(Dimension, DimensionSegment)> selection);
+        public UpdateSelection SelectionUpdatedEvent;
+       
         public void Execute(UIApplication app)
         {
             SelectIndividualDimensionsCommand command = new SelectIndividualDimensionsCommand();
             command.Execute(app);
-            dimensionsAndSegments = command.DimensionsAndSegments;
+            if (command.DimensionsAndSegments == null || command.DimensionsAndSegments.Count == 0) return;
+            SelectionUpdatedEvent?.Invoke(command.DimensionsAndSegments);
         }
 
         public string GetName()

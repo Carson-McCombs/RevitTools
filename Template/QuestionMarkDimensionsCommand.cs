@@ -42,6 +42,7 @@ namespace CarsonsAddins
             questionMarkTransaction.Start("QuestionMarkTransaction");
             //List<XYZ> leftoverKeys = dimensionSegmentsByOrigin.Keys.ToList();
             //List<XYZ> leftoverSelected = new List<XYZ>();
+            //List<(Dimension, DimensionSegment)> dimensionsAndSegments = null;
             SelectIndividualDimensionsCommand selectCommand = new SelectIndividualDimensionsCommand();
             selectCommand.Execute(commandData, ref message, elements);
             List<(Dimension, DimensionSegment)> dimensionsAndSegments = selectCommand.DimensionsAndSegments;

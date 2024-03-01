@@ -40,7 +40,7 @@ namespace CarsonsAddins
     /// <summary>
     /// Interaction logic for SimpleFilterDockablePane.xaml
     /// </summary>
-    public partial class ParameterManagerDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingUpdaterComponent
+    public partial class ParameterManagerDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingsUpdaterComponent
     {
         public const bool IsWIP = false;
 

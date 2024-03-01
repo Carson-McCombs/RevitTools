@@ -26,9 +26,9 @@ using System.Windows.Shapes;
 namespace CarsonsAddins
 {
     /// <summary>
-    /// Interaction logic for TextBoxWithLabel.xaml
+    /// Warning, not updated in a long time, presumed to be unusable
     /// </summary>
-    public partial class PipingLCDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingUpdaterComponent
+    public partial class PipingLCDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingsUpdaterComponent
     {
         public const bool IsWIP = true;
         private PipingLCUpdater updater;
