@@ -123,7 +123,13 @@ namespace CarsonsAddins
         }
 
 
-        
+        public void RemoveStaleReference(ElementId[] elementIds )
+        {
+            foreach (ElementId id in elementIds)
+            {
+                table.RemoveRow(id);
+            }
+        }
 
         private void AddParameterButton(object sender, RoutedEventArgs e)
         {
@@ -225,8 +231,9 @@ namespace CarsonsAddins
     }
 
     
-
-    //will require currently selected elements to be passed to updater to check for deletion (to prevent stale references) and updates
+    /// <summary>
+    /// Abstracts the parameters and element data and interactions with the WPF DataGrid into its own class.
+    /// </summary>
     class ParameterTable
     {
         List<ElementId> ids = new List<ElementId>();
@@ -331,60 +338,67 @@ namespace CarsonsAddins
             parameterDefinitions.Add(definition);
             AddColumn(definition.Name, parameterReadOnly.Last());
         }
-        private void AddColumn(string columnName, bool isReadOnly)
+        /// <summary>
+        /// Adds a new column to the datagrid. This new column will be bound to a specific parameter, such that each cell within that column corresponds to a different element's parameter value.
+        /// </summary>
+        /// <param name="parameterName">Name of the Parameter that the column will bind to. Also is the header of the column.</param>
+        /// <param name="isReadOnly">Whether or not the Parameter being bound to is readonly.</param>
+        private void AddColumn(string parameterName, bool isReadOnly)
         {
-            //dataGrid.Columns.Add
             DataGridTextColumn column = new DataGridTextColumn();
-            
-            column.Binding = new Binding("cells[" + columnName + "].ParameterValue");
-            
-            column.Header = columnName;
+            //Sets the parameter column generic binding to each table cell in the column to show its parameter value
+            column.Binding = new Binding("cells[" + parameterName + "].ParameterValue");
+            column.Header = parameterName;
             column.IsReadOnly = isReadOnly;
+            //If the parameter is not readonly, bind to the cell object's backrgound color property
             if (!isReadOnly)
             {
                 Style style = new Style();
-                
                 Setter backgroundSetter = new Setter();
                 backgroundSetter.Property = DataGridCell.BackgroundProperty;
-                backgroundSetter.Value = new Binding("cells[" + columnName + "].BackgroundColor");
+                backgroundSetter.Value = new Binding("cells[" + parameterName + "].BackgroundColor");
                 style.Setters.Add(backgroundSetter);
-
                 column.CellStyle = style;
-                //.Setters.Add(new Setter(DataGridCell.TemplateProperty, )
-
-
             }
             dataGrid.Columns.Add(column);
         }
 
+        /// <summary>
+        /// Recursive update element parameter values.
+        /// </summary>
         public void PushUpdatesToElements()
         {
-            //SubTransaction subTransaction = new SubTransaction(document);
-            //subTransaction.Start();
             try
             {
                 foreach (ParameterRow row in rows)
                 {
                     row.PushUpdatesToElement();
                 }
-                //subTransaction.Commit();
             }
             catch (Exception ex)
             {
                 TaskDialog.Show("Parameter Table Error", ex.Message);
-                //subTransaction.RollBack();
             }
             
         }
 
-        private void RemoveRow(ElementId id)
+        /// <summary>
+        /// Removes element from parameter. This can be due to altering the selection or removing a stale reference.
+        /// </summary>
+        /// <param name="id">ElementId of the element to be removed.</param>
+        public void RemoveRow(ElementId id)
         {
+            if (!ids.Contains(id)) return;
             rows.RemoveAt(ids.IndexOf(id));
             ids.Remove(id);
         }
     }
 
     class ParameterRowsCollection : ObservableCollection<ParameterRow> { }
+
+    /// <summary>
+    /// Currently binding and tracking changes via the INotifyPropertyChanged base class. Will eventually move to binding via DependencyProperties for speed increase.
+    /// </summary>
     class ParameterRow : INotifyPropertyChanged // 1 to 1: Element to Row
     {
         public event PropertyChangedEventHandler PropertyChanged;
@@ -400,7 +414,6 @@ namespace CarsonsAddins
             }
         }
         public Dictionary<string, ParameterCell> cells { private set; get; }
-        //public Dictionary<Definition, ParameterCell> cells { private set; get; }
         public ParameterRow(Element element)
         {
             cells = new Dictionary<string, ParameterCell>();
@@ -424,9 +437,6 @@ namespace CarsonsAddins
 
         public void PushUpdatesToElement()
         {
-            //SubTransaction subTransaction = new SubTransaction(document);
-            //subTransaction.Start();
-            //string s = "";
             try
             {
                 foreach (string parameterName in cells.Keys)
@@ -437,16 +447,14 @@ namespace CarsonsAddins
                     if (cell.IsSynced) continue;
                     if (cell.IsNull) continue; 
                     Parameter parameter = cell.PushValueToParameter();
-                    //if (parameter !=  null) s = s + parameter.AsValueString() + '\n';
                 }
-                //subTransaction.Commit();
             }
             catch(Exception ex) {
                 TaskDialog.Show("Parameter Row Error", ex.Message);
-                //subTransaction.RollBack();
             }
-            //if (s != "") TaskDialog.Show("FILTER UPDATES CHECK ERROR", s);
         }
+
+
 
         protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
         {

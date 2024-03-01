@@ -42,12 +42,14 @@ namespace CarsonsAddins
             if (!UpdaterRegistry.IsUpdaterRegistered(updaterId)) return;
             UpdaterRegistry.RemoveAllTriggers(updaterId);
             //UpdaterRegistry.AddTrigger(updaterId, doc,elementIds, Element.GetChangeTypeElementDeletion());
-            ElementFilter filter = new SelectionFilter_IsWithinList(ref elementIds);
-            UpdaterRegistry.AddTrigger(updaterId, new )
+            ElementFilter filter = new ElementIdSetFilter(elementIds); //new SelectionFilter_IsWithinList(ref elementIds);
+            UpdaterRegistry.AddTrigger(updaterId, filter, Element.GetChangeTypeElementDeletion() );
         }
         public void Execute(UpdaterData data)
         {
-            throw new NotImplementedException();
+            if (parameterManager == null) return;
+            List<ElementId> deletedElementIds = data.GetDeletedElementIds() as List<ElementId>;
+            parameterManager.RemoveStaleReference(deletedElementIds.ToArray());
         }
 
         public string GetAdditionalInformation()
