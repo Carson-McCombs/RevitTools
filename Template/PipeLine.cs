@@ -24,12 +24,14 @@ namespace CarsonsAddins
     {
         private ISelectionFilter filter = null;
         private List<Element> elements;
+        private Pipe selectedPipe;
 
         public List<Element> GetPipeLine(UIDocument uidoc, Pipe pipe)
         {
             elements = new List<Element>();
             filter = new SelectionFilter_PipingElements(true, true, false, true, true);
             List<Connector> connectors = Util.GetConnectors(pipe);
+            selectedPipe = pipe;
             AddNextElement_Left(uidoc, connectors[0]);
             elements.Add(pipe);
             AddNextElement_Right(uidoc, connectors[1]);
@@ -81,11 +83,59 @@ namespace CarsonsAddins
 
         #region WIP
 
+        public void CreateDimensionLines(Document doc, double offset)
+        {
+            Line locationLine = (selectedPipe.Location as LocationCurve).Curve as Line;
+            Line line = locationLine.CreateOffset(offset, locationLine.GetEndPoint(0).CrossProduct(locationLine.GetEndPoint(1))) as Line;
+            line.MakeUnbound();
+            ReferenceArray referenceArray = new ReferenceArray();
+            
+            ConnectorElement el;
+            
+        }
+        private ElementId[] GetCenterlineIds(Document doc)
+        {
+            List<Element> centerlineStyleElements = new FilteredElementCollector(doc).OfClass(typeof(GraphicsStyle)).ToList();
+            List<ElementId> centerlineStyleIds = new List<ElementId>();
+            for (int i = 0; i < centerlineStyleElements.Count; i++)
+            {
+                if (centerlineStyleElements[i].Name.Equals("zLines") || (centerlineStyleElements[i].Name.Equals("Center line"))) centerlineStyleIds.Add(centerlineStyleElements[i].Id);
+            }
+            return centerlineStyleIds.ToArray();
+        }
+
+        /// <summary>
+        /// Projects a 3D point onto a plane. Meant to be used for projecting dimensioning reference points onto the active view's plane Made by @jeremytammik on https://thebuildingcoder.typepad.com/blog/2014/09/planes-projections-and-picking-points.html
+        /// </summary>
+        /// <param name="plane">Plane to be projected onto.</param>
+        /// <param name="point">Point not on plane.</param>
+        /// <returns>Projected point on plane.</returns>
+        private XYZ ProjectPointOntoPlane(Plane plane, XYZ point)
+        {
+            XYZ offsetFromPlane = point - plane.Origin;
+            double distance = plane.Normal.DotProduct(point);
+            return point - distance * plane.Normal;
+        }
+
+        private bool IsCloserAngleThan(XYZ directionA, XYZ directionB, XYZ sourceDirection)
+        {
+            if (sourceDirection.IsAlmostEqualTo(directionA) || sourceDirection.IsAlmostEqualTo(-directionA)) return true;
+            if (sourceDirection.IsAlmostEqualTo(directionB) || sourceDirection.IsAlmostEqualTo(-directionB)) return false;
+            double angleA = directionA.AngleTo(sourceDirection);
+            double angleB = directionB.AngleTo(sourceDirection);
+            angleA = (angleA > Math.PI / 2)? angleA - Math.PI: angleA;
+            angleB = (angleB > Math.PI / 2) ? angleB - Math.PI : angleB;
+            return (angleA < angleB);
+
+        }
+
         //Below is an attempt at dimensioning Pipe Lines by retrieving the Geometry Objects of each piping element and compares their direction and endpoint positions to the connectors of their respective elements. Due to the current issues stated above, fixing the below function is put on pause.
-        public void CreateDimensionLinesFromReferences(Document doc, double offset) //can only be called after GetPipeLine is called
+        public void CreateDimensionLinesFromReferencesOld(Document doc, double offset) //can only be called after GetPipeLine is called
         {
             if (elements == null) return;
             string names = "";
+            ElementId[] validStyleIds = GetCenterlineIds(doc);
+
             foreach (Element elem in elements)
             {
                 names = names + elem.Id.ToString() + '\n';  
@@ -105,6 +155,7 @@ namespace CarsonsAddins
                 {
                     if (Util.IsPipe(elem))
                     {
+                        continue;
                         flag = 20;
                         PlanarFace[] faces = Util.GetGeometryObjectsOfPipe(doc.ActiveView, elem);
                         List<XYZ> points = new List<XYZ>();
@@ -134,21 +185,28 @@ namespace CarsonsAddins
                         Element connected = (i == 0) ? elements[1] : elements[elements.Count - 2];
                         //XYZ direction = Line.CreateUnbound((elements[0].Location as LocationPoint).Point, (elements[elements.Count - 1].Location as LocationPoint).Point).Direction; //could cause issues depending on view orientation in relation to bend direction
                         XYZ direction = Util.GetDirectionOfConnection(elem as FamilyInstance, connected as FamilyInstance);
-                        Line[] lines = Util.GetGeometryLinesOfBend(doc.ActiveView, elem);
+                        //List<Line> lines = new List<Line>( Util.GetGeometryLinesOfBend(doc.ActiveView, elem, ).Cast<Line>());
+                        Dictionary<int, List<int>> lineIds = Util.GetGeometryObjectsWithStyleIds(doc.ActiveView, elements[i], validStyleIds);
+                        Line[] lines = Util.GetGeometryObjectsWithIds(doc.ActiveView, elements[i], lineIds).Cast<Line>().ToArray();
                         //line = (Util.IsDirectionCloserThan(lines[0].Direction, lines[1].Direction, direction)) ? lines[0] : lines[1];
+                        line = (IsCloserAngleThan(lines[0].Direction, lines[1].Direction,direction)) ? lines[0] : lines[1];
                         //line = (lines[0].Direction.IsAlmostEqualTo(direction) || lines[0].Direction.IsAlmostEqualTo(-direction)) ? lines[0] : lines[1];
                         //XYZ otherDirection = (Util.IsDirectionCloserThan(lines[0].Direction, lines[1].Direction, roughDirection.Direction)) ? lines[0].Direction: lines[1].Direction;
                         referenceArray.Append(line.GetEndPointReference(0));
                         referenceArray.Append(line.GetEndPointReference(1));
 
+                        Plane plane = Plane.CreateByNormalAndOrigin(doc.ActiveView.UpDirection,doc.ActiveView.Origin);                        
+                        
+                        XYZ projectedPointA = ProjectPointOntoPlane(plane, line.GetEndPoint(0));
+                        XYZ projectedPointB = ProjectPointOntoPlane(plane, line.GetEndPoint(1));
 
-
-
-
+                        Line projectedLine = Line.CreateBound(projectedPointA, projectedPointB);
+                        XYZ perpVector = projectedLine.Direction.CrossProduct(plane.Normal);
+                        Line offsetLine = projectedLine.CreateOffset(offset, perpVector) as Line;
                         //line = (Util.IsDirectionCloserThan(lines[0].Direction, lines[1].Direction, roughDirection.Direction)) ? lines[0] : lines[1];
                         //Line lineB = (Util.IsDirectionCloserThan(lines[0].Direction, lines[1].Direction, roughDirection.Direction)) ? lines[1] : lines[0];
                         //PlanarFace planarFace = Util.GetPlanarFaceOfBend(doc.ActiveView, elem, line);
-                        Line parallelLine = line.CreateOffset(offset, XYZ.Zero) as Line;
+                        //Line parallelLine = line.CreateOffset(offset, doc.ActiveView.RightDirection) as Line;
                         //Line parallelLine = Util.GetParallelLine(line.GetEndPoint(0), line.GetEndPoint(1), offset);
                         //Line parallelLine = line.CreateOffset(offset, doc.ActiveView.RightDirection) as Line;
                         //XYZ center = (elem.Location as LocationPoint).Point;
@@ -157,7 +215,7 @@ namespace CarsonsAddins
                         //referenceArray.Append(planarFace.Reference);
                         //referenceArray.Append(centerReference);
                         //dimensionReferences.Add(references);
-                        Dimension dim = doc.Create.NewDimension(doc.ActiveView, parallelLine, referenceArray);
+                        Dimension dim = doc.Create.NewDimension(doc.ActiveView, offsetLine, referenceArray);
                         if (dim == null) continue;
                         //dim.Location.Move(new XYZ(1, 1, 1));
                        // dim.Location.Move(parallelLine.Origin - dim.Origin);

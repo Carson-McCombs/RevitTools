@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
@@ -71,7 +72,6 @@ namespace CarsonsAddins
         [DllImport("user32.dll")]
         public static extern bool SetForegroundWindow(
           IntPtr hWnd);
-
 
 
         #region PipingDBTools
@@ -507,54 +507,68 @@ namespace CarsonsAddins
             }
             return (null,null);
         }
-        public static Line[] GetGeometryLinesOfBend(View activeView, Element element)
+        public static GeometryObject[] GetGeometryLinesOfBend(View activeView, Element element, ElementId validStyleId)
         {
-
+            if (ElementId.InvalidElementId.Equals(validStyleId)) return null;
             GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
-            List<Line> references = new List<Line>();
+            List<GeometryObject> references = new List<GeometryObject>();
             foreach (GeometryObject goA in geometry)
             {
                 if (!(goA is GeometryInstance)) continue;
                 GeometryInstance instance = goA as GeometryInstance;
                 foreach (GeometryObject goB in instance.SymbolGeometry)
                 {
-                    if (goB is Line /* && goB.GraphicsStyleId.IntegerValue.Equals(636627)*/) references.Add((goB as Line));
-
+                    if (!(goB is Line)) continue;
+                    if (!ElementId.InvalidElementId.Equals(validStyleId) && (goB.GraphicsStyleId.Equals(validStyleId))) references.Add(goB);
                 }
 
             }
             if (references.Count == 0) return null;
             return references.ToArray();
         }
-        public static Line[] GetGeometryLinesOfBendB(View activeView, Element element)
+        public static GeometryObject[] GetGeometryObjectsWithIds(View activeView, Element element, Dictionary<int,List<int>> idMap)
         {
-
+            List<GeometryObject> geometryObjects = new List<GeometryObject>();
+            if (idMap == null) return null;
             GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
-            List<Line> references = new List<Line>();
-
-            foreach (GeometryObject go in geometry)
+            foreach (GeometryObject goA in geometry)
             {
-                if (go is Line) references.Add(go as Line);
+                if (!idMap.ContainsKey(goA.Id)) continue;
+                if (!(goA is GeometryInstance)) continue;
+                List<int> ids = idMap[goA.Id];
+                GeometryInstance instance = goA as GeometryInstance;
+                foreach (GeometryObject goB in instance.SymbolGeometry)
+                {
+                    if (!(goB is Line)) continue;
+                    if (!ids.Contains(goB.Id)) continue;
+                    geometryObjects.Add(goB);
+                }
 
             }
-            if (references.Count == 0) return null;
-            return references.ToArray();
+            return geometryObjects.ToArray();
         }
-        public static Line[] GetGeometryLineOfAdjacentFittingsOnBend(View activeView, FamilyInstance bend)
+        public static Dictionary<int,List<int>> GetGeometryObjectsWithStyleIds(View activeView, Element element, ElementId[] validStyleIds)
         {
-            List<Line> lines = new List<Line>();
-            List<Connector> connectors = GetConnectors(bend);
-            foreach (Connector connector in connectors)
+            if (validStyleIds == null || validStyleIds.Length == 0) return null;
+            GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
+
+            Dictionary<int, List<int>> goIds = new Dictionary<int, List<int>>();
+            foreach (GeometryObject goA in geometry)
             {
-                if (!connector.IsConnected) continue;
-                Connector connected = TryGetConnected(connector);
-                if (connected == null) continue;
-                if (connected.Owner == null) continue;
-                if (!connected.Owner.IsValidObject) continue;
-                lines.AddRange(GetGeometryLinesOfBendB(activeView, connected.Owner));
+                if (!(goA is GeometryInstance)) continue;
+                GeometryInstance instance = goA as GeometryInstance;
+                foreach (GeometryObject goB in instance.GetInstanceGeometry())
+                {
+                    if (!(goB is Line)) continue;
+                    if (!validStyleIds.Contains(goB.GraphicsStyleId)) continue;
+                    if (!goIds.ContainsKey(instance.Id)) goIds.Add(instance.Id, new List<int>());
+                    goIds[instance.Id].Add(goB.Id);
+                }
+
             }
-            return lines.ToArray();
+            return goIds;
         }
+
         public static Element[] GetConnectedElements(FamilyInstance elem)
         {
             List<Connector> connectors = GetConnectors(elem);

@@ -22,7 +22,7 @@ namespace CarsonsAddins
     [Regeneration(RegenerationOption.Manual)]
     class DimensionPipeLineCommand : IExternalCommand, ISettingsComponent
     {
-        public const bool IsWIP = true;
+        public const bool IsWIP = false;
         public PushButtonData RegisterButton(Assembly assembly)
         {
             PushButtonData pushButtonData = new PushButtonData("DimensionPipeLineCommand_WIP", "Dimensions Pipe Line (WIP)", assembly.Location, "CarsonsAddins.DimensionPipeLineCommand");
@@ -77,7 +77,7 @@ namespace CarsonsAddins
                 }
                 PipeLine pipeLine = new PipeLine();
                 pipeLine.GetPipeLine(uidoc, pipe);
-                pipeLine.CreateDimensionLinesFromReferences(doc, 4);
+                pipeLine.CreateDimensionLinesFromReferencesOld(doc, 4);
                 transaction.Commit();
                 return Result.Succeeded;
             }
