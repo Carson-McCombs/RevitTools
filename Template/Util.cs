@@ -194,6 +194,8 @@ namespace CarsonsAddins
         /// <returns>Returns true if the Element is a Pipe Accessory. Returns false otherwise.</returns>
         public static bool IsPipeAccessory(Element element)
         {
+            if (element == null) return false;
+            if (element.Category == null) return false;
             return (BuiltInCategory.OST_PipeAccessory.Equals(element.Category.BuiltInCategory));
         }
 
@@ -204,6 +206,8 @@ namespace CarsonsAddins
         /// <returns>Returns true if the Element is a Pipe. Returns false otherwise.</returns>
         public static bool IsPipe(Element element)
         {
+            if (element == null) return false;
+            if (element.Category == null) return false;
             return (BuiltInCategory.OST_PipeCurves.Equals(element.Category.BuiltInCategory));
         }
 

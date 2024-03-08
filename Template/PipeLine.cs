@@ -25,17 +25,15 @@ namespace CarsonsAddins
     {
         private ISelectionFilter filter = null;
         private List<Element> elements;
-        private Pipe selectedPipe;
-
         public List<Element> GetPipeLine(UIDocument uidoc, Pipe pipe)
         {
             elements = new List<Element>();
             filter = new SelectionFilter_PipingElements(true, true, false, true, true);
             List<Connector> connectors = Util.GetConnectors(pipe);
-            selectedPipe = pipe;
             AddNextElement_Left(uidoc, connectors[0]);
             elements.Add(pipe);
             AddNextElement_Right(uidoc, connectors[1]);
+            
             return elements;
         }
         public List<Element> GetPipeLine(UIDocument uidoc, Pipe pipe, ISelectionFilter filter)
@@ -84,16 +82,6 @@ namespace CarsonsAddins
 
         #region WIP
 
-        public void CreateDimensionLines(Document doc, double offset)
-        {
-            Line locationLine = (selectedPipe.Location as LocationCurve).Curve as Line;
-            Line line = locationLine.CreateOffset(offset, locationLine.GetEndPoint(0).CrossProduct(locationLine.GetEndPoint(1))) as Line;
-            line.MakeUnbound();
-            ReferenceArray referenceArray = new ReferenceArray();
-            
-            ConnectorElement el;
-            
-        }
         private ElementId[] GetCenterlineIds(Document doc)
         {
             
@@ -118,40 +106,30 @@ namespace CarsonsAddins
             return point - distance * plane.Normal;
         }
 
-        private bool IsCloserAngleThan(XYZ directionA, XYZ directionB, XYZ sourceDirection)
+        private static XYZ GetOriginOfElement(Element element)
         {
-            if (sourceDirection.IsAlmostEqualTo(directionA) || sourceDirection.IsAlmostEqualTo(-directionA)) return true;
-            if (sourceDirection.IsAlmostEqualTo(directionB) || sourceDirection.IsAlmostEqualTo(-directionB)) return false;
-            double angleA = directionA.AngleTo(sourceDirection);
-            double angleB = directionB.AngleTo(sourceDirection);
-            angleA = (angleA > Math.PI / 2)? angleA - Math.PI: angleA;
-            angleB = (angleB > Math.PI / 2) ? angleB - Math.PI : angleB;
-            return (angleA < angleB);
-
+            if (element == null) return null;
+            Location location = element.Location;
+            if (location is LocationPoint locationPoint) return locationPoint.Point;
+            if (location is LocationCurve locationCurve) return (locationCurve.Curve as Line).Origin;
+            return null;
         }
 
-        private XYZ GetTransformedDirection(Transform transform, XYZ connectionDirection)
-        {
-            connectionDirection = connectionDirection.Normalize();
-            XYZ transformedDirection = connectionDirection.X * transform.BasisX + connectionDirection.Y * transform.BasisY + connectionDirection.Z * transform.BasisZ;
-            transformedDirection = transformedDirection.Normalize();
-            return transformedDirection;
-        }
-        private Line ChooseGeometryLineByDirection(XYZ direction, Line[] lines)
-        {
-            if (direction == null) return null;
-            if (lines == null) return null;
-            Line negative = null;
+        //private Line ChooseGeometryLineByDirection(XYZ direction, Line[] lines)
+        //{
+        //    if (direction == null) return null;
+        //    if (lines == null) return null;
+        //    Line negative = null;
             
-            foreach (Line line in lines)
-            {
-                if (direction.IsAlmostEqualTo(line.Direction)) return line;
-                else if (direction.IsAlmostEqualTo(-line.Direction)) negative = line;
+        //    foreach (Line line in lines)
+        //    {
+        //        if (direction.IsAlmostEqualTo(line.Direction)) return line;
+        //        else if (direction.IsAlmostEqualTo(-line.Direction)) negative = line;
 
-            }
-            return negative;
-        }
-        private Line ChooseGeometryLineByConnectorPosition(XYZ connectorPosition, Line[] lines)
+        //    }
+        //    return negative;
+        //}
+        private static Line ChooseGeometryLineByConnectorPosition(XYZ connectorPosition, Line[] lines)
         {
             if (lines == null) return null;
 
@@ -175,14 +153,23 @@ namespace CarsonsAddins
             }
             return null;
         }
-
+        private static Line CreateDimensionLine(Element[] elements, double offset)
+        {
+            XYZ pointA = GetOriginOfElement(elements[0]);
+            XYZ pointB = GetOriginOfElement(elements[1]);
+            Line line = Line.CreateBound(pointA, pointB);
+            Line dimensionLine = line.CreateOffset(offset, pointA.CrossProduct(pointB).Normalize()) as Line;
+            dimensionLine.MakeUnbound();
+            return dimensionLine;
+        }
         //Below is an attempt at dimensioning Pipe Lines by retrieving the Geometry Objects of each piping element and compares their direction and endpoint positions to the connectors of their respective elements. Due to the current issues stated above, fixing the below function is put on pause.
-        public void CreateDimensionLinesFromReferencesOld(Document doc, double offset) //can only be called after GetPipeLine is called
+        public void CreateDimensionLinesFromReferences(Document doc, double offset) //can only be called after GetPipeLine is called
         {
             if (elements == null) return;
+            
             string names = "";
             ElementId[] validStyleIds = GetCenterlineIds(doc);
-
+            Line dimensionLine = CreateDimensionLine(elements.ToArray(),offset);
             foreach (Element elem in elements)
             {
                 names = names + elem.Id.ToString() + '\n';  
@@ -196,12 +183,12 @@ namespace CarsonsAddins
                 {
                     if (Util.IsPipe(elem))
                     {
-                        DimensionPipeByPlanarFaces(doc, plane, offset, elem);
+                        DimensionPipeByPlanarFaces(doc, plane, dimensionLine, elem);
                     }
 
                     else if (Util.IsPipeBend(elem))
                     {
-                        DimensionPipeBendByGeometryLines(doc, validStyleIds, plane, offset, i, elem);
+                        DimensionPipeBendByGeometryLines(doc, validStyleIds, plane, dimensionLine, i, elem);
                     }
                     else continue;
                 }
@@ -215,10 +202,9 @@ namespace CarsonsAddins
 
         }
 
-        private static Line DimensionPipeByPlanarFaces(Document doc, Plane plane, double offset, Element elem)
+        private static Dimension DimensionPipeByPlanarFaces(Document doc, Plane plane, Line dimensionLine, Element elem)
         {
             ReferenceArray referenceArray = new ReferenceArray();
-            Line line;
             PlanarFace[] faces = Util.GetGeometryObjectsOfPipe(doc.ActiveView, elem);
             List<XYZ> points = new List<XYZ>();
             foreach (PlanarFace face in faces)
@@ -227,24 +213,26 @@ namespace CarsonsAddins
                 referenceArray.Append(face.Reference);
             }
 
-            XYZ projectedPointA = ProjectPointOntoPlane(plane, points[0]);
-            XYZ projectedPointB = ProjectPointOntoPlane(plane, points[1]);
-            Line originalLine = Line.CreateBound(projectedPointA, projectedPointB);
-            line = originalLine.CreateOffset(offset, projectedPointA.CrossProduct(projectedPointB)) as Line;
-            doc.Create.NewDimension(doc.ActiveView, line, referenceArray);
-            return line;
+            //XYZ projectedPointA = ProjectPointOntoPlane(plane, points[0]);
+            //XYZ projectedPointB = ProjectPointOntoPlane(plane, points[1]);
+            //Line originalLine = Line.CreateBound(projectedPointA, projectedPointB);
+           //XYZ perpVector = projectedPointA.CrossProduct(projectedPointB);
+            //line = originalLine.CreateOffset(offset, doc.ActiveView.ViewDirection) as Line;
+            
+            
+            return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray);
         }
         
-        private Dimension DimensionPipeBendByPlanarFaces(Document doc, ElementId[] validStyleIds, Plane plane, int i, Element elem)
-        {
-            FamilyInstance familyInstance = elem as FamilyInstance;
-            FamilyInstance connected = (i == 0) ? elements[1] as FamilyInstance : elements[elements.Count - 2] as FamilyInstance;
-            PlanarFace[] faces = elem.get_Geometry(Util.GetGeometryOptions()).OfType<PlanarFace>().ToArray();
-            Connector connector = Util.TryGetConnection(familyInstance, connected);
-            PlanarFace connectorFace = faces.Where(face => face.Origin.Equals(connector.Origin)).FirstOrDefault();
-            return null;
-        }
-        private Dimension DimensionPipeBendByGeometryLines(Document doc, ElementId[] validStyleIds, Plane plane, double offset, int i, Element elem)
+        //private Dimension DimensionPipeBendByPlanarFaces(Document doc, ElementId[] validStyleIds, Plane plane, int i, Element elem)
+        //{
+        //    FamilyInstance familyInstance = elem as FamilyInstance;
+        //    FamilyInstance connected = (i == 0) ? elements[1] as FamilyInstance : elements[elements.Count - 2] as FamilyInstance;
+        //    PlanarFace[] faces = elem.get_Geometry(Util.GetGeometryOptions()).OfType<PlanarFace>().ToArray();
+        //    Connector connector = Util.TryGetConnection(familyInstance, connected);
+        //    PlanarFace connectorFace = faces.Where(face => face.Origin.Equals(connector.Origin)).FirstOrDefault();
+        //    return null;
+        //}
+        private Dimension DimensionPipeBendByGeometryLines(Document doc, ElementId[] validStyleIds, Plane plane, Line dimensionLine, int i, Element elem)
         {
             FamilyInstance familyInstance = elem as FamilyInstance;
             FamilyInstance connected = (i == 0) ? elements[1] as FamilyInstance : elements[elements.Count - 2] as FamilyInstance;
@@ -260,42 +248,42 @@ namespace CarsonsAddins
 
 
 
-            XYZ projectedPointA = ProjectPointOntoPlane(plane, instanceLine.GetEndPoint(0));
-            XYZ projectedPointB = ProjectPointOntoPlane(plane, instanceLine.GetEndPoint(1));
+            //XYZ projectedPointA = ProjectPointOntoPlane(plane, instanceLine.GetEndPoint(0));
+            //XYZ projectedPointB = ProjectPointOntoPlane(plane, instanceLine.GetEndPoint(1));
 
-            Line projectedLine = Line.CreateBound(projectedPointA, projectedPointB);
-            XYZ perpVector = projectedPointA.CrossProduct(projectedPointB); //projectedLine.Direction.CrossProduct(plane.Normal);
-            Line offsetLine = projectedLine.CreateOffset(offset, perpVector) as Line;
-            return doc.Create.NewDimension(doc.ActiveView, offsetLine, referenceArray);
+            //Line projectedLine = Line.CreateBound(projectedPointA, projectedPointB);
+            //XYZ perpVector = projectedPointA.CrossProduct(projectedPointB); //projectedLine.Direction.CrossProduct(plane.Normal);
+            //Line offsetLine = projectedLine.CreateOffset(offset, doc.ActiveView.ViewDirection) as Line;
+            return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray);
         }
 
-        private Dimension DimensionPipeBendByLineDirection(Document doc, ElementId[] validStyleIds, Plane plane, int i, Element elem)
-        {
-            FamilyInstance familyInstance = elem as FamilyInstance;
-            FamilyInstance connected = (i == 0) ? elements[1] as FamilyInstance : elements[elements.Count - 2] as FamilyInstance;
-            XYZ direction = Util.GetDirectionOfConnection(familyInstance, connected);
+        //private Dimension DimensionPipeBendByLineDirection(Document doc, ElementId[] validStyleIds, Plane plane, int i, Element elem)
+        //{
+        //    FamilyInstance familyInstance = elem as FamilyInstance;
+        //    FamilyInstance connected = (i == 0) ? elements[1] as FamilyInstance : elements[elements.Count - 2] as FamilyInstance;
+        //    XYZ direction = Util.GetDirectionOfConnection(familyInstance, connected);
 
-            Line[] symbolLines = Util.GetSymbolGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(doc.ActiveView), elem, validStyleIds);
-            Line[] instanceLines = Util.GetInstanceGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(doc.ActiveView), elem, validStyleIds);
-
-
-            Line instanceLine = ChooseGeometryLineByDirection(direction, instanceLines);
-            Line symbolLine = GetLineWithId(instanceLine.Id, symbolLines);
-            ReferenceArray referenceArray = new ReferenceArray();
-            referenceArray.Append(symbolLine.GetEndPointReference(0));
-            referenceArray.Append(symbolLine.GetEndPointReference(1));
+        //    Line[] symbolLines = Util.GetSymbolGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(doc.ActiveView), elem, validStyleIds);
+        //    Line[] instanceLines = Util.GetInstanceGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(doc.ActiveView), elem, validStyleIds);
 
 
+        //    Line instanceLine = ChooseGeometryLineByDirection(direction, instanceLines);
+        //    Line symbolLine = GetLineWithId(instanceLine.Id, symbolLines);
+        //    ReferenceArray referenceArray = new ReferenceArray();
+        //    referenceArray.Append(symbolLine.GetEndPointReference(0));
+        //    referenceArray.Append(symbolLine.GetEndPointReference(1));
 
-            XYZ projectedPointA = ProjectPointOntoPlane(plane, instanceLine.GetEndPoint(0));
-            XYZ projectedPointB = ProjectPointOntoPlane(plane, instanceLine.GetEndPoint(1));
 
-            Line projectedLine = Line.CreateBound(projectedPointA, projectedPointB);
-            XYZ perpVector = projectedLine.Direction.CrossProduct(plane.Normal);
-            Line offsetLine = projectedLine.CreateOffset(0, perpVector) as Line;
 
-           return doc.Create.NewDimension(doc.ActiveView, offsetLine, referenceArray);
-        }
+        //    XYZ projectedPointA = ProjectPointOntoPlane(plane, instanceLine.GetEndPoint(0));
+        //    XYZ projectedPointB = ProjectPointOntoPlane(plane, instanceLine.GetEndPoint(1));
+
+        //    Line projectedLine = Line.CreateBound(projectedPointA, projectedPointB);
+        //    XYZ perpVector = projectedLine.Direction.CrossProduct(plane.Normal);
+        //    Line offsetLine = projectedLine.CreateOffset(0, perpVector) as Line;
+
+        //   return doc.Create.NewDimension(doc.ActiveView, offsetLine, referenceArray);
+        //}
 
         #endregion
 
