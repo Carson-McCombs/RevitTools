@@ -559,41 +559,43 @@ namespace CarsonsAddins
             }
             return null;
         }
-        public static T[] GetSymbolGeometryObjectsWithStyleIds<T>(View activeView, Element element, ElementId[] validStyleIds) where T : GeometryObject
+        public static T[] GetSymbolGeometryObjectsWithStyleIds<T>(Options geometryOptions, Element element, ElementId[] validStyleIds) where T : GeometryObject
         {
             if (validStyleIds == null || validStyleIds.Length == 0) return null;
-            GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
+            GeometryElement geometry = element.get_Geometry(geometryOptions);
 
             List<T> geometryObjects = new List<T>(); 
             foreach (GeometryObject goA in geometry)
             {
+                if (validStyleIds.Contains(goA.GraphicsStyleId) && goA is T goTA) geometryObjects.Add(goTA);
                 if (!(goA is GeometryInstance)) continue;
                 GeometryInstance instance = goA as GeometryInstance;
                 foreach (GeometryObject goB in instance.SymbolGeometry)
                 {
                     
                     if (!validStyleIds.Contains(goB.GraphicsStyleId)) continue;
-                    if (goB is T go) geometryObjects.Add(go);
+                    if (goB is T goTB) geometryObjects.Add(goTB);
                 }
 
             }
             return geometryObjects.ToArray();
         }
-        public static T[] GetInstanceGeometryObjectsWithStyleIds<T>(View activeView, Element element, ElementId[] validStyleIds) where T : GeometryObject
+        public static T[] GetInstanceGeometryObjectsWithStyleIds<T>(Options geometryOptions, Element element, ElementId[] validStyleIds) where T : GeometryObject
         {
             if (validStyleIds == null || validStyleIds.Length == 0) return null;
-            GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
+            GeometryElement geometry = element.get_Geometry(geometryOptions);
 
             List<T> geometryObjects = new List<T>();
             foreach (GeometryObject goA in geometry)
             {
+                if (validStyleIds.Contains(goA.GraphicsStyleId) && goA is T goTA) geometryObjects.Add(goTA);
                 if (!(goA is GeometryInstance)) continue;
                 GeometryInstance instance = goA as GeometryInstance;
                 foreach (GeometryObject goB in instance.GetInstanceGeometry())
                 {
 
                     if (!validStyleIds.Contains(goB.GraphicsStyleId)) continue;
-                    if (goB is T go) geometryObjects.Add(go);
+                    if (goB is T goTB) geometryObjects.Add(goTB);
                 }
 
             }
