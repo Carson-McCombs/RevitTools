@@ -77,9 +77,10 @@ namespace CarsonsAddins
                 }
                 PipeLine pipeLine = new PipeLine();
                 pipeLine.GetPipeLine(uidoc, pipe);
-                //uidoc.Selection.PickPoint(ObjectSnapTypes.Perpendicular, "Please select where you would like the dimensions to be placed.");
-                
-                pipeLine.CreateDimensionLinesFromReferences(doc, 4);
+
+                XYZ dimensionPoint = uidoc.Selection.PickPoint(ObjectSnapTypes.Perpendicular, "Please select where you would like the dimensions to be placed.");
+                if (dimensionPoint == null) return Result.Cancelled;
+                pipeLine.CreateDimensionLinesFromReferences(doc, dimensionPoint);
                 transaction.Commit();
                 return Result.Succeeded;
             }

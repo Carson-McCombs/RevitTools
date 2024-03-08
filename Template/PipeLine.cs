@@ -162,14 +162,23 @@ namespace CarsonsAddins
             dimensionLine.MakeUnbound();
             return dimensionLine;
         }
+        private static Line CreateDimensionLine(Element[] elements, XYZ dimensionPoint)
+        {
+            XYZ pointA = GetOriginOfElement(elements[0]);
+            XYZ pointB = GetOriginOfElement(elements[1]);
+            Line line = Line.CreateBound(pointA, pointB);
+            Line dimensionLine = Line.CreateUnbound(dimensionPoint, line.Direction);
+            dimensionLine.MakeUnbound();
+            return dimensionLine;
+        }
         //Below is an attempt at dimensioning Pipe Lines by retrieving the Geometry Objects of each piping element and compares their direction and endpoint positions to the connectors of their respective elements. Due to the current issues stated above, fixing the below function is put on pause.
-        public void CreateDimensionLinesFromReferences(Document doc, double offset) //can only be called after GetPipeLine is called
+        public void CreateDimensionLinesFromReferences(Document doc, XYZ dimensionPoint) //can only be called after GetPipeLine is called
         {
             if (elements == null) return;
             
             string names = "";
             ElementId[] validStyleIds = GetCenterlineIds(doc);
-            Line dimensionLine = CreateDimensionLine(elements.ToArray(),offset);
+            Line dimensionLine = CreateDimensionLine(elements.ToArray(),dimensionPoint);
             foreach (Element elem in elements)
             {
                 names = names + elem.Id.ToString() + '\n';  
