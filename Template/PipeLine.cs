@@ -139,23 +139,94 @@ namespace CarsonsAddins
             }
             return null;
         }
-        private static Line CreateDimensionLine(Element[] elements, XYZ dimensionPoint)
+        private static Line CreateDimensionLine(Plane plane, Line elementLine, XYZ dimensionPoint)
         {
-            XYZ pointA = GetOriginOfElement(elements[0]);
-            XYZ pointB = GetOriginOfElement(elements[1]);
-            Line line = Line.CreateBound(pointA, pointB);
-            Line dimensionLine = Line.CreateUnbound(dimensionPoint, line.Direction);
+            Line dimensionLine = Line.CreateUnbound(ProjectPointOntoPlane(plane, dimensionPoint), elementLine.Direction);
             dimensionLine.MakeUnbound();
             return dimensionLine;
         }
+        private static XYZ Lerp(XYZ start, XYZ end, double amount)
+        {
+            return end + (end - start) * amount;
+        }
+        private static Reference GetCenterReference(ElementId[] validStyleIds, Element element)
+        {
+            Line[] instanceLines = Util.GetInstanceGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), element, validStyleIds);
+            Line[] symbolLines = Util.GetSymbolGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), element, validStyleIds);
+            XYZ origin = GetOriginOfElement(element);
+            int id = -1;
+            int endIndex = -1;
+            foreach(Line line in instanceLines)
+            {
+                for(int i = 0; i < 2; i++)
+                {
+                    if (line.GetEndPoint(i).IsAlmostEqualTo(origin))
+                    {
+                        id = line.Id;
+                        endIndex = i;
+                        break;
+                    }
+                }
+                if (id != -1) break;
+            }
+            
+            return symbolLines.Where(line => line.Id.Equals(id)).FirstOrDefault().GetEndPointReference(endIndex);
+        }
+        private static Reference GetPipeEndReference(Element element)
+        {
+            Pipe pipe = element as Pipe;
+            if (pipe == null) return null;
+            XYZ position = null;
+            foreach (Connector connector in pipe.ConnectorManager.UnusedConnectors)
+            {
+                position = connector.Origin;
+                break;
+            }
+            if (position == null) return null;
+            return element.get_Geometry(Util.GetGeometryOptions()).OfType<PlanarFace>().Where(f => f.Origin.IsAlmostEqualTo(position)).FirstOrDefault().Reference;
+            
+        }
+        private static Line CreateSecondaryDimensionLine(View view, DimensionType secondaryDimensionType, Line elementLine, Line primaryDimensionLine)
+        {
+            double textSize = secondaryDimensionType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble();
+            double textOffset = secondaryDimensionType.get_Parameter(BuiltInParameter.TEXT_DIST_TO_LINE).AsDouble();
+
+            double offset = (textSize + 3 * textOffset) * view.Scale;
+            
+            IntersectionResult result = primaryDimensionLine.Project(elementLine.Origin);
+            return Line.CreateUnbound(Lerp(result.XYZPoint, elementLine.Origin, offset / result.Distance), primaryDimensionLine.Direction);
+        }
+
+        private static Reference GetEndReference(ElementId[] validStyleIds, Element element)
+        {
+            if (Util.IsPipe(element)) return GetPipeEndReference(element);
+            return GetCenterReference(validStyleIds, element);
+        }
+
         //Below is an attempt at dimensioning Pipe Lines by retrieving the Geometry Objects of each piping element and compares their direction and endpoint positions to the connectors of their respective elements. Due to the current issues stated above, fixing the below function is put on pause.
-        public void CreateDimensionLinesFromReferences(Document doc, XYZ dimensionPoint) //can only be called after GetPipeLine is called
+        public void CreateDimensionLinesFromReferences(Document doc, XYZ dimensionPoint, bool secondaryDimension) //can only be called after GetPipeLine is called
         {
             if (elements == null) return;
             
             ElementId[] validStyleIds = GetCenterlineIds(doc);
-            Line dimensionLine = CreateDimensionLine(elements.ToArray(),dimensionPoint);
             Plane plane = Plane.CreateByNormalAndOrigin(doc.ActiveView.ViewDirection, doc.ActiveView.Origin);
+            XYZ pointA = ProjectPointOntoPlane(plane, GetOriginOfElement(elements[0]));
+            XYZ pointB = ProjectPointOntoPlane(plane, GetOriginOfElement(elements[1]));
+            Line elementLine = Line.CreateBound(pointA, pointB);
+
+            Line primaryDimensionLine = CreateDimensionLine(plane, elementLine, dimensionPoint);
+            DimensionType primaryDimensionType = new FilteredElementCollector(doc).OfClass(typeof(DimensionType)).Where(dt => dt.Name.Equals("C & B PIPE")).FirstOrDefault() as DimensionType;
+            DimensionType secondaryPipeDimensionType = new FilteredElementCollector(doc).OfClass(typeof(DimensionType)).Where(dt => dt.Name.Equals("C & B PIPE w/dot")).FirstOrDefault() as DimensionType;
+            DimensionType secondaryFittingDimensionType = new FilteredElementCollector(doc).OfClass(typeof(DimensionType)).Where(dt => dt.Name.Equals("C & B FITTING w/dot")).FirstOrDefault() as DimensionType;
+            Line secondaryDimensionLine = CreateSecondaryDimensionLine(doc.ActiveView, secondaryPipeDimensionType, elementLine, primaryDimensionLine);
+
+            ReferenceArray primaryReferenceArray = new ReferenceArray();
+            primaryReferenceArray.Append(GetEndReference(validStyleIds, elements[0]));
+            primaryReferenceArray.Append(GetEndReference(validStyleIds, elements[elements.Count - 1]));
+
+
+            Dimension primaryDimension = doc.Create.NewDimension(doc.ActiveView, primaryDimensionLine, primaryReferenceArray, primaryDimensionType );
+            if (!secondaryDimension) return;
             for (int i = 0; i < elements.Count; i++)
             {
                 Element element = elements[i];
@@ -163,13 +234,13 @@ namespace CarsonsAddins
                 {
                     if (Util.IsPipe(element))
                     {
-                        DimensionPipeByPlanarFaces(doc, dimensionLine, element);
+                        DimensionPipeByPlanarFaces(doc, secondaryPipeDimensionType, secondaryDimensionLine, element);
                     }
 
                     else if (Util.IsPipeBend(element))
                     {
                         FamilyInstance connected = (i == 0) ? elements[1] as FamilyInstance : elements[elements.Count - 2] as FamilyInstance;
-                        DimensionPipeBendByGeometryLines(doc, validStyleIds, dimensionLine, element as FamilyInstance, connected);
+                        DimensionPipeBendByGeometryLines(doc, secondaryFittingDimensionType, validStyleIds,  secondaryDimensionLine, element as FamilyInstance, connected);
                     }
                     else continue;
                 }
@@ -183,7 +254,7 @@ namespace CarsonsAddins
 
         }
 
-        private static Dimension DimensionPipeByPlanarFaces(Document doc, Line dimensionLine, Element elem)
+        private static Dimension DimensionPipeByPlanarFaces(Document doc, DimensionType dimensionType, Line dimensionLine, Element elem)
         {
             ReferenceArray referenceArray = new ReferenceArray();
             PlanarFace[] faces = Util.GetGeometryObjectsOfPipe(doc.ActiveView, elem);
@@ -197,7 +268,7 @@ namespace CarsonsAddins
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray);
         }
 
-        private static Dimension DimensionPipeBendByGeometryLines(Document doc, ElementId[] validStyleIds, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
+        private static Dimension DimensionPipeBendByGeometryLines(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
         {
             Line[] symbolLines = Util.GetSymbolGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
             Line[] instanceLines = Util.GetInstanceGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);

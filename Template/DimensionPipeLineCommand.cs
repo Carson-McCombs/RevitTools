@@ -80,7 +80,7 @@ namespace CarsonsAddins
 
                 XYZ dimensionPoint = uidoc.Selection.PickPoint(ObjectSnapTypes.Perpendicular, "Please select where you would like the dimensions to be placed.");
                 if (dimensionPoint == null) return Result.Cancelled;
-                pipeLine.CreateDimensionLinesFromReferences(doc, dimensionPoint);
+                pipeLine.CreateDimensionLinesFromReferences(doc, dimensionPoint, true);
                 transaction.Commit();
                 return Result.Succeeded;
             }
