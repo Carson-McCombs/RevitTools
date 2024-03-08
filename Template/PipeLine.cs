@@ -153,14 +153,8 @@ namespace CarsonsAddins
         {
             if (elements == null) return;
             
-            string names = "";
             ElementId[] validStyleIds = GetCenterlineIds(doc);
             Line dimensionLine = CreateDimensionLine(elements.ToArray(),dimensionPoint);
-            foreach (Element elem in elements)
-            {
-                names = names + elem.Id.ToString() + '\n';  
-            }
-            string log = "";
             Plane plane = Plane.CreateByNormalAndOrigin(doc.ActiveView.ViewDirection, doc.ActiveView.Origin);
             for (int i = 0; i < elements.Count; i++)
             {
@@ -181,7 +175,7 @@ namespace CarsonsAddins
                 }
                 catch (Exception ex)
                 { 
-                    TaskDialog.Show("ERROR DIMENSIONING PIPELINE ", log + "\n\n" + ex.Message); 
+                    TaskDialog.Show("ERROR DIMENSIONING PIPELINE ", ex.Message); 
                 }
 
                 
