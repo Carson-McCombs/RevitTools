@@ -39,6 +39,10 @@
 
 ![Total Pipe Length](https://github.com/Carson-McCombs/RevitTools/assets/130939367/c4853da2-6940-4477-a0d8-b9b185f22c1f)
 
+***Dimension Pipe Line Tool***
+
+-Allows for Piping Elements ( Pipes, Pipe Fittings, and Pipe Accessories ) within a "Pipeline" ( as defined above ) to be dimensions together ( without gaskets / flanges / unions ) in one click. Note: Pipe Accessories and Pipe Fittings both require Reference Lines with the subcategory of "Center line" or "zLines" from the center of each Connector to the center of the element to function correctly.
+
 ***Smart Flip***
 
 **Issue:** Not being able to flip a flange without breaking connections and occasionally moving elements.
@@ -59,7 +63,7 @@
 
 ![Question mark Dimension](https://github.com/Carson-McCombs/RevitTools/assets/130939367/cc4e7747-e965-4c1c-b0e0-e21b74061f6d)
 
-***Dockable Element Parameter Assistance:***
+***Dockable Element Parameter Assistant:***
 
 -Opening Dockable Pane
 
@@ -80,3 +84,8 @@
 -Can also set the User's current selection by highlighting specific elements
 
 ![Parameter Manager Selecting from Manager](https://github.com/Carson-McCombs/RevitTools/assets/130939367/ce3ab517-99c8-432a-b28f-dde74de6220c)
+
+***Dimension Text Window***
+
+-Functions as the standard Dimension Window except you can apply your changes to multiple Dimensions and DimensionSegments. The only features not currently functioning is swapping between the "Use Actual Value", the "Replace With Text", and "Show Label in View" as well as the Segment Dimension Leader Visibility Dropdown.
+
