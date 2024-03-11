@@ -187,10 +187,10 @@ namespace CarsonsAddins
             PipeEndPrepPreferences prefs = GetPreferences(familyInstance);
             BellOrSpigot bos = GetPipeEnd(pipe, familyInstance);
             string pipeEndPrep = prefs.GetPipeEndPrep(bos);
-            if (bos.Equals(BellOrSpigot.SPIGOT))
-            {
-                if(IsGaugedPE(pipe, connector, pipeEndPrep)) pipeEndPrep = "GPE";
-            }
+            //if (bos.Equals(BellOrSpigot.SPIGOT))
+            //{
+            //    if(IsGaugedPE(pipe, connector, pipeEndPrep)) pipeEndPrep = "GPE";
+            //}
             return (bos, pipeEndPrep);
         }
 

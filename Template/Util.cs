@@ -332,7 +332,7 @@ namespace CarsonsAddins
             if (connected.Owner == null) return null;
             FamilyInstance familyInstance = connected.Owner as FamilyInstance;
             if (familyInstance == null) return null;
-            if (familyInstance.Name.Equals("Non-Connector")) //Non-Connector Pipe Fitting Element - originally called by the ID for the Non-Connector fitting, but it changes from project to project, so using name as a quick fix
+            if (familyInstance.get_Parameter(BuiltInParameter.ELEM_FAMILY_PARAM).AsValueString().Equals("Non-Connector")) //Non-Connector Pipe Fitting Element - originally called by the ID for the Non-Connector fitting, but it changes from project to project, so using name as a quick fix
             {
                 return GetConnectedFamilyInstance(GetAdjacentConnector(connected));
             };
