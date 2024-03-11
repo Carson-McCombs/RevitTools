@@ -105,7 +105,6 @@
       <DependentUpon>PipeEndPrepPreferencesWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="PipeLine.cs" />
-    <Compile Include="QuestionMarkDimensionsCommand.cs" />
     <Compile Include="SelectAllElementsOfSystemCommand.cs" />
     <Compile Include="SelectPipeLineCommand.cs" />
     <Compile Include="PipingEndPrepUpdater.cs" />
