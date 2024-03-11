@@ -191,7 +191,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <Compile Include="DimensionBendCommand.cs" />
     <Compile Include="DimensionPipeLineCommand.cs" />
     <None Include="packages.config" />
     <None Include="Properties\MySettings.settings">

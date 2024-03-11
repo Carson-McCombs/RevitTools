@@ -89,7 +89,7 @@ namespace CarsonsAddins
 
         private bool Flip(Document doc, FamilyInstance fitting)
         {
-            List<Connector> connectors = Util.GetConnectors(fitting);
+            Connector[] connectors = Util.GetConnectors(fitting);
             Connector primaryConnected = null;
             Connector secondaryConnected = null;
             
@@ -97,7 +97,7 @@ namespace CarsonsAddins
             Connector secondaryConnector = null;
             bool isPinned = fitting.Pinned;
             if (isPinned) fitting.Pinned = false;
-            for (int i = 0; i < connectors.Count; i++)
+            for (int i = 0; i < connectors.Length; i++)
             {
                 
                 

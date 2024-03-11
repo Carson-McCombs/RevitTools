@@ -29,7 +29,7 @@ namespace CarsonsAddins
         {
             elements = new List<Element>();
             filter = new SelectionFilter_PipingElements(true, true, false, true, true);
-            List<Connector> connectors = Util.GetConnectors(pipe);
+            Connector[] connectors = Util.GetConnectors(pipe);
             AddNextElement_Left(uidoc, connectors[0]);
             elements.Add(pipe);
             AddNextElement_Right(uidoc, connectors[1]);
@@ -40,7 +40,7 @@ namespace CarsonsAddins
         {
             elements = new List<Element>();
             this.filter = filter;
-            List<Connector> connectors = Util.GetConnectors(pipe);
+            Connector[] connectors = Util.GetConnectors(pipe);
             AddNextElement_Left(uidoc, connectors[0]);
             elements.Add(pipe);
             AddNextElement_Right(uidoc, connectors[1]);
@@ -89,7 +89,7 @@ namespace CarsonsAddins
             List<ElementId> centerlineStyleIds = new List<ElementId>();
             for (int i = 0; i < centerlineStyleElements.Count; i++)
             {
-                if (centerlineStyleElements[i].Name.Equals("zLines") || (centerlineStyleElements[i].Name.Equals("Center line"))) centerlineStyleIds.Add(centerlineStyleElements[i].Id);
+                if (centerlineStyleElements[i].Name.Equals("zLines") || centerlineStyleElements[i].Name.Equals("Center line")) centerlineStyleIds.Add(centerlineStyleElements[i].Id);
             }
             return centerlineStyleIds.ToArray();
         }
@@ -172,9 +172,8 @@ namespace CarsonsAddins
             
             return symbolLines.Where(line => line.Id.Equals(id)).FirstOrDefault().GetEndPointReference(endIndex);
         }
-        private static Reference GetPipeEndReference(Element element)
+        private static Reference GetPipeEndReference(View activeView, Pipe pipe)
         {
-            Pipe pipe = element as Pipe;
             if (pipe == null) return null;
             XYZ position = null;
             foreach (Connector connector in pipe.ConnectorManager.UnusedConnectors)
@@ -183,9 +182,12 @@ namespace CarsonsAddins
                 break;
             }
             if (position == null) return null;
-            PlanarFace face = element.get_Geometry(Util.GetGeometryOptions()).OfType<PlanarFace>().Where(f => f.Origin.IsAlmostEqualTo(position)).FirstOrDefault();
-            return face.Reference;
-            
+            Line line = Util.GetGeometryLineOfPipe(activeView, pipe);
+            for (int i = 0; i < 2; i++)
+            {
+                if (line.GetEndPoint(i).IsAlmostEqualTo(position)) return line.GetEndPointReference(i);
+            }
+            return null;
         }
         private static Line CreateSecondaryDimensionLine(View view, DimensionType secondaryDimensionType, Line elementLine, Line primaryDimensionLine)
         {
@@ -199,35 +201,66 @@ namespace CarsonsAddins
             return Line.CreateUnbound(Lerp(result.XYZPoint, elementLine.Origin, percent), primaryDimensionLine.Direction);
         }
 
-        private static Reference GetEndReference(ElementId[] validStyleIds, Element element)
+        private static Reference GetEndReference(View activeView, ElementId[] validStyleIds, Element element)
         {
-            if (Util.IsPipe(element)) return GetPipeEndReference(element);
+            if (Util.IsPipe(element)) return GetPipeEndReference(activeView, element as Pipe);
             return GetCenterReference(validStyleIds, element);
+        }
+
+        private struct DimensionStyles
+        {
+            public DimensionType primaryDimensionType;
+            public DimensionType secondaryPipeDimensionType;
+            public DimensionType secondaryAccessoryDimensionType;
+            public DimensionType secondaryFittingDimensionType;
+        }
+        
+
+        private static DimensionStyles GetDimensionStyles(Document doc)
+        {
+            DimensionStyles dimensionStyles = new DimensionStyles();
+            DimensionType[] dimensionTypes = new FilteredElementCollector(doc).WhereElementIsElementType().OfClass(typeof(DimensionType)).ToElements().Cast<DimensionType>().ToArray();
+
+            foreach (DimensionType dimensionType in dimensionTypes)
+            {
+                switch (dimensionType.Name)
+                {
+                    case ("C & B"): dimensionStyles.primaryDimensionType = dimensionType; break;
+                    case ("C & B PIPE w/dot"): dimensionStyles.secondaryPipeDimensionType = dimensionType; break;
+                    case ("C & B FITTING w/dot"): dimensionStyles.secondaryFittingDimensionType = dimensionType; break;
+                    //case ("C & B PIPE"): dimensionStyles.secondaryPipeDimensionType = dimensionType; break;
+                    default: break;
+                }
+            }
+
+            return dimensionStyles;
+
         }
 
         //Below is an attempt at dimensioning Pipe Lines by retrieving the Geometry Objects of each piping element and compares their direction and endpoint positions to the connectors of their respective elements. Due to the current issues stated above, fixing the below function is put on pause.
         public void CreateDimensionLinesFromReferences(Document doc, XYZ dimensionPoint, bool secondaryDimension) //can only be called after GetPipeLine is called
         {
             if (elements == null) return;
-            
+            View activeView = doc.ActiveView;
             ElementId[] validStyleIds = GetCenterlineIds(doc);
-            Plane plane = Plane.CreateByNormalAndOrigin(doc.ActiveView.ViewDirection, doc.ActiveView.Origin);
+            Plane plane = Plane.CreateByNormalAndOrigin(activeView.ViewDirection, activeView.Origin);
             XYZ pointA = ProjectPointOntoPlane(plane, GetOriginOfElement(elements[0]));
             XYZ pointB = ProjectPointOntoPlane(plane, GetOriginOfElement(elements[1]));
             Line elementLine = Line.CreateBound(pointA, pointB);
+            DimensionStyles dimensionStyles = GetDimensionStyles(doc);
 
             Line primaryDimensionLine = CreateDimensionLine(plane, elementLine, dimensionPoint);
-            DimensionType primaryDimensionType = new FilteredElementCollector(doc).OfClass(typeof(DimensionType)).Where(dt => dt.Name.Equals("C & B PIPE")).FirstOrDefault() as DimensionType;
-            DimensionType secondaryPipeDimensionType = new FilteredElementCollector(doc).OfClass(typeof(DimensionType)).Where(dt => dt.Name.Equals("C & B PIPE w/dot")).FirstOrDefault() as DimensionType;
-            DimensionType secondaryFittingDimensionType = new FilteredElementCollector(doc).OfClass(typeof(DimensionType)).Where(dt => dt.Name.Equals("C & B FITTING w/dot")).FirstOrDefault() as DimensionType;
-            Line secondaryDimensionLine = CreateSecondaryDimensionLine(doc.ActiveView, secondaryPipeDimensionType, elementLine, primaryDimensionLine);
+
+            
+            Line secondaryDimensionLine = CreateSecondaryDimensionLine(doc.ActiveView, dimensionStyles.secondaryPipeDimensionType, elementLine, primaryDimensionLine);
 
             ReferenceArray primaryReferenceArray = new ReferenceArray();
-            primaryReferenceArray.Append(GetEndReference(validStyleIds, elements[0]));
-            primaryReferenceArray.Append(GetEndReference(validStyleIds, elements[elements.Count - 1]));
+            primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, elements[0]));
+            primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, elements[elements.Count - 1]));
 
+            ElementId pipeAccessoryStyleId = new FilteredElementCollector(doc).WhereElementIsElementType().OfClass(typeof(GraphicsStyle)).OfCategory(BuiltInCategory.OST_PipeAccessory).FirstElementId();
 
-            Dimension primaryDimension = doc.Create.NewDimension(doc.ActiveView, primaryDimensionLine, primaryReferenceArray, primaryDimensionType );
+            Dimension primaryDimension = doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionStyles.primaryDimensionType );
             if (!secondaryDimension) return;
             for (int i = 0; i < elements.Count; i++)
             {
@@ -236,13 +269,19 @@ namespace CarsonsAddins
                 {
                     if (Util.IsPipe(element))
                     {
-                        DimensionPipeByPlanarFaces(doc, secondaryPipeDimensionType, secondaryDimensionLine, element);
+                        DimensionPipe(doc, dimensionStyles.secondaryPipeDimensionType, secondaryDimensionLine, element as Pipe);
                     }
 
                     else if (Util.IsPipeBend(element))
                     {
                         FamilyInstance connected = (i == 0) ? elements[1] as FamilyInstance : elements[elements.Count - 2] as FamilyInstance;
-                        DimensionPipeBendByGeometryLines(doc, secondaryFittingDimensionType, validStyleIds,  secondaryDimensionLine, element as FamilyInstance, connected);
+                        DimensionPipeBend(doc, dimensionStyles.secondaryFittingDimensionType, validStyleIds,  secondaryDimensionLine, element as FamilyInstance, connected);
+                    }
+
+                    else if (Util.IsPipeAccessory(element))
+                    {
+                        FamilyInstance connected = (i == 0) ? elements[1] as FamilyInstance : elements[elements.Count - 2] as FamilyInstance;
+                        DimensionPipeAccessory(doc, dimensionStyles.secondaryFittingDimensionType, validStyleIds, secondaryDimensionLine, element as FamilyInstance);
                     }
                     else continue;
                 }
@@ -256,21 +295,17 @@ namespace CarsonsAddins
 
         }
 
-        private static Dimension DimensionPipeByPlanarFaces(Document doc, DimensionType dimensionType, Line dimensionLine, Element elem)
+        private static Dimension DimensionPipe(Document doc, DimensionType dimensionType, Line dimensionLine, Pipe pipe)
         {
             ReferenceArray referenceArray = new ReferenceArray();
-            PlanarFace[] faces = Util.GetGeometryObjectsOfPipe(doc.ActiveView, elem);
-            List<XYZ> points = new List<XYZ>();
-            foreach (PlanarFace face in faces)
-            {
-                points.Add(face.Origin);
-                referenceArray.Append(face.Reference);
-            }
-            
-            return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray);
+            Line line =  Util.GetGeometryLineOfPipe(doc.ActiveView, pipe);
+            referenceArray.Append(line.GetEndPointReference(0));
+            referenceArray.Append(line.GetEndPointReference(1));
+
+            return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
 
-        private static Dimension DimensionPipeBendByGeometryLines(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
+        private static Dimension DimensionPipeBend(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
         {
             Line[] symbolLines = Util.GetSymbolGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
             Line[] instanceLines = Util.GetInstanceGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
@@ -283,8 +318,44 @@ namespace CarsonsAddins
             referenceArray.Append(symbolLine.GetEndPointReference(0));
             referenceArray.Append(symbolLine.GetEndPointReference(1));
 
-            return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray);
+            return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
+
+        private static bool ContainsValueAlmostEqualTo(XYZ[] ary,  XYZ value)
+        {
+            foreach (XYZ xyz in ary)
+            {
+                if (value.IsAlmostEqualTo(xyz)) return true;
+            }
+            return false;
+        }
+        private static Dimension DimensionPipeAccessory(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Line dimensionLine, FamilyInstance familyInstance)
+        {
+            ReferenceArray referenceArray = new ReferenceArray();
+            Line line = Util.GetSymbolGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds).FirstOrDefault();
+
+            referenceArray.Append(line.GetEndPointReference(0));
+            referenceArray.Append(line.GetEndPointReference(1));
+
+            return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
+        }
+        //private static Dimension DimensionPipeAccessory(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Line dimensionLine, FamilyInstance familyInstance)
+        //{
+        //    ReferenceArray referenceArray = new ReferenceArray();
+        //    XYZ[] connectorOrigins = Util.GetConnectors(familyInstance).Select(connector => connector.Origin).ToArray();
+        //    PlanarFace[] instanceFaces = Util.GetGeometryObjectFromInstanceGeometry<PlanarFace>(Util.GetGeometryOptions(), familyInstance);
+        //    List<int> instanceIds = new List<int>();
+        //    foreach (PlanarFace face in instanceFaces)
+        //    {
+        //        if (ContainsValueAlmostEqualTo(connectorOrigins, face.Origin)) instanceIds.Add(face.Id);
+        //    }
+        //    PlanarFace[] symbolFaces = Util.GetSymbolGeometryObjectFromId<PlanarFace>(Util.GetGeometryOptions(), familyInstance, instanceIds.ToArray());
+        //    foreach (PlanarFace face in symbolFaces)
+        //    {
+        //        referenceArray.Append(face.Reference);
+        //    }
+        //    return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
+        //}
 
         #endregion
 

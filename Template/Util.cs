@@ -5,6 +5,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -16,7 +17,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using static CarsonsAddins.PipeEndPrepWindow;
 
 namespace CarsonsAddins
@@ -232,8 +235,8 @@ namespace CarsonsAddins
         /// <returns>Returns the connector from elementA that connects to elementB. Returns null if there is no connection.</returns>
         public static Connector TryGetConnection(FamilyInstance elementA, FamilyInstance elementB)
         {
-            List<Connector> connectorsA = GetConnectors(elementA.MEPModel.ConnectorManager);
-            List<Connector> connectorsB = GetConnectors(elementB.MEPModel.ConnectorManager);
+            Connector[] connectorsA = GetConnectors(elementA.MEPModel.ConnectorManager);
+            Connector[] connectorsB = GetConnectors(elementB.MEPModel.ConnectorManager);
             foreach (Connector conA in connectorsA)
             {
                 foreach (Connector conB in connectorsB)
@@ -265,23 +268,23 @@ namespace CarsonsAddins
         /// Gets all of the Connector Elements within the ConnectorManager.
         /// </summary>
         /// <param name="cm">The ConnectorManager whose connectors are being retrieved.</param>
-        /// <returns>a List containing all of the Connector Elements within the ConnectorManager.</returns>
-        public static List<Connector> GetConnectors(ConnectorManager cm)
+        /// <returns>an array containing all of the Connector Elements within the ConnectorManager.</returns>
+        public static Connector[] GetConnectors(ConnectorManager cm)
         {
             List<Connector> connectors = new List<Connector>();
             foreach (Connector con in cm.Connectors)
             {
                 connectors.Add(con);
             }
-            return connectors;
+            return connectors.ToArray();
         }
 
         /// <summary>
         /// Gets all of the Connector Elements from the Pipe's ConnectorManager.
         /// </summary>
         /// <param name="pipe"></param>
-        /// <returns>a List connecting all of the Connector Elements within the provided Pipe's ConnectorManager</returns>
-        public static List<Connector> GetConnectors(Pipe pipe) 
+        /// <returns>an array connecting all of the Connector Elements within the provided Pipe's ConnectorManager</returns>
+        public static Connector[] GetConnectors(Pipe pipe) 
         {
             return GetConnectors(pipe.ConnectorManager); 
         }
@@ -290,12 +293,13 @@ namespace CarsonsAddins
         /// Gets all of the Connector Elements from the FamilyInstace's ConnectorManager.
         /// </summary>
         /// <param name="familyInstance">An MEP Family Instance (i.e. Pipe Fitting or Pipe Accessory).</param>
-        /// <returns>a List connecting all of the Connector Elements within the provided Family Instance's ConnectorManager</returns>
-        public static List<Connector> GetConnectors(FamilyInstance familyInstance) 
+        /// <returns>an array connecting all of the Connector Elements within the provided Family Instance's ConnectorManager</returns>
+        public static Connector[] GetConnectors(FamilyInstance familyInstance) 
         { 
             return GetConnectors(familyInstance.MEPModel.ConnectorManager); 
         }
-        
+      
+
         /// <summary>
         /// Attempts to find the Connector Element that is valid and has a physical connection to the connector passed as a parameter.
         /// </summary>
@@ -443,12 +447,22 @@ namespace CarsonsAddins
             options.View = activeView;
             return options;
         }
-        public static T[] GetGeometryObjectFromSymbolGeometry<T>(View activeView, Element element) where T : GeometryObject
+        public static T[] GetGeometryObjectsFromSolid<T>(Solid solid) where T : GeometryObject
         {
-            GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
+            if (solid == null) return null;
+            Type t = typeof(T);
+            if (t.Equals(typeof(Face)) || t.Equals(typeof(PlanarFace)) || t.Equals(typeof(CylindricalFace))) return solid.Faces.OfType<T>().ToArray();
+            else if (typeof(T).Equals(typeof(Edge))) return solid.Edges.OfType<T>().ToArray();
+            return null;
+        }
+
+        public static T[] GetGeometryObjectFromSymbolGeometry<T>(Options geometryOptions, Element element) where T : GeometryObject
+        {
+            GeometryElement geometry = element.get_Geometry(geometryOptions);
             List<T> gos = new List<T>();
             foreach (GeometryObject goA in geometry)
             {
+                if (goA is Solid solid) gos.AddRange(GetGeometryObjectsFromSolid<T>(solid));
                 if (!(goA is GeometryInstance)) continue;
                 GeometryInstance instance = goA as GeometryInstance;
                 gos.AddRange(GetGeometryObjectFromGeometry<T>(instance.GetSymbolGeometry()));
@@ -457,15 +471,16 @@ namespace CarsonsAddins
             if (gos.Count == 0) return null;
             return gos.ToArray();
         }
-        public static T[] GetGeometryObjectFromInstanceGeometry<T>(View activeView, Element element) where T : GeometryObject
+        public static T[] GetGeometryObjectFromInstanceGeometry<T>(Options geometryOptions, Element element) where T : GeometryObject
         {
-            GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
+            GeometryElement geometry = element.get_Geometry(geometryOptions);
             List<T> gos = new List<T>();
             foreach (GeometryObject goA in geometry)
             {
+                if (goA is Solid solid ) gos.AddRange(GetGeometryObjectsFromSolid<T>(solid));
                 if (!(goA is GeometryInstance)) continue;
                 GeometryInstance instance = goA as GeometryInstance;
-               gos.AddRange(GetGeometryObjectFromGeometry<T>(instance.GetInstanceGeometry()));
+                gos.AddRange(GetGeometryObjectFromGeometry<T>(instance.GetInstanceGeometry()));
 
             }
             if (gos.Count == 0) return null;
@@ -498,12 +513,12 @@ namespace CarsonsAddins
             if (geometryObjects.Count == 0) return null;
             return geometryObjects.ToArray();
         }
-        public static (PlanarFace,PlanarFace) GetPlanarFaceFromConnector(View activeView, Connector connector)
+        public static (PlanarFace,PlanarFace) GetPlanarFaceFromConnector(Options geometryOptions, Connector connector)
         {
             if (connector.Owner == null) return (null,null);
             if (!connector.Owner.IsValidObject) return (null,null);
-            PlanarFace[] instanceFaces = GetGeometryObjectFromInstanceGeometry<PlanarFace>(activeView, connector.Owner);
-            PlanarFace[] symbolFaces = GetGeometryObjectFromSymbolGeometry<PlanarFace>(activeView, connector.Owner);
+            PlanarFace[] instanceFaces = GetGeometryObjectFromInstanceGeometry<PlanarFace>(geometryOptions, connector.Owner);
+            PlanarFace[] symbolFaces = GetGeometryObjectFromSymbolGeometry<PlanarFace>(geometryOptions, connector.Owner);
 
             for (int i = 0; i < symbolFaces.Length; i++)
             {
@@ -530,38 +545,63 @@ namespace CarsonsAddins
             if (references.Count == 0) return null;
             return references.ToArray();
         }
-        public static T GetInstanceGeometryObject<T>(View activeView, Element element, int id) where T : GeometryObject
+        public static T GetInstanceGeometryObjectFromId<T>(Options geometryOptions, Element element, int geometryId) where T : GeometryObject
         {
-            GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
+            GeometryElement geometry = element.get_Geometry(geometryOptions);
             foreach (GeometryObject goA in geometry)
             {
+                if (goA is Solid solid) return GetGeometryObjectsFromSolid<T>(solid).Where(geom => geometryId.Equals(geom.Id)).FirstOrDefault();
                 if (!(goA is GeometryInstance)) continue;
                 GeometryInstance instance = goA as GeometryInstance;
                 foreach (GeometryObject goB in instance.GetInstanceGeometry())
                 {
                     if (!(goB is T)) continue;
-                    if (goB.Id.Equals(id)) return (T)goB;
+                    if (goB.Id.Equals(geometryId)) return (T)goB;
                 }
                 
             }
             return null;
         }
-        public static T GetInstanceGeometryObject<T>(View activeView, Element element, int[] geometryIds) where T : GeometryObject
+
+        public static T GetSymbolGeometryObjectFromId<T>(Options geometryOptions, Element element, int geometryId) where T : GeometryObject
         {
-            
-            GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
+
+            GeometryElement geometry = element.get_Geometry(geometryOptions);
             foreach (GeometryObject goA in geometry)
             {
+                if (goA is Solid solid) return GetGeometryObjectsFromSolid<T>(solid).Where(geom => geometryId.Equals(geom.Id)).FirstOrDefault();
+                if (geometryId.Equals(goA.Id) && goA is T goTA) return goTA;
                 if (!(goA is GeometryInstance)) continue;
                 GeometryInstance instance = goA as GeometryInstance;
-                foreach (GeometryObject goB in instance.GetInstanceGeometry())
+                foreach (GeometryObject goB in instance.SymbolGeometry)
                 {
-                    if (!(goB is T)) continue;
-                    if (geometryIds.Contains(goB.Id)) return (T)goB;
+
+                    if (goB.Id.Equals(geometryId)) return (T)goB;
                 }
 
             }
             return null;
+        }
+        public static T[] GetSymbolGeometryObjectFromId<T>(Options geometryOptions, Element element, int[] geometryIds) where T : GeometryObject
+        {
+
+            GeometryElement geometry = element.get_Geometry(geometryOptions);
+            List<T> symbolGeometry = new List<T>();
+            foreach (GeometryObject goA in geometry)
+            {
+                if (goA is Solid solid) symbolGeometry.AddRange(GetGeometryObjectsFromSolid<T>(solid).Where(geom => geometryIds.Contains(geom.Id)).ToArray());
+                if (geometryIds.Contains(goA.Id) && goA is T goTA) symbolGeometry.Add(goTA);
+                if (!(goA is GeometryInstance)) continue;
+                GeometryInstance instance = goA as GeometryInstance;
+                foreach (GeometryObject goB in instance.SymbolGeometry)
+                {
+
+                    if (!geometryIds.Contains(goB.Id)) continue;
+                    if (goB is T goTB) symbolGeometry.Add(goTB);
+                }
+
+            }
+            return symbolGeometry.ToArray();
         }
         public static T[] GetSymbolGeometryObjectsWithStyleIds<T>(Options geometryOptions, Element element, ElementId[] validStyleIds) where T : GeometryObject
         {
@@ -584,6 +624,7 @@ namespace CarsonsAddins
             }
             return geometryObjects.ToArray();
         }
+
         public static T[] GetInstanceGeometryObjectsWithStyleIds<T>(Options geometryOptions, Element element, ElementId[] validStyleIds) where T : GeometryObject
         {
             if (validStyleIds == null || validStyleIds.Length == 0) return null;
@@ -605,21 +646,69 @@ namespace CarsonsAddins
             }
             return geometryObjects.ToArray();
         }
-        public static Element[] GetConnectedElements(FamilyInstance elem)
-        {
-            List<Connector> connectors = GetConnectors(elem);
-            List<Element> connected = new List<Element>();
-            foreach(Connector connector in connectors)
-            {
-                Connector other = TryGetConnected(connector);
-                if (other == null) continue;
-                if (other.Owner == null) continue;
-                if (!other.Owner.IsValidObject) continue;
+
+        //public static Dictionary<Connector, Reference> GetConnectorReferences(View activeView, Element element)
+        //{
+            
+            
+        //    if (IsPipe(element)) return GetConnectorReferences(activeView, element as Pipe);
+            
+        //    return null;
+
+        //}
+
+        //public static Dictionary<Connector, Reference> GetConnectorReferencesOfPipe(View activeView, Pipe pipe)
+        //{
+        //    Dictionary<Connector, Reference> dictionary = new Dictionary<Connector, Reference>();
+        //    Connector[] connectors = GetConnectors(pipe);
+        //    Line line = GetGeometryLineOfPipe(activeView, pipe);
+        //    foreach (Connector connector in connectors)
+        //    {
+        //        for (int i = 0; i < 2; i++)
+        //        {
+        //            if (line.GetEndPoint(i).IsAlmostEqualTo(connector.Origin))
+        //            {
+        //                dictionary.Add(connector, line.GetEndPointReference(i));
+        //                break;
+        //            }
+        //        }
+        //    }
+        //    return dictionary;
+        //}
+        //public static Dictionary<Connector, Reference> GetConnectorReferencesOfBend(View activeView, Pipe pipe)
+        //{
+        //    Dictionary<Connector, Reference> dictionary = new Dictionary<Connector, Reference>();
+        //    Connector[] connectors = GetConnectors(pipe);
+        //    Line line = GetGeometryLineOfPipe(activeView, pipe);
+        //    foreach (Connector connector in connectors)
+        //    {
+        //        for (int i = 0; i < 2; i++)
+        //        {
+        //            if (line.GetEndPoint(i).IsAlmostEqualTo(connector.Origin))
+        //            {
+        //                dictionary.Add(connector, line.GetEndPointReference(i));
+        //                break;
+        //            }
+        //        }
+        //    }
+        //    return dictionary;
+        //}
+
+        //public static Element[] GetConnectedElements(FamilyInstance elem)
+        //{
+        //    Connector[] connectors = GetConnectors(elem);
+        //    List<Element> connected = new List<Element>();
+        //    foreach(Connector connector in connectors)
+        //    {
+        //        Connector other = TryGetConnected(connector);
+        //        if (other == null) continue;
+        //        if (other.Owner == null) continue;
+        //        if (!other.Owner.IsValidObject) continue;
                 
-                connected.Add(other.Owner);
-            }
-            return connected.ToArray();
-        }
+        //        connected.Add(other.Owner);
+        //    }
+        //    return connected.ToArray();
+        //}
         public static Element[] GetConnectedElements(Connector[] connectors)
         {
             List<Element> connected = new List<Element>();
@@ -702,15 +791,9 @@ namespace CarsonsAddins
 
             return faces.ToArray();
         }
-        public static Line GetGeometryLineOfPipe(View activeView, Element element)
+        public static Line GetGeometryLineOfPipe(View activeView, Pipe pipe)
         {
-            GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
-            foreach (GeometryObject go in geometry)
-            {
-                if (go is Line) return (go as Line);
-            }
-
-            return null;
+            return pipe.get_Geometry(GetGeometryOptions(activeView)).OfType<Line>().Where(line => line.Id.Equals(0)).FirstOrDefault();
         }
         public static Reference[] GetEndPointReferences(Line line)
         {
@@ -993,12 +1076,12 @@ namespace CarsonsAddins
         public static XYZ GetConnectorManagerCenter(ConnectorManager cm)
         {
             XYZ origin = XYZ.Zero;
-            List<Connector> connectors = GetConnectors(cm);
+            Connector[] connectors = GetConnectors(cm);
             foreach (Connector con in connectors)
             {
                 origin += con.Origin;
             }
-            origin /= connectors.Count;
+            origin /= connectors.Length;
             return origin;
         }
     }
