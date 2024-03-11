@@ -50,12 +50,12 @@ namespace CarsonsAddins
         }
         public void RegisterUpdater(AddInId addinId)
         {
-            updater = new PipingLCUpdater(addinId);
+            //updater = new PipingLCUpdater(addinId);
         }
 
         public void UnregisterUpdater()
         {
-            updater.Unregister();
+            //updater.Unregister();
         }
         public void Init(UIDocument uidoc)
         {
