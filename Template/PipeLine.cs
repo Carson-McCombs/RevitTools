@@ -147,7 +147,7 @@ namespace CarsonsAddins
         }
         private static XYZ Lerp(XYZ start, XYZ end, double amount)
         {
-            return end + (end - start) * amount;
+            return start + (end - start) * amount;
         }
         private static Reference GetCenterReference(ElementId[] validStyleIds, Element element)
         {
@@ -183,7 +183,8 @@ namespace CarsonsAddins
                 break;
             }
             if (position == null) return null;
-            return element.get_Geometry(Util.GetGeometryOptions()).OfType<PlanarFace>().Where(f => f.Origin.IsAlmostEqualTo(position)).FirstOrDefault().Reference;
+            PlanarFace face = element.get_Geometry(Util.GetGeometryOptions()).OfType<PlanarFace>().Where(f => f.Origin.IsAlmostEqualTo(position)).FirstOrDefault();
+            return face.Reference;
             
         }
         private static Line CreateSecondaryDimensionLine(View view, DimensionType secondaryDimensionType, Line elementLine, Line primaryDimensionLine)
@@ -194,7 +195,8 @@ namespace CarsonsAddins
             double offset = (textSize + 3 * textOffset) * view.Scale;
             
             IntersectionResult result = primaryDimensionLine.Project(elementLine.Origin);
-            return Line.CreateUnbound(Lerp(result.XYZPoint, elementLine.Origin, offset / result.Distance), primaryDimensionLine.Direction);
+            double percent = offset / result.Distance;
+            return Line.CreateUnbound(Lerp(result.XYZPoint, elementLine.Origin, percent), primaryDimensionLine.Direction);
         }
 
         private static Reference GetEndReference(ElementId[] validStyleIds, Element element)
