@@ -25,7 +25,7 @@ namespace CarsonsAddins
         public const bool IsWIP = false;
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("DimensionPipeLineCommand_WIP", "Dimensions Pipe Line (WIP)", assembly.Location, "CarsonsAddins.DimensionPipeLineCommand");
+            PushButtonData pushButtonData = new PushButtonData("DimensionPipeLineCommand", "Dimensions Pipe Line", assembly.Location, "CarsonsAddins.DimensionPipeLineCommand");
             pushButtonData.ToolTip = "Gets the dimensions of all elements in pipe line.";
             return pushButtonData;
         }
