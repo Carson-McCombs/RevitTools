@@ -87,7 +87,8 @@
 
 ***Dimension Text Window***
 
-![Uploading image.png…]()
+![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/cf724c42-e384-4252-8447-52ea7a0fb922)
+
 
 
 -Functions as the standard Dimension Window except you can apply your changes to multiple Dimensions and DimensionSegments. The only features not currently functioning is swapping between the "Use Actual Value", the "Replace With Text", and "Show Label in View" as well as the Segment Dimension Leader Visibility Dropdown.
