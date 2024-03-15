@@ -22,6 +22,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -48,7 +49,7 @@ namespace CarsonsAddins
         
         private ParameterTable table;
         private StaleReferenceUpdater updater;
-        
+        private string currentGroupName = "";
         public ParameterManagerDockablePane()
         {
             InitializeComponent();
@@ -172,10 +173,30 @@ namespace CarsonsAddins
             if (cvTasks == null) return;
             if (ParameterGroupComboBox.SelectedItem == null) return;
             cvTasks.GroupDescriptions.Clear();
-            cvTasks.GroupDescriptions.Add(new GroupParameterValueProperty("cells[" + ParameterGroupComboBox.SelectedItem.ToString() + "]"));
+            currentGroupName = ParameterGroupComboBox.SelectedItem.ToString();
+
+            cvTasks.GroupDescriptions.Add(new GroupParameterValueProperty("cells[" + currentGroupName + "]"));
         }
 
-        
+        private void DeleteParameter_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = sender as MenuItem;
+            if (menuItem == null)
+            {
+                TaskDialog.Show("Menu Item is Null","");
+                return;
+            } 
+            ContextMenu contextMenu = menuItem.Parent as ContextMenu;
+            if (menuItem == null)
+            {
+                TaskDialog.Show("Context Menu is Null", "");
+                return;
+            }
+            string parameterName = contextMenu.DataContext.ToString();
+            if (currentGroupName ==  parameterName) return;
+            table.RemoveParameter(parameterName);
+                
+        }
     }
 
     //  CURRENTLY UNUSED
@@ -352,7 +373,25 @@ namespace CarsonsAddins
             }
             dataGrid.Columns.Add(column);
         }
+        /// <summary>
+        /// Removes a parameter column from the datagrid.
+        /// </summary>
+        /// <param name="parameterName">Name of the Parameter that will be removed. Also is the header of the column that will be removed alongside.</param>
+        public void RemoveParameter(string parameterName)
+        {
+            if (!columnNames.Contains(parameterName)) return;
+            int parameterIndex = columnNames.IndexOf(parameterName);
+            dataGrid.Columns.Remove(dataGrid.Columns.Where(col => parameterName.Equals(col.Header.ToString())).First());
+            parameterDefinitions.RemoveAt(parameterIndex);
+            columnNames.RemoveAt(parameterIndex);
+            parameterReturnTypes.RemoveAt(parameterIndex);
+            parameterReadOnly.RemoveAt(parameterIndex);
+            foreach (ParameterRow row in rows)
+            {
+                row.RemoveParameter(parameterName);
+            }
 
+        }
         /// <summary>
         /// Recursive update element parameter values.
         /// </summary>
@@ -416,6 +455,11 @@ namespace CarsonsAddins
             Parameter parameter = element.get_Parameter(definition); 
             cells.Add(definition.Name, new ParameterCell(parameter));
             return parameter;
+        }
+        public void RemoveParameter(string parameterName)
+        {
+            if (!cells.ContainsKey(parameterName)) return;
+            cells.Remove(parameterName);
         }
         public string GetCellValue(string parameterName)
         {

@@ -45,8 +45,6 @@
                 <Label Name="count"  Grid.Column="2" Content="0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
             </Grid>
         </DataTemplate>
-
-
         <Style x:Key="DataGridGroupHeaderStyle" TargetType="GroupItem">
             <Setter Property="Margin" Value="0,0,0,5"/>
             <Setter Property="Template">
@@ -67,7 +65,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
     </Page.Resources>
 
     <Grid Background="WhiteSmoke">
@@ -91,7 +88,14 @@
             <Border Grid.Row="1" BorderBrush="DarkGray" BorderThickness="1">
                 <ScrollViewer  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <DataGrid Name="SelectionDataGrid" Background="White" AutoGenerateColumns="False" GridLinesVisibility="None" CanUserResizeRows="False">
-                        
+                        <DataGrid.Resources>
+                            <ContextMenu x:Key="DataGridColumnHeaderContextMenu">
+                                <MenuItem Header="Delete Parameter" Click="DeleteParameter_Click"/>
+                            </ContextMenu>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="ContextMenu" Value="{StaticResource DataGridColumnHeaderContextMenu}"/>
+                            </Style>
+                        </DataGrid.Resources>
                         <DataGrid.GroupStyle>
                             <GroupStyle ContainerStyle="{StaticResource DataGridGroupHeaderStyle}">
                                 <GroupStyle.Panel>
@@ -101,7 +105,6 @@
                                 </GroupStyle.Panel>
                             </GroupStyle>
                         </DataGrid.GroupStyle>
-                        
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="ElementId" Binding="{Binding Id, Mode=OneWay}" IsReadOnly="True" Width="64" CanUserResize="False" CanUserReorder="False"/>
                                 
