@@ -166,33 +166,58 @@ namespace CarsonsAddins
             }
             uidoc.Selection.SetElementIds(selectedIds);
         }
+        private ICollectionView GetDataGridCollectionView()
+        {
+            return CollectionViewSource.GetDefaultView(SelectionDataGrid.ItemsSource);
+        }
+        private void SetGroup(string groupName)
+        {
+            ICollectionView collectionView = GetDataGridCollectionView();
+            if (collectionView == null) return;
 
+            collectionView.GroupDescriptions.Clear();
+            currentGroupName = groupName;
+            collectionView.GroupDescriptions.Clear();
+            collectionView.GroupDescriptions.Add(new GroupParameterValueProperty("cells[" + groupName + "]"));
+        }
         private void AddGroupButton(object sender, RoutedEventArgs e)
         {
-            ICollectionView cvTasks = CollectionViewSource.GetDefaultView(SelectionDataGrid.ItemsSource);
-            if (cvTasks == null) return;
             if (ParameterGroupComboBox.SelectedItem == null) return;
-            cvTasks.GroupDescriptions.Clear();
-            currentGroupName = ParameterGroupComboBox.SelectedItem.ToString();
-
-            cvTasks.GroupDescriptions.Add(new GroupParameterValueProperty("cells[" + currentGroupName + "]"));
+            SetGroup(ParameterGroupComboBox.SelectedItem.ToString());
         }
 
-        private void DeleteParameter_Click(object sender, RoutedEventArgs e)
+        private string GetMenuItemColumnHeader(MenuItem menuItem)
         {
-            MenuItem menuItem = sender as MenuItem;
             if (menuItem == null)
             {
-                TaskDialog.Show("Menu Item is Null","");
-                return;
-            } 
+                TaskDialog.Show("Menu Item is Null", "");
+                return "";
+            }
             ContextMenu contextMenu = menuItem.Parent as ContextMenu;
             if (menuItem == null)
             {
                 TaskDialog.Show("Context Menu is Null", "");
-                return;
+                return "";
             }
-            string parameterName = contextMenu.DataContext.ToString();
+            return contextMenu.DataContext.ToString();
+        }
+
+        private void GroupBy_Click(object sender, RoutedEventArgs e)
+        {
+            string parameterName = GetMenuItemColumnHeader(sender as MenuItem);
+            SetGroup(parameterName);
+        }
+
+        private void ClearGroups_Click(object sender, RoutedEventArgs e)
+        {
+            ParameterGroupComboBox.SelectedItem = null;
+            ICollectionView collectionView = GetDataGridCollectionView();
+            if (collectionView == null) return;
+            collectionView.GroupDescriptions.Clear();
+        }
+        private void DeleteParameter_Click(object sender, RoutedEventArgs e)
+        {
+            string parameterName = GetMenuItemColumnHeader(sender as MenuItem);
             if (currentGroupName ==  parameterName) return;
             table.RemoveParameter(parameterName);
                 

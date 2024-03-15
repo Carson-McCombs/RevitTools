@@ -90,6 +90,8 @@
                     <DataGrid Name="SelectionDataGrid" Background="White" AutoGenerateColumns="False" GridLinesVisibility="None" CanUserResizeRows="False">
                         <DataGrid.Resources>
                             <ContextMenu x:Key="DataGridColumnHeaderContextMenu">
+                                <MenuItem Header="Group By" Click="GroupBy_Click"/>
+                                <MenuItem Header="Clear Groups" Click="ClearGroups_Click"/>
                                 <MenuItem Header="Delete Parameter" Click="DeleteParameter_Click"/>
                             </ContextMenu>
                             <Style TargetType="DataGridColumnHeader">
