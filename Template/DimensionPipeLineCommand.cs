@@ -77,11 +77,30 @@ namespace CarsonsAddins
                 }
                 PipeLine pipeLine = new PipeLine();
                 pipeLine.GetPipeLine(uidoc, pipe);
+                Plane plane = null;
+                if (doc.ActiveView.SketchPlane == null)
+                {
+                    plane = Plane.CreateByNormalAndOrigin(doc.ActiveView.ViewDirection, doc.ActiveView.Origin);
+
+                    SubTransaction sketchplaneTransaction = new SubTransaction(doc);
+                    sketchplaneTransaction.Start();
+                    SketchPlane sketchplane = SketchPlane.Create(doc, plane);
+                    doc.ActiveView.SketchPlane = sketchplane;
+                    
+                    sketchplaneTransaction.Commit();
+                }
+                else
+                {
+                    plane = doc.ActiveView.SketchPlane.GetPlane();
+                }
+                
 
                 XYZ dimensionPoint = uidoc.Selection.PickPoint(ObjectSnapTypes.Perpendicular, "Please select where you would like the dimensions to be placed.");
                 if (dimensionPoint == null) return Result.Cancelled;
-                pipeLine.CreateDimensionLinesFromReferences(doc, dimensionPoint, true);
+                pipeLine.CreateDimensionLinesFromReferences(doc, plane, dimensionPoint, true);
+                doc.ActiveView.HideActiveWorkPlane();
                 transaction.Commit();
+                
                 return Result.Succeeded;
             }
             catch (Exception ex)

@@ -238,12 +238,12 @@ namespace CarsonsAddins
         }
 
         //Below is an attempt at dimensioning Pipe Lines by retrieving the Geometry Objects of each piping element and compares their direction and endpoint positions to the connectors of their respective elements. Due to the current issues stated above, fixing the below function is put on pause.
-        public void CreateDimensionLinesFromReferences(Document doc, XYZ dimensionPoint, bool secondaryDimension) //can only be called after GetPipeLine is called
+        public void CreateDimensionLinesFromReferences(Document doc, Plane plane, XYZ dimensionPoint, bool secondaryDimension) //can only be called after GetPipeLine is called
         {
             if (elements == null) return;
             View activeView = doc.ActiveView;
             ElementId[] validStyleIds = GetCenterlineIds(doc);
-            Plane plane = Plane.CreateByNormalAndOrigin(activeView.ViewDirection, activeView.Origin);
+            
             XYZ pointA = ProjectPointOntoPlane(plane, GetOriginOfElement(elements[0]));
             XYZ pointB = ProjectPointOntoPlane(plane, GetOriginOfElement(elements[1]));
             Line elementLine = Line.CreateBound(pointA, pointB);
