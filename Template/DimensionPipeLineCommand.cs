@@ -86,7 +86,7 @@ namespace CarsonsAddins
                     sketchplaneTransaction.Start();
                     SketchPlane sketchplane = SketchPlane.Create(doc, plane);
                     doc.ActiveView.SketchPlane = sketchplane;
-                    
+                    doc.ActiveView.HideElements(new List<ElementId>(){sketchplane.Id});
                     sketchplaneTransaction.Commit();
                 }
                 else
@@ -98,7 +98,7 @@ namespace CarsonsAddins
                 XYZ dimensionPoint = uidoc.Selection.PickPoint(ObjectSnapTypes.Perpendicular, "Please select where you would like the dimensions to be placed.");
                 if (dimensionPoint == null) return Result.Cancelled;
                 pipeLine.CreateDimensionLinesFromReferences(doc, plane, dimensionPoint, true);
-                doc.ActiveView.HideActiveWorkPlane();
+                
                 transaction.Commit();
                 
                 return Result.Succeeded;
