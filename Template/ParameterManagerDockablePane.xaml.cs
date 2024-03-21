@@ -54,7 +54,6 @@ namespace CarsonsAddins
         {
             InitializeComponent();
             table = new ParameterTable(SelectionDataGrid);
-            ParameterGroupComboBox.ItemsSource = table.columnNames;
         }
         
         public void Init(UIDocument uidoc)
@@ -87,7 +86,6 @@ namespace CarsonsAddins
         {
             if (uidoc == null) return;
             table.Clear();
-            ParameterGroupComboBox.SelectedItem = null;
             ParameterNameControl.Text = "";
             List<ElementId> elementIds = uidoc.Selection.GetElementIds() as List<ElementId>;
             if (elementIds.Count == 0) return;
@@ -180,11 +178,6 @@ namespace CarsonsAddins
             collectionView.GroupDescriptions.Clear();
             collectionView.GroupDescriptions.Add(new GroupParameterValueProperty("cells[" + groupName + "]"));
         }
-        private void AddGroupButton(object sender, RoutedEventArgs e)
-        {
-            if (ParameterGroupComboBox.SelectedItem == null) return;
-            SetGroup(ParameterGroupComboBox.SelectedItem.ToString());
-        }
 
         private string GetMenuItemColumnHeader(MenuItem menuItem)
         {
@@ -210,10 +203,10 @@ namespace CarsonsAddins
 
         private void ClearGroups_Click(object sender, RoutedEventArgs e)
         {
-            ParameterGroupComboBox.SelectedItem = null;
             ICollectionView collectionView = GetDataGridCollectionView();
             if (collectionView == null) return;
             collectionView.GroupDescriptions.Clear();
+            currentGroupName = "";
         }
         private void DeleteParameter_Click(object sender, RoutedEventArgs e)
         {

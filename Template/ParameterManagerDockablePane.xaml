@@ -136,9 +136,7 @@
             <Button Content="Add Parameter" Click="AddParameterButton"  Style="{StaticResource CheckButtonsStyle}"/>
             <TextBox Name="ParameterNameControl" Text="" IsReadOnly="false"/>
             <Line/>
-            <Button Content="Add Group" Click="AddGroupButton"  Style="{StaticResource CheckButtonsStyle}"/>
-            <ComboBox Name="ParameterGroupComboBox"/>
-            
+
         </UniformGrid>
         <Button  Grid.Column="1" VerticalAlignment="Bottom" Content="Apply" Click="ApplyButtonPress" Style="{StaticResource FilterButtonsStyle}"/>
     </Grid>

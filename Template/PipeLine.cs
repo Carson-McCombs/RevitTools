@@ -94,17 +94,7 @@ namespace CarsonsAddins
             return centerlineStyleIds.ToArray();
         }
 
-        /// <summary>
-        /// Projects a 3D point onto a plane. Meant to be used for projecting dimensioning reference points onto the active view's plane Made by @jeremytammik on https://thebuildingcoder.typepad.com/blog/2014/09/planes-projections-and-picking-points.html
-        /// </summary>
-        /// <param name="plane">Plane to be projected onto.</param>
-        /// <param name="point">Point not on plane.</param>
-        /// <returns>Projected point on plane.</returns>
-        private static XYZ ProjectPointOntoPlane(Plane plane, XYZ point)
-        {
-            double distance = plane.Normal.DotProduct(point);
-            return point - distance * plane.Normal;
-        }
+        
 
         private static XYZ GetOriginOfElement(Element element)
         {
@@ -141,7 +131,7 @@ namespace CarsonsAddins
         }
         private static Line CreateDimensionLine(Plane plane, Line elementLine, XYZ dimensionPoint)
         {
-            Line dimensionLine = Line.CreateUnbound(ProjectPointOntoPlane(plane, dimensionPoint), elementLine.Direction);
+            Line dimensionLine = Line.CreateUnbound(Util.ProjectPointOntoPlane(plane, dimensionPoint), elementLine.Direction);
             dimensionLine.MakeUnbound();
             return dimensionLine;
         }
@@ -244,8 +234,8 @@ namespace CarsonsAddins
             View activeView = doc.ActiveView;
             ElementId[] validStyleIds = GetCenterlineIds(doc);
             
-            XYZ pointA = ProjectPointOntoPlane(plane, GetOriginOfElement(elements[0]));
-            XYZ pointB = ProjectPointOntoPlane(plane, GetOriginOfElement(elements[1]));
+            XYZ pointA = Util.ProjectPointOntoPlane(plane, GetOriginOfElement(elements[0]));
+            XYZ pointB = Util.ProjectPointOntoPlane(plane, GetOriginOfElement(elements[1]));
             Line elementLine = Line.CreateBound(pointA, pointB);
             DimensionStyles dimensionStyles = GetDimensionStyles(doc);
 
@@ -275,7 +265,7 @@ namespace CarsonsAddins
                     else if (Util.IsPipeBend(element))
                     {
                         FamilyInstance connected = (i == 0) ? elements[1] as FamilyInstance : elements[elements.Count - 2] as FamilyInstance;
-                        DimensionPipeBend(doc, dimensionStyles.secondaryFittingDimensionType, validStyleIds,  secondaryDimensionLine, element as FamilyInstance, connected);
+                        DimensionPipeBend(doc, dimensionStyles.secondaryFittingDimensionType, validStyleIds, plane,  secondaryDimensionLine, element as FamilyInstance, connected);
                     }
 
                     else if (Util.IsPipeAccessory(element))
@@ -305,7 +295,7 @@ namespace CarsonsAddins
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
 
-        private static Dimension DimensionPipeBend(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
+        private static Dimension DimensionPipeBend(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Plane plane, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
         {
             Line[] symbolLines = Util.GetSymbolGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
             Line[] instanceLines = Util.GetInstanceGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
@@ -317,7 +307,6 @@ namespace CarsonsAddins
             ReferenceArray referenceArray = new ReferenceArray();
             referenceArray.Append(symbolLine.GetEndPointReference(0));
             referenceArray.Append(symbolLine.GetEndPointReference(1));
-
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
 
@@ -339,23 +328,7 @@ namespace CarsonsAddins
 
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
-        //private static Dimension DimensionPipeAccessory(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Line dimensionLine, FamilyInstance familyInstance)
-        //{
-        //    ReferenceArray referenceArray = new ReferenceArray();
-        //    XYZ[] connectorOrigins = Util.GetConnectors(familyInstance).Select(connector => connector.Origin).ToArray();
-        //    PlanarFace[] instanceFaces = Util.GetGeometryObjectFromInstanceGeometry<PlanarFace>(Util.GetGeometryOptions(), familyInstance);
-        //    List<int> instanceIds = new List<int>();
-        //    foreach (PlanarFace face in instanceFaces)
-        //    {
-        //        if (ContainsValueAlmostEqualTo(connectorOrigins, face.Origin)) instanceIds.Add(face.Id);
-        //    }
-        //    PlanarFace[] symbolFaces = Util.GetSymbolGeometryObjectFromId<PlanarFace>(Util.GetGeometryOptions(), familyInstance, instanceIds.ToArray());
-        //    foreach (PlanarFace face in symbolFaces)
-        //    {
-        //        referenceArray.Append(face.Reference);
-        //    }
-        //    return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
-        //}
+        
 
         #endregion
 

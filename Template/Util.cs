@@ -526,6 +526,37 @@ namespace CarsonsAddins
             }
             return (null,null);
         }
+        public static Reference GetPseudoReferenceOfPoint(Options geometryOptions, Plane plane, Element element, XYZ point)
+        {
+            XYZ projectedOrigin = ProjectPointOntoPlane(plane, point);
+            if (projectedOrigin == null) return null;
+            PlanarFace[] instancePlanarFaces = GetGeometryObjectFromInstanceGeometry<PlanarFace>(geometryOptions, element);
+            Line[] instanceLines = GetGeometryObjectFromInstanceGeometry<Line>(geometryOptions, element);
+            Lookup<int, PlanarFace> symbolPlanarFacesLookup = GetGeometryObjectFromSymbolGeometry<PlanarFace>(geometryOptions, element).ToLookup(planarFace => planarFace.Id) as Lookup<int, PlanarFace>;
+            Lookup<int, Line> symbolLineLookup = GetGeometryObjectFromSymbolGeometry<Line>(geometryOptions, element).ToLookup(line => line.Id) as Lookup<int, Line>;
+            PlanarFace instanceFace = instancePlanarFaces.Where(planarFace => ProjectPointOntoPlane(plane, planarFace.Origin).IsAlmostEqualTo(projectedOrigin)).FirstOrDefault();
+            if (instanceFace != default(PlanarFace)) return symbolPlanarFacesLookup[instanceFace.Id].FirstOrDefault().Reference;
+            foreach (Line line in instanceLines)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    if (ProjectPointOntoPlane(plane, line.GetEndPoint(i)).IsAlmostEqualTo(projectedOrigin)) return symbolLineLookup[line.Id].FirstOrDefault().GetEndPointReference(i);
+
+                }
+            }
+            return null;
+        }
+        public static Reference GetPseudoReferenceOfConnector(Options geometryOptions, Plane plane, Connector connector)
+        {
+            XYZ projectedOrigin = ProjectPointOntoPlane(plane, connector.Origin);
+            if (projectedOrigin == null) return null;
+            PlanarFace[] instancePlanarFaces = GetGeometryObjectFromInstanceGeometry<PlanarFace>(geometryOptions, connector.Owner);
+            Lookup<int, PlanarFace> symbolPlanarFacesLookup = GetGeometryObjectFromSymbolGeometry<PlanarFace>(geometryOptions, connector.Owner).ToLookup(planarFace => planarFace.Id) as Lookup<int, PlanarFace>;
+            PlanarFace instanceConnectorFace = instancePlanarFaces.Where(planarFace => ProjectPointOntoPlane( plane, planarFace.Origin).IsAlmostEqualTo(projectedOrigin)).FirstOrDefault();
+            if (instanceConnectorFace == default(PlanarFace)) return null;
+            Reference referenceConnectorFace = symbolPlanarFacesLookup[instanceConnectorFace.Id].FirstOrDefault().Reference;
+            return referenceConnectorFace;
+        }
         public static GeometryObject[] GetGeometryLinesOfBend(View activeView, Element element, ElementId validStyleId)
         {
             if (ElementId.InvalidElementId.Equals(validStyleId)) return null;
@@ -649,10 +680,10 @@ namespace CarsonsAddins
 
         //public static Dictionary<Connector, Reference> GetConnectorReferences(View activeView, Element element)
         //{
-            
-            
+
+
         //    if (IsPipe(element)) return GetConnectorReferences(activeView, element as Pipe);
-            
+
         //    return null;
 
         //}
@@ -704,11 +735,24 @@ namespace CarsonsAddins
         //        if (other == null) continue;
         //        if (other.Owner == null) continue;
         //        if (!other.Owner.IsValidObject) continue;
-                
+
         //        connected.Add(other.Owner);
         //    }
         //    return connected.ToArray();
         //}
+
+        /// <summary>
+        /// Projects a 3D point onto a plane. Meant to be used for projecting dimensioning reference points onto the active view's plane Made by @jeremytammik on https://thebuildingcoder.typepad.com/blog/2014/09/planes-projections-and-picking-points.html
+        /// </summary>
+        /// <param name="plane">Plane to be projected onto.</param>
+        /// <param name="point">Point not on plane.</param>
+        /// <returns>Projected point on plane.</returns>
+        public static XYZ ProjectPointOntoPlane(Plane plane, XYZ point)
+        {
+            double distance = plane.Normal.DotProduct(point);
+            return point - distance * plane.Normal;
+        }
+
         public static Element[] GetConnectedElements(Connector[] connectors)
         {
             List<Element> connected = new List<Element>();
