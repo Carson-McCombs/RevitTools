@@ -173,7 +173,6 @@ namespace CarsonsAddins
             ICollectionView collectionView = GetDataGridCollectionView();
             if (collectionView == null) return;
 
-            collectionView.GroupDescriptions.Clear();
             currentGroupName = groupName;
             collectionView.GroupDescriptions.Clear();
             collectionView.GroupDescriptions.Add(new GroupParameterValueProperty("cells[" + groupName + "]"));
