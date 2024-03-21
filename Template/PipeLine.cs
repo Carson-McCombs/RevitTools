@@ -301,6 +301,22 @@ namespace CarsonsAddins
             Line[] instanceLines = Util.GetInstanceGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
 
             Connector connector = Util.TryGetConnection(familyInstance, connected);
+            Reference connectorReference = Util.GetPseudoReferenceOfConnector(Util.GetGeometryOptions(), plane, connector);
+            if (connectorReference == null) connectorReference =  Util.GetPseudoReferenceOfConnector(Util.GetGeometryOptions(doc.ActiveView), plane, connector);
+            if (connectorReference == null) return null;
+            Reference centerReference = GetCenterReference(validStyleIds, familyInstance);
+            if (centerReference == null) return null;
+            ReferenceArray referenceArray = new ReferenceArray();
+            referenceArray.Append(centerReference);
+            referenceArray.Append(connectorReference);
+            return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
+        }
+        private static Dimension DimensionPipeBendB(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Plane plane, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
+        {
+            Line[] symbolLines = Util.GetSymbolGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
+            Line[] instanceLines = Util.GetInstanceGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
+
+            Connector connector = Util.TryGetConnection(familyInstance, connected);
             Line instanceLine = ChooseGeometryLineByConnectorPosition(connector.Origin, instanceLines);
             Line symbolLine = GetLineWithId(instanceLine.Id, symbolLines);
 
@@ -308,15 +324,6 @@ namespace CarsonsAddins
             referenceArray.Append(symbolLine.GetEndPointReference(0));
             referenceArray.Append(symbolLine.GetEndPointReference(1));
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
-        }
-
-        private static bool ContainsValueAlmostEqualTo(XYZ[] ary,  XYZ value)
-        {
-            foreach (XYZ xyz in ary)
-            {
-                if (value.IsAlmostEqualTo(xyz)) return true;
-            }
-            return false;
         }
         private static Dimension DimensionPipeAccessory(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Line dimensionLine, FamilyInstance familyInstance)
         {

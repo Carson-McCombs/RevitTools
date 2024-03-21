@@ -90,6 +90,7 @@
     <Compile Include="SelectDimensionsIndividuallyCommand.cs" />
     <Compile Include="SetDimensionTextEventHandler.cs" />
     <Compile Include="StaleReferenceUpdater.cs" />
+    <Compile Include="TestGetDimensionPointsCommand.cs" />
     <Compile Include="ToggleableTextBox.xaml.cs">
       <DependentUpon>ToggleableTextBox.xaml</DependentUpon>
     </Compile>
