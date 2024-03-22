@@ -311,20 +311,21 @@ namespace CarsonsAddins
             referenceArray.Append(connectorReference);
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
-        private static Dimension DimensionPipeBendB(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Plane plane, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
-        {
-            Line[] symbolLines = Util.GetSymbolGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
-            Line[] instanceLines = Util.GetInstanceGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
+        //This methods uses solely references lines
+        //private static Dimension DimensionPipeBendC(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Plane plane, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
+        //{
+        //    Line[] symbolLines = Util.GetSymbolGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
+        //    Line[] instanceLines = Util.GetInstanceGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), familyInstance, validStyleIds);
 
-            Connector connector = Util.TryGetConnection(familyInstance, connected);
-            Line instanceLine = ChooseGeometryLineByConnectorPosition(connector.Origin, instanceLines);
-            Line symbolLine = GetLineWithId(instanceLine.Id, symbolLines);
+        //    Connector connector = Util.TryGetConnection(familyInstance, connected);
+        //    Line instanceLine = ChooseGeometryLineByConnectorPosition(connector.Origin, instanceLines);
+        //    Line symbolLine = GetLineWithId(instanceLine.Id, symbolLines);
 
-            ReferenceArray referenceArray = new ReferenceArray();
-            referenceArray.Append(symbolLine.GetEndPointReference(0));
-            referenceArray.Append(symbolLine.GetEndPointReference(1));
-            return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
-        }
+        //    ReferenceArray referenceArray = new ReferenceArray();
+        //    referenceArray.Append(symbolLine.GetEndPointReference(0));
+        //    referenceArray.Append(symbolLine.GetEndPointReference(1));
+        //    return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
+        //}
         private static Dimension DimensionPipeAccessory(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Line dimensionLine, FamilyInstance familyInstance)
         {
             ReferenceArray referenceArray = new ReferenceArray();

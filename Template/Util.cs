@@ -44,12 +44,12 @@ namespace CarsonsAddins
         /// <param name="assembly">The Addin Assembly</param>
         /// <param name="imagePath">The filepath the image is located</param>
         /// <returns>The image as a Bitmap</returns>
-        public static BitmapSource GetImage(Assembly assembly, string imagePath)
+        public static System.Windows.Media.Imaging.BitmapSource GetImage(Assembly assembly, string imagePath)
         {
             try
             {
                 Stream s = assembly.GetManifestResourceStream(imagePath);
-                return BitmapFrame.Create(s);
+                return System.Windows.Media.Imaging.BitmapFrame.Create(s);
             }
             catch
             {
@@ -787,9 +787,12 @@ namespace CarsonsAddins
             if (geometryInstance == null) return new XYZWithReference[0];
             List<XYZWithReference> geometryObjectWithReferences = new List<XYZWithReference>();
             IdWithXYZ[] idsWithXYZs = IdWithXYZ.BreakdownGeometryObjects(BreakdownSolidsIntoDimensionableGeometryObjects(geometryInstance.GetInstanceGeometry()));
-            IdWithReference[] idsWithReferences = IdWithReference.BreakdownGeometryObjects(BreakdownSolidsIntoDimensionableGeometryObjects(geometryInstance.GetSymbolGeometry()));
+            Lookup<int,IdWithReference> idsWithReferences = IdWithReference.BreakdownGeometryObjects(BreakdownSolidsIntoDimensionableGeometryObjects(geometryInstance.GetSymbolGeometry()))
+                .ToLookup<IdWithReference, int>(idWithReference => idWithReference.id) as Lookup<int, IdWithReference>;
 
-            XYZWithReference[] xyzsWithReferences = idsWithXYZs.Zip<IdWithXYZ, IdWithReference, XYZWithReference>(idsWithReferences, )
+            XYZWithReference[] xyzsWithReferences = idsWithXYZs.Select(xyzWithRef => new XYZWithReference(xyzWithRef.xyz, idsWithReferences[xyzWithRef.id]
+                .Where(idWithRef => xyzWithRef.secondaryId == idWithRef.secondaryId).FirstOrDefault().reference)).ToArray();
+            return xyzsWithReferences;
         }
         
         public GeometryObject[] BreakdownSolidsIntoDimensionableGeometryObjects(GeometryElement geometryElement)
