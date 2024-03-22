@@ -670,14 +670,19 @@ namespace CarsonsAddins
             foreach (GeometryObject goA in geometry)
             {
                 if (validStyleIds.Contains(goA.GraphicsStyleId) && goA is T goTA) geometryObjects.Add(goTA);
-                if (!(goA is GeometryInstance)) continue;
-                GeometryInstance instance = goA as GeometryInstance;
-                foreach (GeometryObject goB in instance.SymbolGeometry)
+                else if (goA is Solid solid) geometryObjects.AddRange(GetGeometryObjectsFromSolid<T>(solid));
+
+                else if (goA is GeometryInstance)
                 {
-                    
-                    if (!validStyleIds.Contains(goB.GraphicsStyleId)) continue;
-                    if (goB is T goTB) geometryObjects.Add(goTB);
+                    GeometryInstance instance = goA as GeometryInstance;
+                    foreach (GeometryObject goB in instance.SymbolGeometry)
+                    {
+
+                        if (!validStyleIds.Contains(goB.GraphicsStyleId)) continue;
+                        if (goB is T goTB) geometryObjects.Add(goTB);
+                    }
                 }
+                
 
             }
             return geometryObjects.ToArray();
@@ -692,14 +697,18 @@ namespace CarsonsAddins
             foreach (GeometryObject goA in geometry)
             {
                 if (validStyleIds.Contains(goA.GraphicsStyleId) && goA is T goTA) geometryObjects.Add(goTA);
-                if (!(goA is GeometryInstance)) continue;
-                GeometryInstance instance = goA as GeometryInstance;
-                foreach (GeometryObject goB in instance.GetInstanceGeometry())
+                if (goA is Solid solid) geometryObjects.AddRange(GetGeometryObjectsFromSolid<T>(solid));
+                if (goA is GeometryInstance)
                 {
+                    GeometryInstance instance = goA as GeometryInstance;
+                    foreach (GeometryObject goB in instance.GetInstanceGeometry())
+                    {
 
-                    if (!validStyleIds.Contains(goB.GraphicsStyleId)) continue;
-                    if (goB is T goTB) geometryObjects.Add(goTB);
+                        if (!validStyleIds.Contains(goB.GraphicsStyleId)) continue;
+                        if (goB is T goTB) geometryObjects.Add(goTB);
+                    }
                 }
+                
 
             }
             return geometryObjects.ToArray();
@@ -1281,7 +1290,7 @@ namespace CarsonsAddins
         public static bool IsLinearElement(Element element)
         {
             if (element == null) return false;
-            if (IsPipe(element)) return true;
+            if (IsPipe(element) || IsPipeFlange(element)) return true;
             FamilyInstance familyInstance = element as FamilyInstance;
             if (familyInstance == null) return false;
             XYZ[] connectorOrigins = GetConnectors(familyInstance).Select(connector => connector.Origin).ToArray();
@@ -1289,6 +1298,7 @@ namespace CarsonsAddins
             if (connectorOrigins.Length != 2) return false;
             XYZ origin = (element.Location as LocationPoint).Point;
             Line line = Line.CreateBound(connectorOrigins[0], connectorOrigins[1]);
+            line.MakeUnbound();
             IntersectionResult intersectionResult = line.Project(origin);
             return (origin.IsAlmostEqualTo(intersectionResult.XYZPoint)) ;
         }

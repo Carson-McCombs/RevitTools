@@ -139,7 +139,7 @@ namespace CarsonsAddins
         {
             return start + (end - start) * amount;
         }
-        private static Reference GetCenterReference(ElementId[] validStyleIds, Element element)
+        private static Reference GetCenterReference(View activeView, ElementId[] validStyleIds, Element element)
         {
             Line[] instanceLines = Util.GetInstanceGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), element, validStyleIds);
             Line[] symbolLines = Util.GetSymbolGeometryObjectsWithStyleIds<Line>(Util.GetGeometryOptions(), element, validStyleIds);
@@ -194,7 +194,7 @@ namespace CarsonsAddins
         private static Reference GetEndReference(View activeView, ElementId[] validStyleIds, Element element)
         {
             if (Util.IsPipe(element)) return GetPipeEndReference(activeView, element as Pipe);
-            return GetCenterReference(validStyleIds, element);
+            return GetCenterReference(activeView, validStyleIds, element);
         }
 
         private struct DimensionStyles
@@ -243,16 +243,19 @@ namespace CarsonsAddins
             if (elements == null) return;
             View activeView = doc.ActiveView;
             ElementId[] validStyleIds = GetCenterlineIds(doc);
-            
-            XYZ pointA = Util.ProjectPointOntoPlane(plane, GetOriginOfElement(elements[0]));
-            XYZ pointB = Util.ProjectPointOntoPlane(plane, GetOriginOfElement(elements[1]));
+            XYZ pointA = GetOriginOfElement(elements[0]);
+            XYZ pointB = GetOriginOfElement(elements[1]);
             Line elementLine = Line.CreateBound(pointA, pointB);
+            XYZ projectedPointA = Util.ProjectPointOntoPlane(plane, pointA);
+            XYZ projectedPointB = Util.ProjectPointOntoPlane(plane, pointB);
+            Line projectedElementLine = Line.CreateBound(projectedPointA, projectedPointB);
+            if (!elementLine.Direction.IsAlmostEqualTo(projectedElementLine.Direction)) secondaryDimension = false;
             DimensionStyles dimensionStyles = GetDimensionStyles(doc);
 
-            Line primaryDimensionLine = CreateDimensionLine(plane, elementLine, dimensionPoint);
+            Line primaryDimensionLine = CreateDimensionLine(plane, projectedElementLine, dimensionPoint);
 
             
-            Line secondaryDimensionLine = CreateSecondaryDimensionLine(doc.ActiveView, dimensionStyles.secondaryPipeDimensionType, elementLine, primaryDimensionLine);
+            Line secondaryDimensionLine = CreateSecondaryDimensionLine(doc.ActiveView, dimensionStyles.secondaryPipeDimensionType, projectedElementLine, primaryDimensionLine);
 
             ReferenceArray primaryReferenceArray = new ReferenceArray();
             primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, elements[0]));
@@ -365,7 +368,7 @@ namespace CarsonsAddins
             Reference connectorReference = Util.GetPseudoReferenceOfConnector(Util.GetGeometryOptions(), plane, connector);
             if (connectorReference == null) connectorReference = Util.GetPseudoReferenceOfConnector(Util.GetGeometryOptions(doc.ActiveView), plane, connector);
             if (connectorReference == null) return null;
-            Reference centerReference = GetCenterReference(validStyleIds, familyInstance);
+            Reference centerReference = GetCenterReference(doc.ActiveView, validStyleIds, familyInstance);
             if (centerReference == null) return null;
             ReferenceArray referenceArray = new ReferenceArray();
             referenceArray.Append(centerReference);
