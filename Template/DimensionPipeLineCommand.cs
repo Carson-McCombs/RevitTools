@@ -94,8 +94,8 @@ namespace CarsonsAddins
                     plane = doc.ActiveView.SketchPlane.GetPlane();
                 }
                 
-
-                XYZ dimensionPoint = uidoc.Selection.PickPoint(ObjectSnapTypes.Perpendicular, "Please select where you would like the dimensions to be placed.");
+                ObjectSnapTypes objectSnapTypes = ObjectSnapTypes.Endpoints | ObjectSnapTypes.Nearest | ObjectSnapTypes.Intersections | ObjectSnapTypes.Perpendicular | ObjectSnapTypes.Points;
+                XYZ dimensionPoint = uidoc.Selection.PickPoint(objectSnapTypes, "Please select where you would like the dimensions to be placed.");
                 if (dimensionPoint == null) return Result.Cancelled;
                 pipeLine.CreateDimensionLinesFromReferences(doc, plane, dimensionPoint, true);
                 
