@@ -172,7 +172,7 @@ namespace CarsonsAddins
         {
             if (element == null) return false;
             if (!(element is FamilyInstance)) return false;
-            if (!element.Category.Equals(BuiltInCategory.OST_PipeFitting)) return false;
+            if (!BuiltInCategory.OST_PipeFitting.Equals(element.Category.BuiltInCategory)) return false;
             return FlangePartTypes.Contains(GetPartType(element as FamilyInstance));
         }
 
@@ -435,6 +435,7 @@ namespace CarsonsAddins
             Options options = new Options();
             options.ComputeReferences = true;
             options.IncludeNonVisibleObjects = true;
+            options.DetailLevel = ViewDetailLevel.Fine;
             return options;
         }
         public static Options GetGeometryOptions(View activeView)
@@ -443,6 +444,7 @@ namespace CarsonsAddins
             options.ComputeReferences = true;
             options.IncludeNonVisibleObjects = true;
             options.View = activeView;
+
             return options;
         }
         public static T[] GetGeometryObjectsFromSolid<T>(Solid solid) where T : GeometryObject
@@ -1276,6 +1278,20 @@ namespace CarsonsAddins
             return pipe.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble();
             
         }
+        public static bool IsLinearElement(Element element)
+        {
+            if (element == null) return false;
+            if (IsPipe(element)) return true;
+            FamilyInstance familyInstance = element as FamilyInstance;
+            if (familyInstance == null) return false;
+            XYZ[] connectorOrigins = GetConnectors(familyInstance).Select(connector => connector.Origin).ToArray();
+            if (connectorOrigins == null) return false;
+            if (connectorOrigins.Length != 2) return false;
+            XYZ origin = (element.Location as LocationPoint).Point;
+            Line line = Line.CreateBound(connectorOrigins[0], connectorOrigins[1]);
+            IntersectionResult intersectionResult = line.Project(origin);
+            return (origin.IsAlmostEqualTo(intersectionResult.XYZPoint)) ;
+        }
 
         /// <summary>
         /// Returns the position of the ConnectorManager based on the average of all the Connector Elements' Origins. Not the same as the Element position / location.
@@ -1351,6 +1367,7 @@ namespace CarsonsAddins
         private bool allowOtherFittings = true;
 
         private bool allowAccessories = true;
+        private bool linearOnly = true;
         public SelectionFilter_PipingElements(bool allowPipes, bool allowFlanges, bool allowBends, bool allowOtherFittings, bool allowAccessories)
         {
             this.allowPipes = allowPipes;
@@ -1359,10 +1376,20 @@ namespace CarsonsAddins
             this.allowOtherFittings = allowOtherFittings;
             this.allowAccessories = allowAccessories;
         }
+        public SelectionFilter_PipingElements(bool allowPipes, bool allowFlanges, bool allowBends, bool allowOtherFittings, bool allowAccessories, bool linearOnly)
+        {
+            this.allowPipes = allowPipes;
+            this.allowFlanges = allowFlanges;
+            this.allowBends = allowBends;
+            this.allowOtherFittings = allowOtherFittings;
+            this.allowAccessories = allowAccessories;
+            this.linearOnly = linearOnly;
+        }
 
         public bool AllowElement(Element elem)
         {
             if (elem == null || elem.Category == null) return false;
+            if (linearOnly && ! Util.IsLinearElement(elem)) return false;
             if (allowPipes && Util.IsPipe(elem)) { return true; }
             if (allowAccessories && Util.IsPipeAccessory(elem)) return true;
             if (elem.Category.BuiltInCategory.Equals(BuiltInCategory.OST_PipeFitting)) 
