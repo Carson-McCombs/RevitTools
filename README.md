@@ -53,7 +53,7 @@
 
 ![Smart Flip](https://github.com/Carson-McCombs/RevitTools/assets/130939367/e886694a-0e40-4f93-9e51-52ecf9c03f5a)
 
-***Quick Dimension Tool:***
+***( REPLACED WITH DIMENSION TEXT WINDOW ) Question Mark Dimension Tool:***
 
 **Issue:** To replace a single dimensions text with a question mark takes you double clicking the dimension, clicking the option to replace the text, then typing in your question mark, and pressing "Apply". -> takes about 5 actions, which is fine unless you need to do multiple.
 
