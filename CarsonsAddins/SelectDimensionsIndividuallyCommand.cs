@@ -11,6 +11,8 @@ using System.Windows.Controls;
 
 namespace CarsonsAddins
 {
+    [Transaction(TransactionMode.Manual)]
+    [Regeneration(RegenerationOption.Manual)]
     public class SelectIndividualDimensionsCommand : IExternalCommand
     {
         private List<(Dimension, DimensionSegment)> dimensionsAndSegments = new List<(Dimension, DimensionSegment)>();
