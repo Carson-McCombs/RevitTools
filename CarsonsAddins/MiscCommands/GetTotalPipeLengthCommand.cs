@@ -34,19 +34,16 @@ namespace CarsonsAddins
         }
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            return Execute(commandData.Application);
-        }
-        public Result Execute(UIApplication uiapp)
-        {
+            UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
             {
-                TaskDialog.Show("Question Mark Dimensions Command", "Command should not be used within a family document.");
+                message = "Command should not be used within a family document.";
                 return Result.Failed;
             }
             Transaction transaction = new Transaction(doc);
-            
+
             try
             {
                 transaction.Start("GetTotalPipeLengthCommand");
@@ -59,7 +56,7 @@ namespace CarsonsAddins
                     if (!(doc.GetElement(elementId) is Pipe pipe)) continue;
                     double? length = (pipe.Location as LocationCurve).Curve.Length;
                     if (length == null) continue;
-                    count ++;
+                    count++;
                     totalLength += (double)length;
                 }
                 int totalFeet = (int)totalLength;
@@ -73,12 +70,14 @@ namespace CarsonsAddins
                 return Result.Succeeded;
 
             }
-            catch
+            catch (Exception ex) 
             {
                 transaction.RollBack();
+                message = ex.Message;
                 return Result.Failed;
             }
         }
+
 
         
     }

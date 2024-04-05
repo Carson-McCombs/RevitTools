@@ -31,15 +31,12 @@ namespace CarsonsAddins
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            return Execute(commandData.Application);
-        }
-        public Result Execute(UIApplication uiapp)
-        {
+            UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
             {
-                TaskDialog.Show("Select Pipeline Command", "Command should not be used within a family document.");
+                message = "Command should not be used within a family document.";
                 return Result.Failed;
             }
             Transaction transaction = new Transaction(doc);
@@ -53,29 +50,23 @@ namespace CarsonsAddins
                     return Result.Cancelled;
                 }
                 PipeLine pipeLine = new PipeLine();
-                List<Element> elements = pipeLine.GetPipeLine(uidoc, pipe);
-                List<ElementId> elementIds = new List<ElementId>();
-                foreach (Element element in elements)
-                {
-                    
-                    //if (element != null || !element.IsValidObject || element.Id == null || element.Id.Equals(ElementId.InvalidElementId)) continue;
-                    elementIds.Add(element.Id);
-                }
+                List<Element> elementList = pipeLine.GetPipeLine(uidoc, pipe);
+
+                ElementId[] elementIds = elementList.Select(element => element.Id).ToArray();
+                elementList.ForEach(element => elements.Insert(element));
+
                 uidoc.Selection.SetElementIds(elementIds);
                 transaction.Commit();
                 return Result.Succeeded;
-                //Utils.TryGetConnected()
             }
             catch (Exception ex)
             {
                 transaction.RollBack();
-                TaskDialog.Show("Pipe Line Section Command", ex.Message);
+                message = ex.Message;
                 return Result.Failed;
             }
-            //return Result.Succeeded;
         }
 
-        
     }
 
  

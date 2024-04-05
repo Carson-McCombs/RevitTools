@@ -70,6 +70,7 @@ namespace CarsonsAddins
                     if (!Flip(doc, familyInstance))
                     {
                         transaction.RollBack();
+                        elements.Insert(doc.GetElement(elemReference));
                         return Result.Failed;
                     }
 

@@ -53,7 +53,7 @@ namespace CarsonsAddins.GenericCommands
             windowInstance.SetupDockablePane(data);
             if (windowInstance is ISettingsUpdaterComponent updaterComponent) updaterComponent.RegisterUpdater(uiapp.ActiveAddInId);
             DockablePaneId id = new DockablePaneId(ApplicationIds.GetId(typeof(T)));
-            uiapp.RegisterDockablePane(id, typeof(T).Name, windowInstance as IDockablePaneProvider);
+            uiapp.RegisterDockablePane(id, typeof(T).Name, windowInstance);
             uiapp.Application.DocumentOpened += new EventHandler<DocumentOpenedEventArgs>(OnDocumentOpened);
             uiapp.ApplicationClosing += new EventHandler<ApplicationClosingEventArgs>(OnApplicationClosing);
             return Result.Succeeded;
@@ -94,13 +94,11 @@ namespace CarsonsAddins.GenericCommands
                 DockablePaneId id = new DockablePaneId(ApplicationIds.GetId(typeof(T)));
                 DockablePane dockablePane = commandData.Application.GetDockablePane(id);
                 dockablePane.Show();
-
                 return Result.Succeeded;
-
             }
             catch (Exception e)
             {
-                TaskDialog.Show("Error Showing " + typeof(T).Name, ApplicationIds.GetId(typeof(T)).ToString() + '\n' + e.Message);
+                message = "Error Showing " + typeof(T).Name + " - " + ApplicationIds.GetId(typeof(T)).ToString() + '\n' + e.Message;
                 return Result.Failed;
             }
 
@@ -131,6 +129,7 @@ namespace CarsonsAddins.GenericCommands
             }
             catch
             {
+                message = "Error showing window ( " + nameof(T) + " )";
                 return Result.Failed;
             }
 

@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Forms;
 
 namespace CarsonsAddins
 {
@@ -21,17 +22,14 @@ namespace CarsonsAddins
         public const bool IsWIP = false;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            return Execute(commandData.Application);
-        }
-        public Result Execute(UIApplication uiapp)
-        {
+            UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
             Transaction transaction = new Transaction(doc);
             transaction.Start("SelectAllElementsOfSystem");
             try
             {
-                Reference elementReference = uidoc.Selection.PickObject(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_PipingElements(true,true,true,true,true), "Please select a Piping Element.");
+                Reference elementReference = uidoc.Selection.PickObject(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_PipingElements(true, true, true, true, true), "Please select a Piping Element.");
                 Element element = doc.GetElement(elementReference.ElementId);
                 ElementId psTypeId = element.get_Parameter(BuiltInParameter.RBS_PIPING_SYSTEM_TYPE_PARAM).AsElementId();
                 PipingSystemType psType = doc.GetElement(psTypeId) as PipingSystemType;
@@ -44,20 +42,21 @@ namespace CarsonsAddins
                     foreach (Element elem in ps.PipingNetwork)
                     {
                         psElementIds.Add(elem.Id);
+                        elements.Insert(elem);
                     }
                 }
                 uidoc.Selection.SetElementIds(psElementIds);
                 transaction.Commit();
-                //List<ElementId> elements = FilteredElementCollector()
                 return Result.Succeeded;
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("Select All Elements Of System Command", ex.Message);
+                message = ex.Message;
                 transaction.RollBack();
                 return Result.Failed;
             }
         }
+
 
         public PushButtonData RegisterButton(Assembly assembly)
         {
