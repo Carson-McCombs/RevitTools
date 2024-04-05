@@ -72,7 +72,26 @@ namespace CarsonsAddins
             miscComponentsPulldownButtonData.LargeImage = Util.GetImage(assembly, "CarsonsAddins.Resources.blockA_32.png");
             PulldownButton miscComponentsPulldownButton = panel.AddItem(miscComponentsPulldownButtonData) as PulldownButton;
 
-            // Get each ComponentState and if they are enabled, then attempts to generate a new instance of each component, registering them in the progress
+            RegisterComponentPushButtons(assembly, uiComponentsPulldownButton, miscComponentsPulldownButton);
+
+            app.ControlledApplication.ApplicationInitialized += RegisterDockablePanes;
+            return Result.Succeeded;
+        }
+        
+
+        public Result OnShutdown(UIControlledApplication app)
+        {
+            return Result.Succeeded;
+        }
+
+        /// <summary>
+        /// Get each ComponentState and if they are enabled, then attempts to generate a new instance of each component, registering them in the progress
+        /// </summary>
+        /// <param name="assembly">Assembly where the Addin is located.</param>
+        /// <param name="uiComponentsPulldownButton">Pulldown Button for classes with a UI component such as Windows or DockablePanes.</param>
+        /// <param name="miscComponentsPulldownButton">Pulldown Button for classes without a UI component.</param>
+        private void RegisterComponentPushButtons(Assembly assembly, PulldownButton uiComponentsPulldownButton, PulldownButton miscComponentsPulldownButton)
+        {
             foreach (ComponentState state in componentStates)
             {
 
@@ -89,18 +108,11 @@ namespace CarsonsAddins
                     else miscComponentsPulldownButton.AddPushButton(buttonData);
                 }
             }
-
-            app.ControlledApplication.ApplicationInitialized += RegisterDockablePanes;
-            return Result.Succeeded;
-        }
-        
-
-        public Result OnShutdown(UIControlledApplication app)
-        {
-            return Result.Succeeded;
         }
 
-        
+        /// <summary>
+        /// Registers all of the classes with a SettingsComponent that contain a DockablePane via reflection.
+        /// </summary>
         private void RegisterDockablePanes(object sender, ApplicationInitializedEventArgs e)
         {
             UIApplication uiapp = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
@@ -109,9 +121,9 @@ namespace CarsonsAddins
                 if (!(component is IDockablePaneProvider))  continue;
                 if (component is ISettingsUIComponent uiComponent) 
                 {
-                    Type registerCommandType = typeof( RegisterDockablePane<>).MakeGenericType(uiComponent.GetType());
+                    Type registerCommandType = typeof( GenericCommands.RegisterDockablePane<>).MakeGenericType(uiComponent.GetType());
                     var registerCommand = Activator.CreateInstance(registerCommandType);
-                    if (registerCommand is IExecuteWithUIApplication command) command.Execute(uiapp);
+                    if (registerCommand is GenericCommands.IExecuteWithUIApplication command) command.Execute(uiapp);
                 }
             }
         }
@@ -119,7 +131,6 @@ namespace CarsonsAddins
 
     }
     
-    #region Window Setup
     public class Availability_NoActiveUIDocument : IExternalCommandAvailability
     {
         public bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
@@ -133,128 +144,6 @@ namespace CarsonsAddins
         }
     }
 
-
-
-    interface IExecuteWithUIApplication
-    {
-        Result Execute(UIApplication uiapp);
-    }
-
-
-
-    /// <summary>
-    /// Registers a Generic Dockable Pane to Revit.
-    /// </summary>
-    /// <typeparam name="T">Generic Type for a Dockable Pane that also extends ISettingsUIComponent and has a parameterless constructor.</typeparam>
-    [Transaction(TransactionMode.Manual)]
-    [Regeneration(RegenerationOption.Manual)]
-    public class RegisterDockablePane<T> : IExternalCommand, IExecuteWithUIApplication where T : ISettingsUIComponent, IDockablePaneProvider, new()
-    {
-        public T windowInstance;
-        UIApplication uiapp = null;
-
-        //By passing the Execute function to one with only the UIApplication parameter, this allows for the extenal command to be called easier and less reliant on Revit
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            return Execute(commandData.Application);
-
-        }
-
-
-        /// <summary>
-        /// Registers the dockable pane of a generic type, along with any updaters.
-        /// </summary>
-        /// <param name="uiapp">The UIApplication</param>
-        /// <returns>Always returns Result.Succeeded.</returns>
-        public Result Execute(UIApplication uiapp)
-        {
-            this.uiapp = uiapp;
-            DockablePaneProviderData data = new DockablePaneProviderData();
-            windowInstance = new T();
-            windowInstance.SetupDockablePane(data);
-            if (windowInstance is ISettingsUpdaterComponent updaterComponent) updaterComponent.RegisterUpdater(uiapp.ActiveAddInId);
-            DockablePaneId id = new DockablePaneId(ApplicationIds.GetId(typeof(T)));
-            uiapp.RegisterDockablePane(id, typeof(T).Name, windowInstance as IDockablePaneProvider);
-            uiapp.Application.DocumentOpened += new EventHandler<DocumentOpenedEventArgs>(OnDocumentOpened);
-            uiapp.ApplicationClosing += new EventHandler<ApplicationClosingEventArgs>(OnApplicationClosing);
-            return Result.Succeeded;
-        }
-
-        // Makes sure that the Dockable pane instance is initialized each time a new document is opened.
-        private void OnDocumentOpened(object sender, DocumentOpenedEventArgs e)
-        {
-            //TaskDialog.Show("OnViewActivated", "View has been activated.");
-            if (uiapp.ActiveUIDocument == null)
-            {
-                TaskDialog.Show("ERROR", typeof(T).Name + " IS NULL");
-                return;
-            }
-            windowInstance.Init(uiapp.ActiveUIDocument);
-        }
-        //If the Dockable Pane has an updater, unregister it on application closing
-        private void OnApplicationClosing(object sender, ApplicationClosingEventArgs e)
-        {
-            if (windowInstance is ISettingsUpdaterComponent updaterComponent) updaterComponent.UnregisterUpdater();
-        }
-    }
-
-    /// <summary>
-    ///Retrieves an instance of the Dockable Pane of Type T and shows it.
-    /// </summary>
-    /// <typeparam name="T">Generic Type for Dockable Pane that also extends the ISettingsUIComponent ( most usecases will also have a parameterless constructor ).</typeparam>
-    [Transaction(TransactionMode.Manual)]
-    public class ShowDockablePane<T> : IExternalCommand where T : ISettingsUIComponent, IDockablePaneProvider
-    {        
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            try
-            {
-                DockablePaneId id = new DockablePaneId(ApplicationIds.GetId(typeof(T)));
-                DockablePane dockablePane = commandData.Application.GetDockablePane(id);
-                dockablePane.Show();
-
-                return Result.Succeeded;
-
-            }
-            catch (Exception e)
-            {
-                TaskDialog.Show("Error Showing " + typeof(T).Name, ApplicationIds.GetId(typeof(T)).ToString() + '\n' + e.Message);
-                return Result.Failed;
-            }
-
-        }
-    }
-    
-
-    [Transaction(TransactionMode.Manual)]
-    public class ShowWindow<T> : IExternalCommand where T : Window, ISettingsUIComponent, new()
-    {
-        private static T instance;
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            try
-            {
-                instance = new T();
-                instance.Init(commandData.Application.ActiveUIDocument);
-                instance.ShowDialog();
-                
-                return Result.Succeeded;
-
-            }
-            catch (Exception e)
-            {
-                return Result.Failed;
-            }
-
-        }
-
-
-
-
-        
-    }
-
-    #endregion
 
 
 }

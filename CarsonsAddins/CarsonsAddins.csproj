@@ -87,6 +87,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationIds.cs" />
+    <Compile Include="ComponentState.cs" />
+    <Compile Include="GenericComponentCommands.cs" />
+    <Compile Include="MyApplicationSettings.cs" />
     <Compile Include="SelectDimensionsIndividuallyCommand.cs" />
     <Compile Include="SetDimensionTextEventHandler.cs" />
     <Compile Include="StaleReferenceUpdater.cs" />
