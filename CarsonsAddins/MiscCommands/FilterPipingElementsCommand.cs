@@ -3,9 +3,9 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using System.Reflection;
-
+using System.Windows.Forms;
 
 namespace CarsonsAddins
 {
@@ -28,10 +28,7 @@ namespace CarsonsAddins
         }
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            return Execute(commandData.Application);
-        }
-        public Result Execute(UIApplication uiapp)
-        {
+            UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
@@ -45,10 +42,14 @@ namespace CarsonsAddins
             {
                 Utils.SelectionFilters.SelectionFilter_PipingElements filter = new Utils.SelectionFilters.SelectionFilter_PipingElements(true, true, true, true, true);
                 List<ElementId> selectedIds = uidoc.Selection.GetElementIds() as List<ElementId>;
+                List<Element> selectedElements = selectedIds.Select<ElementId, Element>(id => doc.GetElement(id)).ToList();
                 List<ElementId> filteredIds = new List<ElementId>();
-                foreach (ElementId id in selectedIds)
+                foreach (Element element in selectedElements)
                 {
-                    if (filter.AllowElement((doc.GetElement(id)))) filteredIds.Add(id);
+                    
+                    if (!filter.AllowElement((element))) continue;
+                    filteredIds.Add(element.Id);
+                    elements.Insert(element);
                 }
                 uidoc.Selection.SetElementIds(filteredIds);
                 transaction.Commit();
@@ -56,10 +57,11 @@ namespace CarsonsAddins
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("Filter Piping Elements Error ", ex.Message);
+                message = ex.Message;
                 transaction.RollBack();
                 return Result.Failed;
             }
         }
+
     }
 }

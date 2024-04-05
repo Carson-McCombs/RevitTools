@@ -39,7 +39,7 @@ namespace CarsonsAddins
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
             {
-                TaskDialog.Show("Question Mark Dimensions Command", "Command should not be used within a family document.");
+                message = "Command should not be used within a family document.";
                 return Result.Failed;
             }
             while (true)

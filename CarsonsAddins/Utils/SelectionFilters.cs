@@ -27,7 +27,6 @@ namespace CarsonsAddins.Utils
                 if (ElementCheckUtils.IsPipe(elem)) return false;
                 FamilyInstance familyInstance = elem as FamilyInstance;
                 PartType pt = ElementCheckUtils.GetPartType(familyInstance);
-                //TaskDialog.Show("TEST SELECTION", param.AsValueString());
                 return (partType.Equals(pt));
             }
 

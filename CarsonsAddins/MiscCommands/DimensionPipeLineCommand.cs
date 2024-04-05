@@ -33,15 +33,12 @@ namespace CarsonsAddins
         }
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            return Execute(commandData.Application);
-        }
-        public Result Execute(UIApplication uiapp)
-        {
+            UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
             {
-                TaskDialog.Show("Dimension Pipe Command", "Command should not be used within a family document.");
+                message = "Command should not be used within a family document.";
                 return Result.Failed;
             }
             Transaction transaction = new Transaction(doc);
@@ -49,10 +46,12 @@ namespace CarsonsAddins
             try
             {
                 Reference pipeReference = uidoc.Selection.PickObject(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_Pipe(), "Please select a Pipe.");
-                if (!(doc.GetElement(pipeReference.ElementId) is Pipe pipe))
+                Element pipeElement = doc.GetElement(pipeReference.ElementId);
+                if (!(pipeElement is Pipe pipe))
                 {
                     transaction.RollBack();
-                    TaskDialog.Show("DPL Error", "Pipe is null");
+                    message = "Pipe is null";
+                    elements.Insert(pipeElement);
                     return Result.Cancelled;
                 }
                 PipeLine pipeLine = new PipeLine();
@@ -66,31 +65,32 @@ namespace CarsonsAddins
                     sketchplaneTransaction.Start();
                     SketchPlane sketchplane = SketchPlane.Create(doc, plane);
                     doc.ActiveView.SketchPlane = sketchplane;
-                    doc.ActiveView.HideElements(new List<ElementId>(){sketchplane.Id});
+                    doc.ActiveView.HideElements(new List<ElementId>() { sketchplane.Id });
                     sketchplaneTransaction.Commit();
                 }
                 else
                 {
                     plane = doc.ActiveView.SketchPlane.GetPlane();
                 }
-                
+
                 ObjectSnapTypes objectSnapTypes = ObjectSnapTypes.Endpoints | ObjectSnapTypes.Nearest | ObjectSnapTypes.Intersections | ObjectSnapTypes.Perpendicular | ObjectSnapTypes.Points;
                 XYZ dimensionPoint = uidoc.Selection.PickPoint(objectSnapTypes, "Please select where you would like the dimensions to be placed.");
                 if (dimensionPoint == null) return Result.Cancelled;
                 pipeLine.CreateDimensionLinesFromReferences(doc, plane, dimensionPoint, true);
-                
+
                 transaction.Commit();
-                
+
                 return Result.Succeeded;
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("Dimension Pipe Line Command Error ", ex.Message);
-               
+                message = ex.Message;
+
                 transaction.RollBack();
                 return Result.Failed;
             }
         }
+        
 
         
     }

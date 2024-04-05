@@ -48,8 +48,10 @@ namespace CarsonsAddins
         /// <returns></returns>
         public static PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("Carsons Addins Settings", "Carson's Addins Settings", assembly.Location, typeof(ShowSettingsWindow).FullName);
-            pushButtonData.ToolTip = "Opens Carson's Addins Settings Window";
+            PushButtonData pushButtonData = new PushButtonData("Carsons Addins Settings", "Carson's Addins Settings", assembly.Location, typeof(ShowSettingsWindow).FullName)
+            {
+                ToolTip = "Opens Carson's Addins Settings Window"
+            };
             return pushButtonData;
         }
         
@@ -88,9 +90,9 @@ namespace CarsonsAddins
                     return Result.Succeeded;
 
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    TaskDialog.Show("Error Showing Settings Window", e.Message);
+                    message = ex.Message;
                     return Result.Failed;
                 }
 
