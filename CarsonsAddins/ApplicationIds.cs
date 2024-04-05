@@ -7,11 +7,13 @@ using System.Threading.Tasks;
 
 namespace CarsonsAddins
 {
-    /*
-     * This class is used to store IDs for UI ( such as windows and dockable panes ) and for updaters, all of which are required to be registered through Revit
-     * 
-     * Originally, this class just stored IDs in the form of static/const variables. But after the the usuage of ComponentStates began, retrieving IDs by type became necessary to retrieve ( 
-     */
+    /// <summary>
+    /// This class is used to store IDs for UI ( such as windows and dockable panes ) and for updaters, all of which are required to be registered through Revit.
+    /// These are stored here instead of all of them being generated at runtime so that Revit doesn't ask the user to allow each component everytime Revit is launched or everytime the addin is updated.
+    /// 
+    /// Originally, this class just stored IDs in the form of static/const variables. 
+    /// But after the the usuage of ComponentStates began, retrieving IDs by type became necessary to retrieve references to Dockable Panes and Updaters.
+    /// </summary>
     public static class ApplicationIds
     {
 
@@ -30,18 +32,25 @@ namespace CarsonsAddins
             };
             
         }
-        /*public static Guid GetId<T>() where T : Type
-        {
-            Type t = typeof(T);
-            if (guidsTypeMap.ContainsKey(t)) return guidsTypeMap[t];
-            return Guid.Empty;//AddNewGuidForType(t);
-        }*/
+
+        /// <summary>
+        /// Retrieves the GUID corresponding to a given type, if there isn't a corresponding GUID found, a new one is generated.
+        /// </summary>
+        /// <param name="t">The type of the class - which should extend any class that can be registered through Revit ( i.e. IDockablePaneProver, IUpdater, etc. )</param>
+        /// <example>GetId(typeof(this));</example>
+        /// <returns>GUID corresponding the the given class type.</returns>
         public static Guid GetId(Type t)
         {
             if (guidsTypeMap.ContainsKey(t)) return guidsTypeMap[t];
-            return Guid.Empty;//AddNewGuidForType(t);
-
+            return AddNewGuidForType(t); //this should never be called
+            //return Guid.Empty;
         }
+
+        /// <summary>
+        /// Registers a new GUID for a given type
+        /// </summary>
+        /// <param name="t">The type of the class being registered.</param>
+        /// <returns></returns>
         private static Guid AddNewGuidForType(Type t)
         {
             Guid guid = Guid.NewGuid();
