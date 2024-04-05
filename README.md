@@ -11,7 +11,9 @@
 
 ***Dockable Automatic Pipe End Prep Updater:***
 
--Dynamically adds all possible fitting flanges and labels each end
+-Dynamically adds all possible fitting flanges and labels each end. 
+
+*Note, as of 04/05/24, the way the direction a bell or flange is facing changed, from checking the handle orientation which might not line up if the connection has deflection ( a slight angle ), to checking if the connection is a primary connector or not. The primary connector should always be the "Bell" end and the secondary connector should always be the "Spigot" end. 
 
 -> Setting Up Pipe End Prep Updater
 
