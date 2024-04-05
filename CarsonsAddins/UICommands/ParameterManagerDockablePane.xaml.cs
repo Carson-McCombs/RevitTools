@@ -30,16 +30,13 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using static CarsonsAddins.PipeEndPrepWindow;
-using static CarsonsAddins.Util;
 
 using Binding = System.Windows.Data.Binding;
-//using DataGrid = System.Windows.Controls.DataGrid;
 
 namespace CarsonsAddins
 {
     /// <summary>
-    /// Interaction logic for SimpleFilterDockablePane.xaml
+    /// Allows for Pipe End Prep to be set for each side of each Flange / Union FamilyInstance that is currently loaded.
     /// </summary>
     public partial class ParameterManagerDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingsUpdaterComponent
     {
@@ -47,7 +44,7 @@ namespace CarsonsAddins
 
         private UIDocument uidoc;
         
-        private ParameterTable table;
+        private readonly ParameterTable table;
         private StaleReferenceUpdater updater;
         private string currentGroupName = "";
         public ParameterManagerDockablePane()
@@ -64,8 +61,10 @@ namespace CarsonsAddins
         }
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("Parameter Manager", "Parameter Manager", assembly.Location, typeof(ShowDockablePane<ParameterManagerDockablePane>).FullName);
-            pushButtonData.ToolTip = "An element parameter manager which can be used to sort and set element parameter values.";
+            PushButtonData pushButtonData = new PushButtonData("Parameter Manager", "Parameter Manager", assembly.Location, typeof(GenericCommands.ShowDockablePane<ParameterManagerDockablePane>).FullName)
+            {
+                ToolTip = "An element parameter manager which can be used to sort and set element parameter values."
+            };
             return pushButtonData;
         }
         public void RegisterUpdater(AddInId addinId)
@@ -216,13 +215,15 @@ namespace CarsonsAddins
         }
     }
 
-    //  CURRENTLY UNUSED
-    //  Purpose: to act as a buffer for retrieving element parameters. Will attempt to retrieve the a via parameter if no definition is saved, otherwise retrieving the parameter through the definition.
+    /// <summary>
+    ///  CURRENTLY UNUSED
+    ///  Purpose: to act as a buffer for retrieving element parameters. Will attempt to retrieve the a via parameter if no definition is saved, otherwise retrieving the parameter through the definition.
+    /// </summary>
     class ParametersByTypeId
     {
         public static ParametersByTypeId instance;
-        private UIDocument uidoc;
-        private Dictionary<ElementId, List<Definition>> parameterDictionary = new Dictionary<ElementId, List<Definition>>();
+        private readonly UIDocument uidoc;
+        private readonly Dictionary<ElementId, List<Definition>> parameterDictionary = new Dictionary<ElementId, List<Definition>>();
         public ParametersByTypeId(UIDocument uidoc)
         {
             instance = this;
@@ -231,7 +232,6 @@ namespace CarsonsAddins
 
         public List<Definition> GetParameterDefinitions(ElementId id, ElementId familyId, Definition[] ignore )
         {
-            
             if (familyId == null) return null;
             if (parameterDictionary.ContainsKey(familyId))
             {
@@ -243,8 +243,7 @@ namespace CarsonsAddins
             if (uidoc == null) return null;
             Element element = uidoc.Document.GetElement(id);
             if (element == null) return null;
-            List<Parameter> parameters = element.GetOrderedParameters() as List<Parameter>;
-            if (parameters == null) return null;
+            if (!(element.GetOrderedParameters() is List<Parameter> parameters)) return null;
             if (parameters.Count == 0) return null;
             List<Definition> parameterDefinitions = new List<Definition>();
             foreach(Parameter parameter in parameters)
@@ -267,10 +266,10 @@ namespace CarsonsAddins
         public List<ElementId> ids = new List<ElementId>();
         public ParameterRowsCollection rows = new ParameterRowsCollection();
         public ObservableCollection<string> columnNames = new ObservableCollection<string>();
-        List<Definition> parameterDefinitions = new List<Definition>();
-        List<bool> parameterReadOnly = new List<bool>(); 
-        List<StorageType> parameterReturnTypes = new List<StorageType>();
-        private DataGrid dataGrid;
+        private readonly List<Definition> parameterDefinitions = new List<Definition>();
+        private readonly List<bool> parameterReadOnly = new List<bool>();
+        private readonly List<StorageType> parameterReturnTypes = new List<StorageType>();
+        private readonly DataGrid dataGrid;
         public ParameterTable(DataGrid dataGrid)
         {
             this.dataGrid = dataGrid;
@@ -321,7 +320,7 @@ namespace CarsonsAddins
                 if (i == 0) {
                    
                     StorageType st = parameter.StorageType;
-                    bool readOnly = (st == StorageType.ElementId) ? true : parameter.IsReadOnly;
+                    bool readOnly = (st == StorageType.ElementId) || parameter.IsReadOnly;
                     parameterReadOnly.Add(readOnly);
                     parameterReturnTypes.Add(st);
 
@@ -348,7 +347,7 @@ namespace CarsonsAddins
                     row.AddParameter(definition);
                     rows[i] = row;
                     StorageType st = parameter.StorageType;
-                    bool readOnly = (st == StorageType.ElementId) ? true : parameter.IsReadOnly;
+                    bool readOnly = (st == StorageType.ElementId) || parameter.IsReadOnly;
                     parameterReadOnly.Add(readOnly);
                     parameterReturnTypes.Add(st);
                     parameterDefinitions.Add(definition);
@@ -373,18 +372,22 @@ namespace CarsonsAddins
         /// <param name="isReadOnly">Whether or not the Parameter being bound to is readonly.</param>
         private void AddColumn(string parameterName, bool isReadOnly)
         {
-            DataGridTextColumn column = new DataGridTextColumn();
-            //Sets the parameter column generic binding to each table cell in the column to show its parameter value
-            column.Binding = new Binding("cells[" + parameterName + "].ParameterValue");
-            column.Header = parameterName;
-            column.IsReadOnly = isReadOnly;
+            DataGridTextColumn column = new DataGridTextColumn
+            {
+                //Sets the parameter column generic binding to each table cell in the column to show its parameter value
+                Binding = new Binding("cells[" + parameterName + "].ParameterValue"),
+                Header = parameterName,
+                IsReadOnly = isReadOnly
+            };
             //If the parameter is not readonly, bind to the cell object's backrgound color property
             if (!isReadOnly)
             {
                 Style style = new Style();
-                Setter backgroundSetter = new Setter();
-                backgroundSetter.Property = DataGridCell.BackgroundProperty;
-                backgroundSetter.Value = new Binding("cells[" + parameterName + "].BackgroundColor");
+                Setter backgroundSetter = new Setter
+                {
+                    Property = DataGridCell.BackgroundProperty,
+                    Value = new Binding("cells[" + parameterName + "].BackgroundColor")
+                };
                 style.Setters.Add(backgroundSetter);
                 column.CellStyle = style;
             }
@@ -481,8 +484,7 @@ namespace CarsonsAddins
         public string GetCellValue(string parameterName)
         {
             if (parameterName == null) return "";
-            ParameterCell cell;
-            if (!cells.TryGetValue(parameterName, out cell)) return "";
+            if (!cells.TryGetValue(parameterName, out ParameterCell cell)) return "";
             return cell.ParameterValue;
         }
 
@@ -509,10 +511,7 @@ namespace CarsonsAddins
 
         protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(memberName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
         }
     }
 
@@ -547,7 +546,7 @@ namespace CarsonsAddins
             }
         }
         public bool IsNull = true;
-        private Parameter parameter;
+        private readonly Parameter parameter;
         private string parameterValue = "";
         public string ParameterValue { 
             get => parameterValue;
@@ -602,22 +601,19 @@ namespace CarsonsAddins
                         }
                     case StorageType.Integer:
                         {
-                            int value;
-                            int.TryParse(parameterValue, out value);
+                            int.TryParse(parameterValue, out int value);
                             parameter.Set(value);
                             return parameter;
                         }
                     case StorageType.Double:
                         {
-                            double value;
-                            double.TryParse(parameterValue, out value);
+                            double.TryParse(parameterValue, out double value);
                             parameter.Set(value);
                             return parameter;
                         }
                     case StorageType.ElementId:
                         {
-                            ElementId value;
-                            ElementId.TryParse(parameterValue, out value);
+                            ElementId.TryParse(parameterValue, out ElementId value);
                             parameter.Set(value);
                             return parameter;
                         }
@@ -630,10 +626,7 @@ namespace CarsonsAddins
         }
         protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(memberName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
         }
     }
 

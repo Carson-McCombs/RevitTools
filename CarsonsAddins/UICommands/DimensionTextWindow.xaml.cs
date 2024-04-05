@@ -19,7 +19,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using static CarsonsAddins.Util;
+using static CarsonsAddins.Utils.DimensioningUtils;
+
 
 namespace CarsonsAddins
 {
@@ -160,8 +161,10 @@ namespace CarsonsAddins
 
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("DimensionsTextWindow", "Dimensions Text Window", assembly.Location, typeof(ShowWindow<DimensionTextWindow>).FullName);
-            pushButtonData.ToolTip = "Dimension Text Window";
+            PushButtonData pushButtonData = new PushButtonData("DimensionsTextWindow", "Dimensions Text Window", assembly.Location, typeof(GenericCommands.ShowWindow<DimensionTextWindow>).FullName)
+            {
+                ToolTip = "Dimension Text Window"
+            };
             return pushButtonData;
         }
         private void UseActualValueControl_OnChecked(object sender, RoutedEventArgs e)
@@ -214,8 +217,8 @@ namespace CarsonsAddins
             bool similarPrefixText = true;
             bool similarSuffixText = true;
 
-            DimensionAndSegment current;
-            DimensionAndSegment next = new DimensionAndSegment(selected[0]);
+            Utils.DimensioningUtils.DimensionAndSegment current;
+            Utils.DimensioningUtils.DimensionAndSegment next = new Utils.DimensioningUtils.DimensionAndSegment(selected[0]);
             if (selected.Count > 1)
             {
                 for (int i = 0; i < selected.Count - 1; i++)
@@ -248,7 +251,7 @@ namespace CarsonsAddins
         
         }
 
-        private string EmptyIfNull(string value) => (value == null) ? "": value;
+        private string EmptyIfNull(string value) => value ?? "";
 
         /// <summary>
         /// Called when the SelectDimensionEvent finished executing. The current default texts within the UserControl are then updated to match the new selection.
@@ -258,16 +261,16 @@ namespace CarsonsAddins
         {
             dimensionsAndSegments = selection;
             SetDefaultTextsBySelected(dimensionsAndSegments);
-            if (windowHandle != null ) SetForegroundWindow(windowHandle);
+            if (windowHandle != null ) Utils.MediaUtils.SetForegroundWindow(windowHandle);
             ShowDialog();
             
         }
         private void ReselectButton_Click(object sender, RoutedEventArgs e)
         {
             selectDimensionsEvent.Raise();
-            windowHandle = GetForegroundWindow();
+            windowHandle = Utils.MediaUtils.GetForegroundWindow();
             Hide();
-            SetForegroundWindow(uidoc.Application.MainWindowHandle);
+            Utils.MediaUtils.SetForegroundWindow(uidoc.Application.MainWindowHandle);
 
         }
         
@@ -325,7 +328,7 @@ namespace CarsonsAddins
                 transaction.Commit();
                 
             }
-            catch (Exception ex)
+            catch
             {
                 transaction.RollBack();
             }

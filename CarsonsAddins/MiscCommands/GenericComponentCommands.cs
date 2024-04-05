@@ -129,7 +129,7 @@ namespace CarsonsAddins.GenericCommands
                 return Result.Succeeded;
 
             }
-            catch (Exception e)
+            catch
             {
                 return Result.Failed;
             }

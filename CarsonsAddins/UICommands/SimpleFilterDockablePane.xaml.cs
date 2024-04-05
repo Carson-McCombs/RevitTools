@@ -24,7 +24,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static CarsonsAddins.PipeEndPrepWindow;
-using static CarsonsAddins.Util;
 
 namespace CarsonsAddins
 {
@@ -212,10 +211,10 @@ namespace CarsonsAddins
                 OnNotifyPropertyChanged();
             }
         }
-        private string categoryName = "Null Name";
+        private readonly string categoryName = "Null Name";
         public string CategoryName { get => categoryName; }
         public int Count { get => elementIds.Count; }
-        private List<ElementId> elementIds = new List<ElementId>();
+        private readonly List<ElementId> elementIds = new List<ElementId>();
 
         
 
@@ -224,7 +223,7 @@ namespace CarsonsAddins
         {
             this.categoryName = categoryName;
         }
-        public CategorySelectionItem(bool isSelected, string categoryName, uint count)
+        public CategorySelectionItem(bool isSelected, string categoryName)
         {
             this.isSelected = isSelected;
             this.categoryName = categoryName;
@@ -235,10 +234,7 @@ namespace CarsonsAddins
         }
         protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(memberName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
         }
         public override string ToString()
         {

@@ -77,10 +77,10 @@ namespace CarsonsAddins
                 try
                 {
                     bool? isWIP = type.GetField("IsWIP", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy).GetRawConstantValue() as bool?;
-                    bool isEnabled = (isWIP != null) ? !(bool)isWIP : true;
+                    bool isEnabled = isWIP == null || !(bool)isWIP;
                     settingsState.Add(new ComponentState(type, isEnabled, !isEnabled));
                 }
-                catch (Exception ex)
+                catch
                 {
                     log = log + type.FullName + '\n';
                 }

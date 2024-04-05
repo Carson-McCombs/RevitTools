@@ -23,11 +23,13 @@ namespace CarsonsAddins
     class GetTotalPipeLengthCommand : IExternalCommand, ISettingsComponent
     {
         public const bool IsWIP = false;
-        private static double nominalLength = 17.5;
+        //private static double nominalLength = 17.5;
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("GetTotalPipeLengthCommand", "Get Total Pipe Length", assembly.Location, "CarsonsAddins.GetTotalPipeLengthCommand");
-            pushButtonData.ToolTip = "Gets the total length of all selected pipe.";
+            PushButtonData pushButtonData = new PushButtonData("GetTotalPipeLengthCommand", "Get Total Pipe Length", assembly.Location, "CarsonsAddins.GetTotalPipeLengthCommand")
+            {
+                ToolTip = "Gets the total length of all selected pipe."
+            };
             return pushButtonData;
         }
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -54,26 +56,24 @@ namespace CarsonsAddins
                 foreach (ElementId elementId in currentSelection)
                 {
                     if (elementId.Equals(ElementId.InvalidElementId)) continue;
-                    Pipe pipe = doc.GetElement(elementId) as Pipe;
-                    if (pipe == null) continue;
-                    double? length = Util.GetPipeLength(pipe);
+                    if (!(doc.GetElement(elementId) is Pipe pipe)) continue;
+                    double? length = (pipe.Location as LocationCurve).Curve.Length;
                     if (length == null) continue;
                     count ++;
                     totalLength += (double)length;
                 }
                 int totalFeet = (int)totalLength;
                 double totalInches = (totalLength - totalFeet) * 12;
-                double closureLength = totalLength % nominalLength;
-                int closureFeet = (int)closureLength;
-                double closureInches = (closureLength - closureFeet) * 12;
+                //double closureLength = totalLength % nominalLength;
+                //int closureFeet = (int)closureLength;
+                //double closureInches = (closureLength - closureFeet) * 12;
                 TaskDialog.Show("Total Pipe Length ( " + count + " )", "Total Pipe Length:\n" + totalFeet + "\'- " + totalInches + "\"");
 
-                //TaskDialog.Show("Total Pipe Length", "Total Pipe Length:\n" + totalFeet + "\'- " + totalInches + "\"\n\n Closure Piece:\n " + closureFeet + "\'- " + closureInches + "\"");
                 transaction.Commit();
                 return Result.Succeeded;
 
             }
-            catch (Exception e)
+            catch
             {
                 transaction.RollBack();
                 return Result.Failed;

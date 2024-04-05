@@ -22,8 +22,10 @@ namespace CarsonsAddins
 
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushbuttonData = new PushButtonData("SelectPipeLineCommand", "Select Elements in Pipe Line", assembly.Location, "CarsonsAddins.SelectPipeLineCommand");
-            pushbuttonData.ToolTip = "Selects all pipes connected to selected pipe.";
+            PushButtonData pushbuttonData = new PushButtonData("SelectPipeLineCommand", "Select Elements in Pipe Line", assembly.Location, "CarsonsAddins.SelectPipeLineCommand")
+            {
+                ToolTip = "Selects all pipes connected to selected pipe."
+            };
             return pushbuttonData;
         }
 
@@ -44,9 +46,8 @@ namespace CarsonsAddins
             transaction.Start("SelectPipeLineCommand");
             try
             {
-                Reference pipeReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilter_Pipe(), "Please select a Pipe.");
-                Pipe pipe = doc.GetElement(pipeReference.ElementId) as Pipe;
-                if (pipe == null)
+                Reference pipeReference = uidoc.Selection.PickObject(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_Pipe(), "Please select a Pipe.");
+                if (!(doc.GetElement(pipeReference.ElementId) is Pipe pipe))
                 {
                     transaction.RollBack();
                     return Result.Cancelled;
@@ -63,7 +64,7 @@ namespace CarsonsAddins
                 uidoc.Selection.SetElementIds(elementIds);
                 transaction.Commit();
                 return Result.Succeeded;
-                //Util.TryGetConnected()
+                //Utils.TryGetConnected()
             }
             catch (Exception ex)
             {

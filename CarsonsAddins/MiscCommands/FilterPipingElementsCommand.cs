@@ -3,11 +3,9 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
-using System.Configuration.Assemblies;
-using System.Linq;
+
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace CarsonsAddins
 {
@@ -22,8 +20,10 @@ namespace CarsonsAddins
         public const bool IsWIP = false;
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("FilterPipingElementsCommand", "Filters Piping Elements", assembly.Location, "CarsonsAddins.FilterPipingElementsCommand");
-            pushButtonData.ToolTip = "Filters Selection.";
+            PushButtonData pushButtonData = new PushButtonData("FilterPipingElementsCommand", "Filters Piping Elements", assembly.Location, "CarsonsAddins.FilterPipingElementsCommand")
+            {
+                ToolTip = "Filters Selection."
+            };
             return pushButtonData;
         }
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -43,7 +43,7 @@ namespace CarsonsAddins
             transaction.Start("FilterPipingElementsCommand");
             try
             {
-                SelectionFilter_PipingElements filter = new SelectionFilter_PipingElements(true, true, true, true, true);
+                Utils.SelectionFilters.SelectionFilter_PipingElements filter = new Utils.SelectionFilters.SelectionFilter_PipingElements(true, true, true, true, true);
                 List<ElementId> selectedIds = uidoc.Selection.GetElementIds() as List<ElementId>;
                 List<ElementId> filteredIds = new List<ElementId>();
                 foreach (ElementId id in selectedIds)

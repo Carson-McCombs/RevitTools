@@ -93,10 +93,7 @@ namespace CarsonsAddins
         /// </summary>
         protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(memberName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
         }
 
     }

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static CarsonsAddins.Util;
 
 namespace CarsonsAddins
 {
@@ -52,19 +51,21 @@ namespace CarsonsAddins
                 transaction.Commit();
             }
 
-            catch (Exception e)
+            catch
             {
                 transaction.RollBack();
             }
         }
         private void SetDimensionOrSegment((Dimension, DimensionSegment) pair, string above, string below, string valueOverride, string prefix, string suffix)
         {
-            DimensionAndSegment dimensionAndSegment = new DimensionAndSegment(pair);
-            dimensionAndSegment.Above = above;
-            dimensionAndSegment.Below = below;
-            dimensionAndSegment.ValueOverride = valueOverride;
-            dimensionAndSegment.Prefix = prefix;
-            dimensionAndSegment.Suffix = suffix;
+            new Utils.DimensioningUtils.DimensionAndSegment(pair)
+            {
+                Above = above,
+                Below = below,
+                ValueOverride = valueOverride,
+                Prefix = prefix,
+                Suffix = suffix
+            };
         }
         public string GetName()
         {

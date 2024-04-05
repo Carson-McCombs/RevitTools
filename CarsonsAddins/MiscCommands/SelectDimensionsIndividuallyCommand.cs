@@ -44,8 +44,7 @@ namespace CarsonsAddins
             {
                 try
                 {
-                    Dimension dimension = doc.GetElement(id) as Dimension;
-                    if (dimension == null) continue;
+                    if (!(doc.GetElement(id) is Dimension dimension)) continue;
                     if (!DimensionShape.Linear.Equals(dimension.DimensionShape)) continue;
                     if (dimension.HasOneSegment())
                     {
@@ -53,7 +52,7 @@ namespace CarsonsAddins
                         continue;
                     }
                     multiSegmentDimensions.Add(id);
-                    Dictionary<XYZ, (Dimension, DimensionSegment)> tmp = Util.ExtractPseudoDimensions(doc, dimension);
+                    Dictionary<XYZ, (Dimension, DimensionSegment)> tmp = Utils.DimensioningUtils.ExtractPseudoDimensions(doc, dimension);
                     foreach (XYZ origin in tmp.Keys)
                     {
                         dimensionSegmentsByOrigin.Add(origin, tmp[origin]);
@@ -68,10 +67,10 @@ namespace CarsonsAddins
             }
             doc.Delete(multiSegmentDimensions);
             if (errorLog != "") TaskDialog.Show("Dummy Seperate Dimensions Error", errorLog);
-            List<Reference> selectedDimensionReferences = new List<Reference>();
+            List<Reference> selectedDimensionReferences;
             try
             {
-                selectedDimensionReferences = uidoc.Selection.PickObjects(ObjectType.Element, new SelectionFilter_LinearDimension(), "Please select dimensions to question mark.") as List<Reference>;
+                selectedDimensionReferences = uidoc.Selection.PickObjects(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_LinearDimension(), "Please select dimensions to question mark.") as List<Reference>;
             }
             catch
             {
@@ -93,8 +92,7 @@ namespace CarsonsAddins
             List<XYZ> origins = new List<XYZ>();    
             foreach (Reference reference in selectedDimensionReferences)
             {
-                Dimension dimension = doc.GetElement(reference.ElementId) as Dimension;
-                if (dimension == null) continue;
+                if (!(doc.GetElement(reference.ElementId) is Dimension dimension)) continue;
                 origins.Add(dimension.Origin);
 
 

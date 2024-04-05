@@ -40,7 +40,7 @@ namespace CarsonsAddins
     {
         public static string tmplog = string.Empty;
         private List<ComponentState> componentStates = new List<ComponentState>();
-        private List<ISettingsComponent> settingsComponents = new List<ISettingsComponent>();
+        private readonly List<ISettingsComponent> settingsComponents = new List<ISettingsComponent>();
         public static CarsonsAddinsApplication instance {  get; private set; }
         public CarsonsAddinsApplication() { instance = this; }
         public Result OnStartup(UIControlledApplication app)
@@ -59,17 +59,21 @@ namespace CarsonsAddins
             componentStates = MyApplicationSettings.Instance.InitComponentStates(assembly);
 
             // Includes all components with UI, such as Windows and DockablePanes
-            PulldownButtonData uiComponentsPulldownButtonData = new PulldownButtonData("UIComponentsPullDownButton","Windows");
-            uiComponentsPulldownButtonData.ToolTip = "All tools with their own dedicated window or dockable pane.";
-            uiComponentsPulldownButtonData.Image = Util.GetImage(assembly, "CarsonsAddins.Resources.blockC_32.png");
-            uiComponentsPulldownButtonData.LargeImage = Util.GetImage(assembly, "CarsonsAddins.Resources.blockC_32.png");
+            PulldownButtonData uiComponentsPulldownButtonData = new PulldownButtonData("UIComponentsPullDownButton", "Windows")
+            {
+                ToolTip = "All tools with their own dedicated window or dockable pane.",
+                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.blockC_32.png"),
+                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.blockC_32.png")
+            };
             PulldownButton uiComponentsPulldownButton = panel.AddItem(uiComponentsPulldownButtonData) as PulldownButton;
-            
+
             // Includes all components without UI
-            PulldownButtonData miscComponentsPulldownButtonData = new PulldownButtonData("MiscComponentsPullDownButton", "Misc Tools");
-            miscComponentsPulldownButtonData.ToolTip = "All tools without their own dedicated window or dockable pane.";
-            miscComponentsPulldownButtonData.Image = Util.GetImage(assembly, "CarsonsAddins.Resources.blockA_16.png");
-            miscComponentsPulldownButtonData.LargeImage = Util.GetImage(assembly, "CarsonsAddins.Resources.blockA_32.png");
+            PulldownButtonData miscComponentsPulldownButtonData = new PulldownButtonData("MiscComponentsPullDownButton", "Misc Tools")
+            {
+                ToolTip = "All tools without their own dedicated window or dockable pane.",
+                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.blockA_16.png"),
+                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.blockA_32.png")
+            };
             PulldownButton miscComponentsPulldownButton = panel.AddItem(miscComponentsPulldownButtonData) as PulldownButton;
 
             RegisterComponentPushButtons(assembly, uiComponentsPulldownButton, miscComponentsPulldownButton);
@@ -104,7 +108,7 @@ namespace CarsonsAddins
 
                     settingsComponents.Add(component);
                     PushButtonData buttonData = component.RegisterButton(assembly);
-                    if (component is ISettingsUIComponent uiComponent) uiComponentsPulldownButton.AddPushButton(buttonData);
+                    if (component is ISettingsUIComponent) uiComponentsPulldownButton.AddPushButton(buttonData);
                     else miscComponentsPulldownButton.AddPushButton(buttonData);
                 }
             }

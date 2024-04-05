@@ -21,10 +21,12 @@ namespace CarsonsAddins
         public const bool IsWIP = false;
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("SmartFlipFittingCommand", "Smart Flip Pipe Fitting", assembly.Location, "CarsonsAddins.SmartFlipCommand");
-            pushButtonData.Image = Util.GetImage(assembly, "CarsonsAddins.Resources.flip_32.png");
-            pushButtonData.LargeImage = Util.GetImage(assembly, "CarsonsAddins.Resources.flip_32.png");
-            pushButtonData.ToolTip = "Disconnects Selected Fitting Before Flipping it and Reconnecting it";
+            PushButtonData pushButtonData = new PushButtonData("SmartFlipFittingCommand", "Smart Flip Pipe Fitting", assembly.Location, "CarsonsAddins.SmartFlipCommand")
+            {
+                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.flip_32.png"),
+                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.flip_32.png"),
+                ToolTip = "Disconnects Selected Fitting Before Flipping it and Reconnecting it"
+            };
             return pushButtonData;
         }
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -46,7 +48,7 @@ namespace CarsonsAddins
                 transaction.Start();
                 try
                 {
-                    Reference elemReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilter_PipeFittingPartType(PartType.PipeFlange), "Please select the pipe flange or bell you wish to flip.");
+                    Reference elemReference = uidoc.Selection.PickObject(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_PipeFittingPartType(PartType.PipeFlange), "Please select the pipe flange or bell you wish to flip.");
                     if (elemReference == null)
                     {
                         transaction.RollBack();
@@ -59,8 +61,7 @@ namespace CarsonsAddins
                         return Result.Cancelled;
                     }
 
-                    FamilyInstance familyInstance = elem as FamilyInstance;
-                    if (familyInstance == null)
+                    if (!(elem is FamilyInstance familyInstance))
                     {
                         transaction.RollBack();
                         return Result.Cancelled;
@@ -74,7 +75,7 @@ namespace CarsonsAddins
 
                     transaction.Commit();
                 }
-                catch (Exception ex)
+                catch
                 {
                     transaction.RollBack();
                     return Result.Succeeded;
@@ -89,7 +90,7 @@ namespace CarsonsAddins
 
         private bool Flip(Document doc, FamilyInstance fitting)
         {
-            Connector[] connectors = Util.GetConnectors(fitting);
+            Connector[] connectors = Utils.ConnectionUtils.GetConnectors(fitting);
             Connector primaryConnected = null;
             Connector secondaryConnected = null;
             
@@ -103,7 +104,7 @@ namespace CarsonsAddins
                 
                 SubTransaction subA = new SubTransaction(doc);
                 subA.Start();
-                Connector other = Util.TryGetConnected(connectors[i]);
+                Connector other = Utils.ConnectionUtils.TryGetConnected(connectors[i]);
                 if (connectors[i].GetMEPConnectorInfo().IsPrimary) 
                 {
                     primaryConnector = connectors[i];
@@ -122,9 +123,9 @@ namespace CarsonsAddins
                     connectors[i].DisconnectFrom(other);
                     subA.Commit();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    TaskDialog.Show("ERR Disconnecting",i.ToString());
+                    TaskDialog.Show("ERR Disconnecting ( " + i.ToString() + " )", ex.Message);
                     subA.RollBack();
                 }
 
@@ -165,7 +166,7 @@ namespace CarsonsAddins
             }
             catch (Exception ex)
             {
-                TaskDialog.Show("ERR Reconnecting", "");
+                TaskDialog.Show("ERR Reconnecting", ex.Message);
                 subD.RollBack();
             }
             fitting.Pinned = isPinned;

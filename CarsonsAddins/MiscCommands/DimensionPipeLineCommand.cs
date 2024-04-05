@@ -25,8 +25,10 @@ namespace CarsonsAddins
         public const bool IsWIP = false;
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("DimensionPipeLineCommand", "Dimensions Pipe Line", assembly.Location, "CarsonsAddins.DimensionPipeLineCommand");
-            pushButtonData.ToolTip = "Gets the dimensions of all elements in pipe line.";
+            PushButtonData pushButtonData = new PushButtonData("DimensionPipeLineCommand", "Dimensions Pipe Line", assembly.Location, "CarsonsAddins.DimensionPipeLineCommand")
+            {
+                ToolTip = "Gets the dimensions of all elements in pipe line."
+            };
             return pushButtonData;
         }
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -46,30 +48,8 @@ namespace CarsonsAddins
             transaction.Start("DimensionPipeLineCommand");
             try
             {
-                //Reference elementReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilter_PipingElements(true, true, true, true), "Please select a Pipe, Flange, Bend, or Accessory");
-                //Element elem = doc.GetElement(elementReference);
-                //if (elem == null)
-                //{
-                //    transaction.RollBack();
-                //    return Result.Cancelled;
-                //}
-                //string s = "";
-                //XYZ[] points = Util.GetDimensionPoints(elem);
-                //if (points == null)
-                //{
-                //    TaskDialog.Show("Get Dimension Points from Element", "Element Dimension Points are null");
-                //    transaction.RollBack();
-                //    return Result.Failed;
-                //}
-                //foreach (XYZ point in points)
-                //{
-                //    s = s + point.ToString() + "\n";
-                //}
-                //TaskDialog.Show("Get Dimension Points from Element",s);
-                
-                Reference pipeReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilter_Pipe(), "Please select a Pipe.");
-                Pipe pipe = doc.GetElement(pipeReference.ElementId) as Pipe;
-                if (pipe == null)
+                Reference pipeReference = uidoc.Selection.PickObject(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_Pipe(), "Please select a Pipe.");
+                if (!(doc.GetElement(pipeReference.ElementId) is Pipe pipe))
                 {
                     transaction.RollBack();
                     TaskDialog.Show("DPL Error", "Pipe is null");

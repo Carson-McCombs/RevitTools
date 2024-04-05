@@ -31,7 +31,7 @@ namespace CarsonsAddins
     public partial class PipingLCDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingsUpdaterComponent
     {
         public const bool IsWIP = true;
-        private PipingLCUpdater updater;
+        //private readonly PipingLCUpdater updater;
         public delegate void ToggleLCUpdaterEvent(bool enabled);
         public event ToggleLCUpdaterEvent ToggleLCUpdater;
         UIDocument uidoc = null;
@@ -44,8 +44,10 @@ namespace CarsonsAddins
         }
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("OpenPreferencesWindow", "Open Preferences Window", assembly.Location, "CarsonsAddins.ShowPreferenceWindow");
-            pushButtonData.ToolTip = "Opens Dockable Preference Window";
+            PushButtonData pushButtonData = new PushButtonData("OpenPreferencesWindow", "Open Preferences Window", assembly.Location, "CarsonsAddins.ShowPreferenceWindow")
+            {
+                ToolTip = "Opens Dockable Preference Window"
+            };
             return pushButtonData;
         }
         public void RegisterUpdater(AddInId addinId)
@@ -71,7 +73,7 @@ namespace CarsonsAddins
             try
             {
                 PipingSystemLC.DefaultPipeTypeNames = new List<string>();
-                List<Element> fams = Util.GetAllPipeTypeFamilies(doc);
+                List<Element> fams = Utils.DatabaseUtils.GetAllPipeTypeFamilies(doc);
                 foreach (Element fam in fams)
                 {
                     PipingSystemLC.DefaultPipeTypeNames.Add(fam.Name);
@@ -112,7 +114,7 @@ namespace CarsonsAddins
         }
         private void LoadFromDB()
         {
-            List<Element> elems = Util.GetAllPipeSystemFamilies(doc);
+            List<Element> elems = Utils.DatabaseUtils.GetAllPipeSystemFamilies(doc);
             foreach (Element elem in elems)
             {
                 PipingSystemLC ps = new PipingSystemLC(elem.Name);
@@ -163,11 +165,11 @@ namespace CarsonsAddins
             PipeTypeLC pf = GetPipeTypeLC(elem);
             if (pf.Enabled == false) return;
 
-            Parameter coatingParam = elem.LookupParameter("C&B_Coating");
-            Parameter liningParam = elem.LookupParameter("SYS LINING");
+            //Parameter coatingParam = elem.LookupParameter("C&B_Coating");
+            //Parameter liningParam = elem.LookupParameter("SYS LINING");
 
-            bool ct = coatingParam.Set(pf.Coating);
-            bool ln = liningParam.Set(pf.Lining);
+            //bool ct = coatingParam.Set(pf.Coating);
+            //bool ln = liningParam.Set(pf.Lining);
             //TaskDialog.Show("Set LC Status", "Coating ( " + ct.ToString() + " ), Lining ( " + ln.ToString() + " )");
 
 
@@ -186,7 +188,6 @@ namespace CarsonsAddins
         
         private void SaveButton(object sender, RoutedEventArgs e)
         {
-            UIApplication uiapp = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
             SmartFlipCommand sf = new SmartFlipCommand();
             string msg = "Carson messed up ;(";
             sf.Execute(uidoc.Application, ref msg, new ElementSet());
@@ -213,7 +214,7 @@ public class PipeTypeLC
                 enabled = value;
         }
     }
-    private string pipeTypeName = "default_pipe_type";
+    private readonly string pipeTypeName = "default_pipe_type";
     public string PipeTypeName { get { return pipeTypeName; } }
 
     private string lining = "default_lining";
@@ -239,9 +240,9 @@ public class PipeTypeLC
 public class PipingSystemLC
 {
     public static List<string> DefaultPipeTypeNames;
-    private string pipingSystemName = "default_piping_system";
+    private readonly string pipingSystemName = "default_piping_system";
     public string PipingSystemName { get {  return pipingSystemName; } }
-    private ObservableCollection<PipeTypeLC> pipeTypeLCs;
+    private readonly ObservableCollection<PipeTypeLC> pipeTypeLCs;
 public ObservableCollection<PipeTypeLC> PipeTypeLCs {  get { return pipeTypeLCs; } }
     public PipingSystemLC(string pipingSystemName)
     {

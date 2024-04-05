@@ -88,33 +88,39 @@
   <ItemGroup>
     <Compile Include="ApplicationIds.cs" />
     <Compile Include="ComponentState.cs" />
-    <Compile Include="GenericComponentCommands.cs" />
+    <Compile Include="MiscCommands\GenericComponentCommands.cs" />
     <Compile Include="MyApplicationSettings.cs" />
-    <Compile Include="SelectDimensionsIndividuallyCommand.cs" />
-    <Compile Include="SetDimensionTextEventHandler.cs" />
-    <Compile Include="StaleReferenceUpdater.cs" />
-    <Compile Include="ToggleableTextBox.xaml.cs">
+    <Compile Include="MiscCommands\SelectDimensionsIndividuallyCommand.cs" />
+    <Compile Include="MiscCommands\SetDimensionTextEventHandler.cs" />
+    <Compile Include="Updaters\StaleReferenceUpdater.cs" />
+    <Compile Include="Controls\ToggleableTextBox.xaml.cs">
       <DependentUpon>ToggleableTextBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DimensionTextWindow.xaml.cs">
+    <Compile Include="UICommands\DimensionTextWindow.xaml.cs">
       <DependentUpon>DimensionTextWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MyApplicationSettingsWindow.xaml.cs">
+    <Compile Include="UICommands\MyApplicationSettingsWindow.xaml.cs">
       <DependentUpon>MyApplicationSettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="FilterPipingElementsCommand.cs" />
-    <Compile Include="GetTotalPipeLengthCommand.cs" />
-    <Compile Include="PipeEndPrepPreferencesWindow.xaml.cs">
+    <Compile Include="MiscCommands\FilterPipingElementsCommand.cs" />
+    <Compile Include="MiscCommands\GetTotalPipeLengthCommand.cs" />
+    <Compile Include="UICommands\PipeEndPrepPreferencesWindow.xaml.cs">
       <DependentUpon>PipeEndPrepPreferencesWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PipeLine.cs" />
-    <Compile Include="SelectAllElementsOfSystemCommand.cs" />
-    <Compile Include="SelectPipeLineCommand.cs" />
-    <Compile Include="PipingEndPrepUpdater.cs" />
-    <Compile Include="PipingSystemSelectorControl.xaml.cs">
+    <Compile Include="Utils\ConnectionUtils.cs" />
+    <Compile Include="Utils\DatabaseUtils.cs" />
+    <Compile Include="Utils\DimensioningUtils.cs" />
+    <Compile Include="Utils\ElementCheckUtils.cs" />
+    <Compile Include="Utils\GeometryUtils.cs" />
+    <Compile Include="Utils\MediaUtils.cs" />
+    <Compile Include="Utils\PipeLine.cs" />
+    <Compile Include="MiscCommands\SelectAllElementsOfSystemCommand.cs" />
+    <Compile Include="MiscCommands\SelectPipeLineCommand.cs" />
+    <Compile Include="Updaters\PipingEndPrepUpdater.cs" />
+    <Compile Include="Controls\PipingSystemSelectorControl.xaml.cs">
       <DependentUpon>PipingSystemSelectorControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PipingLCUpdater.cs" />
+    <Compile Include="Updaters\PipingLCUpdater.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\MySettings.cs" />
     <Compile Include="Properties\MySettings.Designer.cs">
@@ -127,59 +133,59 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
-    <Compile Include="ParameterManagerDockablePane.xaml.cs">
+    <Compile Include="UICommands\ParameterManagerDockablePane.xaml.cs">
       <DependentUpon>ParameterManagerDockablePane.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SimpleFilterDockablePane.xaml.cs">
+    <Compile Include="UICommands\SimpleFilterDockablePane.xaml.cs">
       <DependentUpon>SimpleFilterDockablePane.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SmartFlipCommand.cs" />
+    <Compile Include="MiscCommands\SmartFlipCommand.cs" />
     <Compile Include="CarsonsAddinsApplication.cs" />
     <Compile Include="CarsonsAddinsApplication.Designer.cs">
       <DependentUpon>CarsonsAddinsApplication.cs</DependentUpon>
     </Compile>
-    <Compile Include="PipingLCDockablePane.xaml.cs">
+    <Compile Include="UICommands\PipingLCDockablePane.xaml.cs">
       <DependentUpon>PipingLCDockablePane.xaml</DependentUpon>
     </Compile>
-    <Compile Include="TextBoxWithLabel.xaml.cs">
+    <Compile Include="Controls\TextBoxWithLabel.xaml.cs">
       <DependentUpon>TextBoxWithLabel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Util.cs" />
+    <Compile Include="Utils\SelectionFilters.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="ToggleableTextBox.xaml">
+    <Page Include="Controls\ToggleableTextBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="DimensionTextWindow.xaml">
+    <Page Include="UICommands\DimensionTextWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MyApplicationSettingsWindow.xaml">
+    <Page Include="UICommands\MyApplicationSettingsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="PipeEndPrepPreferencesWindow.xaml">
+    <Page Include="UICommands\PipeEndPrepPreferencesWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PipingSystemSelectorControl.xaml">
+    <Page Include="Controls\PipingSystemSelectorControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PipingLCDockablePane.xaml">
+    <Page Include="UICommands\PipingLCDockablePane.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ParameterManagerDockablePane.xaml">
+    <Page Include="UICommands\ParameterManagerDockablePane.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="SimpleFilterDockablePane.xaml">
+    <Page Include="UICommands\SimpleFilterDockablePane.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="TextBoxWithLabel.xaml">
+    <Page Include="Controls\TextBoxWithLabel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -193,7 +199,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <Compile Include="DimensionPipeLineCommand.cs" />
+    <Compile Include="MiscCommands\DimensionPipeLineCommand.cs" />
     <None Include="packages.config" />
     <None Include="Properties\MySettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

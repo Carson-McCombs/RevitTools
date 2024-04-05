@@ -31,7 +31,7 @@ namespace CarsonsAddins
             transaction.Start("SelectAllElementsOfSystem");
             try
             {
-                Reference elementReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilter_PipingElements(true,true,true,true,true), "Please select a Piping Element.");
+                Reference elementReference = uidoc.Selection.PickObject(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_PipingElements(true,true,true,true,true), "Please select a Piping Element.");
                 Element element = doc.GetElement(elementReference.ElementId);
                 ElementId psTypeId = element.get_Parameter(BuiltInParameter.RBS_PIPING_SYSTEM_TYPE_PARAM).AsElementId();
                 PipingSystemType psType = doc.GetElement(psTypeId) as PipingSystemType;
@@ -40,8 +40,7 @@ namespace CarsonsAddins
 
                 foreach (ElementId psId in psIds)
                 {
-                    PipingSystem ps = doc.GetElement(psId) as PipingSystem;
-                    if (ps == null) continue;
+                    if (!(doc.GetElement(psId) is PipingSystem ps)) continue;
                     foreach (Element elem in ps.PipingNetwork)
                     {
                         psElementIds.Add(elem.Id);
@@ -62,8 +61,10 @@ namespace CarsonsAddins
 
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("SelectAllElementsOfSystemCommand", "Selects all Elements in Piping System", assembly.Location, "CarsonsAddins.SelectAllElementsOfSystemCommand");
-            pushButtonData.ToolTip = "Selects all Elements in Piping System.";
+            PushButtonData pushButtonData = new PushButtonData("SelectAllElementsOfSystemCommand", "Selects all Elements in Piping System", assembly.Location, "CarsonsAddins.SelectAllElementsOfSystemCommand")
+            {
+                ToolTip = "Selects all Elements in Piping System."
+            };
             return pushButtonData;
         }
     }

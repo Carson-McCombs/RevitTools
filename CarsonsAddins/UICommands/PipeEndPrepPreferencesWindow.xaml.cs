@@ -26,7 +26,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static CarsonsAddins.PipeEndPrepWindow;
-using static CarsonsAddins.Util;
+using static CarsonsAddins.Utils.ConnectionUtils;
 
 namespace CarsonsAddins
 {
@@ -42,11 +42,8 @@ namespace CarsonsAddins
         private static PipingEndPrepUpdater updater;
         private bool enabled = false;
         private bool forceUpdate = false;
-        UIDocument uidoc = null;
         Document doc = null;
         public ObservableCollection<PipeEndPrepPreferences> preferences;
-
-        //ComponentInfo ISettingsComponent.info { get => new ComponentInfo(this); }
 
         public PipeEndPrepWindow()
         {
@@ -56,8 +53,10 @@ namespace CarsonsAddins
 
         public PushButtonData RegisterButton(Assembly assembly)
         {
-            PushButtonData pushButtonData = new PushButtonData("Pipe End Prep", "Pipe End Prep", assembly.Location, typeof(ShowDockablePane<PipeEndPrepWindow>).FullName);
-            pushButtonData.ToolTip = "Opens Pipe End Prep Settings Window";
+            PushButtonData pushButtonData = new PushButtonData("Pipe End Prep", "Pipe End Prep", assembly.Location, typeof(GenericCommands.ShowDockablePane<PipeEndPrepWindow>).FullName)
+            {
+                ToolTip = "Opens Pipe End Prep Settings Window"
+            };
             return pushButtonData;
         }
 
@@ -74,7 +73,6 @@ namespace CarsonsAddins
 
         public void Init(UIDocument uidoc)
         {
-            this.uidoc = uidoc;
             doc = uidoc.Document;
             enabled = false;
             forceUpdate = false;
@@ -88,11 +86,7 @@ namespace CarsonsAddins
             trans.Start("PopulatePEPFittings");
             try
             {
-                //preferences = new ObservableCollection<PipeEndPrepPreferences>();
-                //LoadFromDB();
                 if (!LoadFromSettings()) LoadFromDB();
-
-
                 trans.Commit();
 
 
@@ -114,7 +108,7 @@ namespace CarsonsAddins
         private void LoadFromDB()
         {
             preferences = new ObservableCollection<PipeEndPrepPreferences>();
-            List<Element> fittings = GetAllPipeFittingFamilies(doc);
+            List<Element> fittings = Utils.DatabaseUtils.GetAllPipeFittingFamilies(doc);
             foreach (Element element in fittings)
             {
                 FamilySymbol familySymbol = element as FamilySymbol;
@@ -189,13 +183,8 @@ namespace CarsonsAddins
             (FamilyInstance, Connector) connection = GetConnectedFamilyInstanceWithConnector(connector);
             if (connection.Item1 == null) return (BellOrSpigot.SPIGOT, "PE");
             PipeEndPrepPreferences prefs = GetPreferences(connection.Item1);
-            //BellOrSpigot bos = GetPipeEnd(pipe, familyInstance);
             BellOrSpigot bos = GetPipeEnd(connection.Item2);
             string pipeEndPrep = prefs.GetPipeEndPrep(bos);
-            //if (bos.Equals(BellOrSpigot.SPIGOT))
-            //{
-            //    if(IsGaugedPE(pipe, connector, pipeEndPrep)) pipeEndPrep = "GPE";
-            //}
             return (bos, pipeEndPrep);
         }
 
@@ -205,8 +194,7 @@ namespace CarsonsAddins
         
         private PipeEndPrepPreferences GetPreferences(Element element)
         {
-            FamilyInstance fitting = element as FamilyInstance;
-            if (fitting == null) return new PipeEndPrepPreferences(ElementId.InvalidElementId.ToString(), "NULL");
+            if (!(element is FamilyInstance fitting)) return new PipeEndPrepPreferences(ElementId.InvalidElementId.ToString(), "NULL");
 
             ElementId elementId = fitting.Symbol.Id;
             foreach (PipeEndPrepPreferences pref in preferences)
@@ -269,8 +257,8 @@ namespace CarsonsAddins
     }
     public class PipeEndPrepPreferences
     {
-        public string pipeTypeId = "-1";
-        private string pipeTypeName = "default_pipe_type";
+        public readonly string pipeTypeId = "-1";
+        private readonly string pipeTypeName = "default_pipe_type";
         public string PipeTypeName { get { return pipeTypeName; } }
         private string bellEndPrep = "DEFAULT_BELL";
         public string BellEndPrep { get { return bellEndPrep; } set { if (!bellEndPrep.Equals(value)) { bellEndPrep = value; } } }
@@ -299,83 +287,3 @@ namespace CarsonsAddins
         }
     }
 }
-
-#region OLDCODE
-//private List<string> GetConnectorNameList(Pipe pipe)
-//{
-//    List<Connector> allConnectorRefs = GetAllConnectorRefs(pipe);
-//    List<string> bells = new List<string>();
-//    List<string> spigots = new List<string>();
-//    foreach (Connector con in allConnectorRefs)
-//    {
-//        try
-//        {
-//            if (con.Owner == null) continue;
-//            if (!con.Owner.IsValidObject) continue;
-
-//            FamilyInstance fitting = con.Owner as FamilyInstance;
-
-//            if (fitting.Symbol.Family.Id.Equals(ElementId.Parse("4584135")))
-//            {
-//                Connector next = TryGetConnected(con);
-//                if (next == null) continue;
-//                if (next.Owner == null) continue;
-//                if (!next.Owner.IsValidObject) continue;
-//                fitting = next.Owner as FamilyInstance;
-//            }
-//            if (fitting == null) continue;
-//            PipeEndPrepPreferences prefs = GetPreferences(fitting);
-//            BellOrSpigot bos = GetPipeEnd(pipe, fitting);
-//            if (bos.Equals(BellOrSpigot.BELL)) bells.Add(prefs.GetPipeEndPrep(bos));
-//            else if (bos.Equals(BellOrSpigot.SPIGOT))
-//            {
-//                string spigotEndPrep = prefs.GetPipeEndPrep(bos);
-//                if (IsGaugedPE(pipe, con, spigotEndPrep)) spigotEndPrep = "GPE";
-//                spigots.Add(spigotEndPrep);
-//            };
-//        }catch(Exception e)
-//        {
-//            List<string> strings = new List<string>();
-//            strings.AddRange(bells);
-//            strings.AddRange(spigots);
-//            string s = "";
-//            strings.ForEach(str => s = s + str);
-//            TaskDialog.Show("PEP ERROR", "GetConnectorNameList: \n" + e.Message + "\n\n" + s);
-//            continue;
-//        }
-
-//    }
-//    List<string> connectionNames = new List<string>();
-//    connectionNames.AddRange(bells);
-//    connectionNames.AddRange(spigots);
-
-//    return connectionNames;
-//}
-//private string GetConnectorNames(Pipe pipe)
-//{
-//    List<string> nameList = GetConnectorNameList(pipe);
-//    if (nameList.Count == 0) return "PE x PE";
-//    else if (nameList.Count == 1) return nameList[0] + " x ---";
-//    else if (nameList.Count == 2) return nameList[0] + " x " + nameList[1];
-//    string name = "";
-
-//    foreach (string n in nameList)
-//    {
-//        name = name + n + " x ";// + '\n';
-//    }
-//    return name;
-
-//}
-
-//private Element GetConnectedElement(Connector connector)
-//{
-//    if (connector == null) return null;
-//    int i = 0;
-//    foreach (Connector c in connector.AllRefs)
-//    {
-//        if (i == 1) return c.Owner;
-//        i++;
-//    }
-//    return null;
-//}
-#endregion
