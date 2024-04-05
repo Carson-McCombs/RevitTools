@@ -336,7 +336,27 @@ namespace CarsonsAddins
             };
             return connected.Owner as FamilyInstance;
         }
-        
+
+        /// <summary>
+        /// Attempts to find the Connected Family Instance with the joining Connector. If there is a "Non-Connector" that is found, instead return the next Family Instance that is connected with the connector that joins to the Non-Connector.
+        /// </summary>
+        /// <param name="connector">A Connector Element</param>
+        /// <returns>A Family Instance and the joining connector that is connected to the provided connector.</returns>
+        public static (FamilyInstance,Connector) GetConnectedFamilyInstanceWithConnector(Connector connector)
+        {
+            if (connector == null) return (null,null);
+            Connector connected = TryGetConnected(connector);
+            if (connected == null) return (null, null);
+            if (connected.Owner == null) return (null, null);
+            FamilyInstance familyInstance = connected.Owner as FamilyInstance;
+            if (familyInstance == null) return (null, null);
+            if (familyInstance.get_Parameter(BuiltInParameter.ELEM_FAMILY_PARAM).AsValueString().Equals("Non-Connector")) //Non-Connector Pipe Fitting Element - originally called by the ID for the Non-Connector fitting, but it changes from project to project, so using name as a quick fix
+            {
+                return GetConnectedFamilyInstanceWithConnector(GetAdjacentConnector(connected));
+            };
+            return (connected.Owner as FamilyInstance, connected);
+        }
+
         /// <summary>
         /// Attempts to find an "adjacent" Connector Element. In other words, it finds another Connector Element that shares the same ConnectorManager and Owner.
         /// </summary>
@@ -380,9 +400,9 @@ namespace CarsonsAddins
             return true;
         }
 
-
+        /*Old - doesn't work with deflected pipe
         /// <summary>
-        /// Gets the direction from the Pipe to the connected Pipe Fitting and checks to see if it lines up with the Pipe Fitting's "Hand Orientation" to determine if the pipe end is a Spigot-End or a Bell-End.
+        /// Gets the direction from the Pipe to the connected Pipe Fitting and checks to see if it lines up with the Pipe Fitting's "Hand Orientation" to determine if the pipe end is a Spigot-End or a Bell-End. NOTE: this only works with linear pipe with no deflection.
         /// Spigot-End: Pipe end acts as a "male" connector.
         /// Bell-End: Pipe end acts as a "female" connector.
         /// </summary>
@@ -395,6 +415,13 @@ namespace CarsonsAddins
             XYZ direction = offset.Normalize();
             return (fitting.HandOrientation.IsAlmostEqualTo(direction)) ? BellOrSpigot.SPIGOT : BellOrSpigot.BELL;
 
+        }*/
+        public static BellOrSpigot GetPipeEnd(Connector fittingConnector)
+        {
+            MEPConnectorInfo connectorInfo = fittingConnector.GetMEPConnectorInfo();
+            if (connectorInfo == null) return BellOrSpigot.NONE;
+            BellOrSpigot bos = connectorInfo.IsPrimary ? BellOrSpigot.BELL : BellOrSpigot.SPIGOT;
+            return bos;
         }
 
         public static bool IsGaugedPE(Pipe pipe, Connector connector, string endPrep)

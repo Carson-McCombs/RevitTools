@@ -153,39 +153,44 @@ namespace CarsonsAddins
             }
         }
         
+        //Checks if the pipe end prep order should be reversed
+        private bool CheckIfReorder((BellOrSpigot, string) endPrepA, (BellOrSpigot, string) endPrepB)
+        {
+            if (endPrepA.Item1.Equals(endPrepB.Item1)) // same ending types (i.e. either as bell x bell or pe x pe or none x none)
+            {
+                if (endPrepA.Item2 == "PE") return true;
+                else if (endPrepB.Item2 == "PE") return false;
+                else return endPrepA.Item2.CompareTo(endPrepB.Item2) > 0;
+
+            }
+            return ((int)endPrepA.Item1 > (int)endPrepB.Item1); //reorders end preps such that a bell will always be before a spigot and a spigot will always be before a 'none' type
+        }
+
         public string GetBothEndPreps(Pipe pipe)
         {
 
             List<(BellOrSpigot, string)> endPrepData = new List<(BellOrSpigot, string)>();
             foreach (Connector connector in pipe.ConnectorManager.Connectors)
             {
-                endPrepData.Add(GetEndPrep(pipe, connector));
+                
+                endPrepData.Add(GetEndPrep(connector));
             }
-            bool reorder = false;
-            if (endPrepData[0].Item1.Equals(endPrepData[1].Item1)) // same ending types (i.e. either as bell x bell or pe x pe or none x none)
-            {
-                if (endPrepData[0].Item2 != "PE") reorder = true;
-                else reorder = endPrepData[0].Item2.CompareTo(endPrepData[1].Item2) > 0;
-
-            }
-            else
-            {
-                reorder = ((int)endPrepData[0].Item1 > (int)endPrepData[1].Item1); //reorders end preps such that a bell will always be before a spigot and a spigot will always be before a 'none' type
-
-            }
+            bool reorder = CheckIfReorder(endPrepData[0], endPrepData[1]);
+            
             string firstEndPrep = reorder ? endPrepData[1].Item2 : endPrepData[0].Item2;
             string secondEndPrep = reorder ? endPrepData[0].Item2 : endPrepData[1].Item2;
             return firstEndPrep + " x " + secondEndPrep;
         }
 
 
-        public (BellOrSpigot,string) GetEndPrep(Pipe pipe, Connector connector)
+        public (BellOrSpigot,string) GetEndPrep(Connector connector)
         {
             if (connector == null) return (BellOrSpigot.NONE, "NULL");
-            FamilyInstance familyInstance = GetConnectedFamilyInstance(connector);
-            if (familyInstance == null) return (BellOrSpigot.SPIGOT, "PE");
-            PipeEndPrepPreferences prefs = GetPreferences(familyInstance);
-            BellOrSpigot bos = GetPipeEnd(pipe, familyInstance);
+            (FamilyInstance, Connector) connection = GetConnectedFamilyInstanceWithConnector(connector);
+            if (connection.Item1 == null) return (BellOrSpigot.SPIGOT, "PE");
+            PipeEndPrepPreferences prefs = GetPreferences(connection.Item1);
+            //BellOrSpigot bos = GetPipeEnd(pipe, familyInstance);
+            BellOrSpigot bos = GetPipeEnd(connection.Item2);
             string pipeEndPrep = prefs.GetPipeEndPrep(bos);
             //if (bos.Equals(BellOrSpigot.SPIGOT))
             //{
