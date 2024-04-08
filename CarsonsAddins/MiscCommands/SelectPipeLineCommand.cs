@@ -50,10 +50,10 @@ namespace CarsonsAddins
                     return Result.Cancelled;
                 }
                 PipeLine pipeLine = new PipeLine();
-                List<Element> elementList = pipeLine.GetPipeLine(uidoc, pipe);
+                Element[] elementList = pipeLine.GetPipeLine(uidoc, pipe);
 
                 ElementId[] elementIds = elementList.Select(element => element.Id).ToArray();
-                elementList.ForEach(element => elements.Insert(element));
+                Array.ForEach(elementList, element => elements.Insert(element));
 
                 uidoc.Selection.SetElementIds(elementIds);
                 transaction.Commit();
