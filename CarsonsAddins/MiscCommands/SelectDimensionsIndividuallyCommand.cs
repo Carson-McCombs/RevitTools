@@ -70,7 +70,7 @@ namespace CarsonsAddins
             List<Reference> selectedDimensionReferences;
             try
             {
-                selectedDimensionReferences = uidoc.Selection.PickObjects(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_LinearDimension(), "Please select dimensions to question mark.") as List<Reference>;
+                selectedDimensionReferences = uidoc.Selection.PickObjects(ObjectType.Element, new SelectionFilters.SelectionFilter_LinearDimension(), "Please select dimensions to question mark.") as List<Reference>;
             }
             catch
             {

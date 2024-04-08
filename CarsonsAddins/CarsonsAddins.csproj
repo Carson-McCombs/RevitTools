@@ -92,6 +92,10 @@
     <Compile Include="MyApplicationSettings.cs" />
     <Compile Include="MiscCommands\SelectDimensionsIndividuallyCommand.cs" />
     <Compile Include="MiscCommands\SetDimensionTextEventHandler.cs" />
+    <Compile Include="SelectionFilters\SelectionFilter_LinearDimension.cs" />
+    <Compile Include="SelectionFilters\SelectionFilter_Pipe.cs" />
+    <Compile Include="SelectionFilters\SelectionFilter_PipeFittingPartType.cs" />
+    <Compile Include="SelectionFilters\SelectionFilter_PipingElements.cs" />
     <Compile Include="Updaters\StaleReferenceUpdater.cs" />
     <Compile Include="Controls\ToggleableTextBox.xaml.cs">
       <DependentUpon>ToggleableTextBox.xaml</DependentUpon>
@@ -150,7 +154,6 @@
     <Compile Include="Controls\TextBoxWithLabel.xaml.cs">
       <DependentUpon>TextBoxWithLabel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Utils\SelectionFilters.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="Controls\ToggleableTextBox.xaml">

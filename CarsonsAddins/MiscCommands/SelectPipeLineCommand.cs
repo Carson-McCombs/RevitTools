@@ -43,7 +43,7 @@ namespace CarsonsAddins
             transaction.Start("SelectPipeLineCommand");
             try
             {
-                Reference pipeReference = uidoc.Selection.PickObject(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_Pipe(), "Please select a Pipe.");
+                Reference pipeReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilters.SelectionFilter_Pipe(), "Please select a Pipe.");
                 if (!(doc.GetElement(pipeReference.ElementId) is Pipe pipe))
                 {
                     transaction.RollBack();

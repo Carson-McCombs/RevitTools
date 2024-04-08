@@ -188,9 +188,6 @@ namespace CarsonsAddins
         
         private void SaveButton(object sender, RoutedEventArgs e)
         {
-            SmartFlipCommand sf = new SmartFlipCommand();
-            string msg = "Carson messed up ;(";
-            sf.Execute(uidoc.Application, ref msg, new ElementSet());
             SaveToSettings();
         }
 

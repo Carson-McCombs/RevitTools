@@ -29,12 +29,10 @@ namespace CarsonsAddins
             };
             return pushButtonData;
         }
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            return Execute(commandData.Application, ref message, elements);
-        }
-        public Result Execute(UIApplication uiapp, ref string message, ElementSet elements)
-        {
+            UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
             if (doc.IsFamilyDocument)
@@ -42,53 +40,62 @@ namespace CarsonsAddins
                 message = "Command should not be used within a family document.";
                 return Result.Failed;
             }
-            while (true)
+            
+            while (true) //this is not good practice, but it is the simpliest way to achieve this loop without using something like recursion. This loop is only exited on either the user cancelling their action or an error.
             {
                 Transaction transaction = new Transaction(doc, "SmartFlipFittingCommand");
                 transaction.Start();
                 try
                 {
-                    Reference elemReference = uidoc.Selection.PickObject(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_PipeFittingPartType(PartType.PipeFlange), "Please select the pipe flange or bell you wish to flip.");
+                    
+                    Reference elemReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilters.SelectionFilter_PipeFittingPartType(PartType.PipeFlange), "Please select the pipe flange or bell you wish to flip.");
                     if (elemReference == null)
                     {
                         transaction.RollBack();
-                        return Result.Succeeded;
+                        return Result.Cancelled;
                     }
                     Element elem = doc.GetElement(elemReference);
+                    elements.Insert(elem);
                     if (elem == null)
                     {
                         transaction.RollBack();
                         return Result.Cancelled;
                     }
 
-                    if (!(elem is FamilyInstance familyInstance))
+                    else if (!(elem is FamilyInstance familyInstance))
                     {
                         transaction.RollBack();
                         return Result.Cancelled;
                     }
 
-                    if (!Flip(doc, familyInstance))
+                    else if (!Flip(doc, familyInstance))
                     {
                         transaction.RollBack();
-                        elements.Insert(doc.GetElement(elemReference));
+                        message += "Could not flip element.\n";
                         return Result.Failed;
                     }
 
                     transaction.Commit();
+                    
                 }
-                catch
+                catch (Exception ex)
                 {
+                    message += ex.ToString() + '\n';
                     transaction.RollBack();
-                    return Result.Succeeded;
+                    return Result.Cancelled;
                 }
 
             }
 
-
         }
 
         
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="fitting"></param>
+        /// <returns></returns>
         private bool Flip(Document doc, FamilyInstance fitting)
         {
             Connector[] connectors = Utils.ConnectionUtils.GetConnectors(fitting);

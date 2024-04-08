@@ -45,7 +45,7 @@ namespace CarsonsAddins
             transaction.Start("DimensionPipeLineCommand");
             try
             {
-                Reference pipeReference = uidoc.Selection.PickObject(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_Pipe(), "Please select a Pipe.");
+                Reference pipeReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilters.SelectionFilter_Pipe(), "Please select a Pipe.");
                 Element pipeElement = doc.GetElement(pipeReference.ElementId);
                 if (!(pipeElement is Pipe pipe))
                 {

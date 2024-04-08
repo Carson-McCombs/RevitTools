@@ -29,7 +29,7 @@ namespace CarsonsAddins
             transaction.Start("SelectAllElementsOfSystem");
             try
             {
-                Reference elementReference = uidoc.Selection.PickObject(ObjectType.Element, new Utils.SelectionFilters.SelectionFilter_PipingElements(true, true, true, true, true), "Please select a Piping Element.");
+                Reference elementReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilters.SelectionFilter_PipingElements(true, true, true, true, true), "Please select a Piping Element.");
                 Element element = doc.GetElement(elementReference.ElementId);
                 ElementId psTypeId = element.get_Parameter(BuiltInParameter.RBS_PIPING_SYSTEM_TYPE_PARAM).AsElementId();
                 PipingSystemType psType = doc.GetElement(psTypeId) as PipingSystemType;
