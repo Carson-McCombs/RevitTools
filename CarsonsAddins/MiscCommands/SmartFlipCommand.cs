@@ -13,7 +13,9 @@ using System.Windows.Controls;
 namespace CarsonsAddins
 {
 
-
+    /// <summary>
+    /// An ExternalCommand that is used to flip flanges / unions / bells. It does this by disconnecting selected elements before calling the "FlipHand" function and then reconnecting the element.
+    /// </summary>
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     class SmartFlipCommand : IExternalCommand, ISettingsComponent
@@ -91,11 +93,11 @@ namespace CarsonsAddins
 
         
         /// <summary>
-        /// 
+        /// Disconnects each connector on a piping element before flipping that element and reconnecting the connectors.
         /// </summary>
-        /// <param name="doc"></param>
-        /// <param name="fitting"></param>
-        /// <returns></returns>
+        /// <param name="doc">The active Document.</param>
+        /// <param name="fitting">The piping element being flipped. It is assumed that this a flange / union / bell, however as long as it is a "linear" element, it should be fine.</param>
+        /// <returns>Whether or not the piping element was able to be flipped.</returns>
         private bool Flip(Document doc, FamilyInstance fitting)
         {
             Connector[] connectors = Utils.ConnectionUtils.GetConnectors(fitting);
