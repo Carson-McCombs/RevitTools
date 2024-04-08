@@ -91,7 +91,7 @@
     <Compile Include="MiscCommands\GenericComponentCommands.cs" />
     <Compile Include="MyApplicationSettings.cs" />
     <Compile Include="MiscCommands\SelectDimensionsIndividuallyCommand.cs" />
-    <Compile Include="MiscCommands\SetDimensionTextEventHandler.cs" />
+    <Compile Include="UICommands\SetDimensionTextEventHandler.cs" />
     <Compile Include="SelectionFilters\SelectionFilter_LinearDimension.cs" />
     <Compile Include="SelectionFilters\SelectionFilter_Pipe.cs" />
     <Compile Include="SelectionFilters\SelectionFilter_PipeFittingPartType.cs" />

@@ -26,7 +26,6 @@ namespace CarsonsAddins.Utils
             {
                 ComputeReferences = true,
                 IncludeNonVisibleObjects = true,
-                DetailLevel = ViewDetailLevel.Fine,
                 View = activeView
             };
         }
