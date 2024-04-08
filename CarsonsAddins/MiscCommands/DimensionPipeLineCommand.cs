@@ -76,7 +76,7 @@ namespace CarsonsAddins
                 ObjectSnapTypes objectSnapTypes = ObjectSnapTypes.Endpoints | ObjectSnapTypes.Nearest | ObjectSnapTypes.Intersections | ObjectSnapTypes.Perpendicular | ObjectSnapTypes.Points;
                 XYZ dimensionPoint = uidoc.Selection.PickPoint(objectSnapTypes, "Please select where you would like the dimensions to be placed.");
                 if (dimensionPoint == null) return Result.Cancelled;
-                pipeLine.CreateDimensionLinesFromReferences(doc, plane, dimensionPoint, true);
+                pipeLine.CreateDimensions(doc, plane, dimensionPoint, true);
 
                 transaction.Commit();
 

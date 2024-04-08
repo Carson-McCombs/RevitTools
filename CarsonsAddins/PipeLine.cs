@@ -13,19 +13,25 @@ using System.Threading.Tasks;
 namespace CarsonsAddins
 {
 
-    /*
-     * I am defining a Pipe Line as all of the connected piping elements ( i.e. Pipes, Pipe Fittings, and Pipe Accessories ) between either a Pipe Junction ( i.e. a Bend, Tee, Wye, Cross, etc. ) or end of pipe ( an empty connection ).
-     * 
-     * This is meant to be a base class that will be called for actions such as movement and dimensioning of piping elements.
-     *
-     * Note: Currently dimensioning a any junction that is not a bend in Revit does not work. Lateral Tees and Crosses seem to work for dimensioning but not for Routing Preferences. 
-     *  Getting the programmatic dimensioning to work is put on delay until either the problem is solved within my current Revit setup or by Revit themselves.
-     */
+
+
+
+
+
+
+
+    /// <summary>
+    /// I am defining a Pipe Line as all of the connected piping elements ( i.e. Pipes, Pipe Fittings, and Pipe Accessories ) between either a Pipe Junction ( i.e. a Bend, Tee, Wye, Cross, etc. ) or end of pipe ( an empty connection ).
+    /// This is meant to be a utility class that will be called for actions such as movement and dimensioning of piping elements.
+    /// Future revisions of this will include UI to customize settings.
+    /// Note: Currently dimensioning a any junction that is not a bend in Revit does not work. Lateral Tees and Crosses seem to work for dimensioning but not for Routing Preferences. 
+    /// Getting the programmatic dimensioning to work is put on delay until either the problem is solved within my current Revit setup or by Revit themselves.
+    /// </summary>
     public class PipeLine
     {
         private ISelectionFilter filter = null;
         private List<Element> elements;
-        public List<Element> GetPipeLine(UIDocument uidoc, Pipe pipe)
+        public Element[] GetPipeLine(UIDocument uidoc, Pipe pipe)
         {
             elements = new List<Element>();
             filter = new SelectionFilters.SelectionFilter_PipingElements(true, true, false, true, true, true);
@@ -34,9 +40,16 @@ namespace CarsonsAddins
             elements.Add(pipe);
             AddNextElement_Right(uidoc, connectors[1]);
             
-            return elements;
+            return elements.ToArray();
         }
-        public List<Element> GetPipeLine(UIDocument uidoc, Pipe pipe, ISelectionFilter filter)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="uidoc">The active UIDocument</param>
+        /// <param name="pipe">The selected Pipe</param>
+        /// <param name="filter">The SelectionFilter</param>
+        /// <returns>An array of elements containing all of the elements in the pipeline.</returns>
+        public Element[] GetPipeLine(UIDocument uidoc, Pipe pipe, SelectionFilters.SelectionFilter_PipingElements filter)
         {
             elements = new List<Element>();
             this.filter = filter;
@@ -44,10 +57,14 @@ namespace CarsonsAddins
             AddNextElement_Left(uidoc, connectors[0]);
             elements.Add(pipe);
             AddNextElement_Right(uidoc, connectors[1]);
-            return elements;
+            return elements.ToArray();
         }
 
-        //Recursively adds all the connected piping elements on one side (arbitrarly called the "left" side) of an element
+        /// <summary>
+        /// Recursively adds all the connected piping elements on one side (arbitrarly called the "left" side) of an element
+        /// </summary>
+        /// <param name="uidoc">The active UIDocument</param>
+        /// <param name="current">The current connector/ </param>
         private void AddNextElement_Left(UIDocument uidoc, Connector current)
         {
             Connector adjacent = Utils.ConnectionUtils.GetAdjacentConnector(current);
@@ -57,7 +74,11 @@ namespace CarsonsAddins
             if (adjacent.IsConnected) elements.Add(next.Owner);
         }
 
-        //Recursively adds all the connected piping elements on one side (arbitrarly called the "right" side) of an element
+        /// <summary>
+        /// Recursively adds all the connected piping elements on one side (arbitrarly called the "right" side) of an element
+        /// </summary>
+        /// <param name="uidoc">The active UIDocument</param>
+        /// <param name="current">The current connector/ </param>
         private void AddNextElement_Right(UIDocument uidoc, Connector current)
         {
             Connector adjacent = Utils.ConnectionUtils.GetAdjacentConnector(current);
@@ -69,7 +90,11 @@ namespace CarsonsAddins
             
         }
 
-        //Checks if the Pipe Line extends to the next element, or if the current element is the last one in the Pipe Line.
+        /// <summary>
+        /// Checks if the Pipe Line extends to the next element, or if the current element is the last one on this end of the Pipeline.
+        /// </summary>
+        /// <param name="next">The next connector to be checked.</param>
+        /// <returns>a boolean value determining if the next connector is still apart of the Pipeline.</returns>
         private bool CanContinue(Connector next)
         {
             if (next == null) return false;
@@ -80,11 +105,14 @@ namespace CarsonsAddins
             return true;
         }
 
-        #region WIP
 
+        /// <summary>
+        /// Retrieves an array of Line style Ids where each style's name must be either "zLines" or "Center line". This is quite static now, but will be able to be adjusted in future revisions. 
+        /// </summary>
+        /// <param name="doc">The active Document.</param>
+        /// <returns>an array of ElementIds corresponding to valid centerline line styles.</returns>
         private ElementId[] GetCenterlineIds(Document doc)
         {
-            
             List<Element> centerlineStyleElements = new FilteredElementCollector(doc).OfClass(typeof(GraphicsStyle)).ToList();
             List<ElementId> centerlineStyleIds = new List<ElementId>();
             for (int i = 0; i < centerlineStyleElements.Count; i++)
@@ -95,7 +123,11 @@ namespace CarsonsAddins
         }
 
         
-
+        /// <summary>
+        /// Retrieves the center point of the element based on whether or not it has a location point or a location curve.
+        /// </summary>
+        /// <param name="element">a piping element.</param>
+        /// <returns>The center point of the element.</returns>
         private static XYZ GetOriginOfElement(Element element)
         {
             if (element == null) return null;
@@ -105,16 +137,38 @@ namespace CarsonsAddins
             return null;
         }
 
-        private static Line CreateDimensionLine(Plane plane, Line elementLine, XYZ dimensionPoint)
+        /// <summary>
+        /// Creates a line that is parallel with the projected element line and intersects the dimension point. This is where the primary dimension will be placed.
+        /// </summary>
+        /// <param name="plane">The plane of the active View.</param>
+        /// <param name="projectedElementLine">The line ranging from each end of the pipeline and projected onto the active View plane.</param>
+        /// <param name="dimensionPoint">The point that the dimension line intersects and therefore determines the position of the dimension line.</param>
+        /// <returns>A line offset from the pipeline where the primary dimension will be placed.</returns>
+        private static Line CreateDimensionLine(Plane plane, Line projectedElementLine, XYZ dimensionPoint)
         {
-            Line dimensionLine = Line.CreateUnbound(Utils.GeometryUtils.ProjectPointOntoPlane(plane, dimensionPoint), elementLine.Direction);
+            Line dimensionLine = Line.CreateUnbound(Utils.GeometryUtils.ProjectPointOntoPlane(plane, dimensionPoint), projectedElementLine.Direction);
             dimensionLine.MakeUnbound();
             return dimensionLine;
         }
+
+        /// <summary>
+        /// Lerp Function. Calculates a point that is an "amount" from the "start" point to the "end" point.
+        /// </summary>
+        /// <param name="start">The starting point XYZ position</param>
+        /// <param name="end">The endpoint XYZ position</param>
+        /// <param name="amount">The amount to offset from the starting point.</param>
+        /// <returns>an XYZ position that has been offset an "amount" from the "start" point to the "end" point.</returns>
         private static XYZ Lerp(XYZ start, XYZ end, double amount)
         {
             return start + (end - start) * amount;
         }
+        /// <summary>
+        /// Gets a pseudo-Reference to the center of the piping element. 
+        /// This is done by retrieving all of the element's geometry lines that have a valid line style and have an endpoint sharing a position with the center of the piping element.
+        /// </summary>
+        /// <param name="validStyleIds">An array of valid Line Style Ids for centerlines. </param>
+        /// <param name="element">a piping element.</param>
+        /// <returns>a Reference to the center of the piping element.</returns>
         private static Reference GetCenterReference(ElementId[] validStyleIds, Element element)
         {
             Line[] instanceLines = Utils.GeometryUtils.GetInstanceGeometryObjectsWithStyleIds<Line>(Utils.GeometryUtils.GetGeometryOptions(), element, validStyleIds);
@@ -138,9 +192,17 @@ namespace CarsonsAddins
             
             return symbolLines.Where(line => line.Id.Equals(id)).FirstOrDefault().GetEndPointReference(endIndex);
         }
+        
+        /// <summary>
+        /// Retrieves the Reference for unused connector of the pipe.
+        /// </summary>
+        /// <param name="activeView">The active View.</param>
+        /// <param name="pipe">a Pipe element with one open connector.</param>
+        /// <returns>a Reference to the endpoint of the pipe.</returns>
         private static Reference GetPipeEndReference(View activeView, Pipe pipe)
         {
             if (pipe == null) return null;
+            //Gets the position of the open connector of the pipe.
             XYZ position = null;
             foreach (Connector connector in pipe.ConnectorManager.UnusedConnectors)
             {
@@ -148,6 +210,7 @@ namespace CarsonsAddins
                 break;
             }
             if (position == null) return null;
+            //Attempts to find an endpoint of the pipes geometry that shares the same position as the open connector.
             Line line = Utils.GeometryUtils.GetGeometryLineOfPipe(activeView, pipe);
             for (int i = 0; i < 2; i++)
             {
@@ -155,24 +218,43 @@ namespace CarsonsAddins
             }
             return null;
         }
-        private static Line CreateSecondaryDimensionLine(View view, DimensionType secondaryDimensionType, Line elementLine, Line primaryDimensionLine)
+
+        /// <summary>
+        /// Creates a Line based on by taking the primary dimension line and offsetting that line an amount equal to the Dimension Type (text size + 3 * text offset) *  active View scale, towards the original projected element line.
+        /// </summary>
+        /// <param name="activeView">The active View.</param>
+        /// <param name="secondaryDimensionType">The Dimension Type of the secondary Dimension. This should the Dimension Type with the largest text size and text offset ( although generally each Dimension Type within the secondary dimension is equal).</param>
+        /// <param name="projectedElementLine">The element line projected onto the active activeView's plane.</param>
+        /// <param name="primaryDimensionLine">The dimension line for the primary dimension.</param>
+        /// <returns>a secondary dimension line.</returns>
+        private static Line CreateSecondaryDimensionLine(View activeView, DimensionType secondaryDimensionType, Line projectedElementLine, Line primaryDimensionLine)
         {
             double textSize = secondaryDimensionType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble();
             double textOffset = secondaryDimensionType.get_Parameter(BuiltInParameter.TEXT_DIST_TO_LINE).AsDouble();
 
-            double offset = (textSize + 3 * textOffset) * view.Scale;
+            double offset = (textSize + 3 * textOffset) * activeView.Scale;
             
-            IntersectionResult result = primaryDimensionLine.Project(elementLine.Origin);
+            IntersectionResult result = primaryDimensionLine.Project(projectedElementLine.Origin);
             double percent = offset / result.Distance;
-            return Line.CreateUnbound(Lerp(result.XYZPoint, elementLine.Origin, percent), primaryDimensionLine.Direction);
+            return Line.CreateUnbound(Lerp(result.XYZPoint, projectedElementLine.Origin, percent), primaryDimensionLine.Direction);
         }
 
+        /// <summary>
+        /// Retrieves a reference to the end point of a Piping Element. Meant to be used when dimensioning to a end of the pipeline
+        /// </summary>
+        /// <param name="activeView">The active View.</param>
+        /// <param name="validStyleIds">The ElementIds corresponding to the valid centerline line styles.</param>
+        /// <param name="element">a Piping Element</param>
+        /// <returns>a Reference corresponding to the endpoint of the Piping Element.</returns>
         private static Reference GetEndReference(View activeView, ElementId[] validStyleIds, Element element)
         {
             if (Utils.ElementCheckUtils.IsPipe(element)) return GetPipeEndReference(activeView, element as Pipe);
             return GetCenterReference(validStyleIds, element);
         }
 
+        /// <summary>
+        /// A list of static Dimension Types corresponding to each element category within the pipeline and one for the Primary Dimension.
+        /// </summary>
         private struct DimensionStyles
         {
             public DimensionType primaryDimensionType;
@@ -181,6 +263,12 @@ namespace CarsonsAddins
             public DimensionType secondaryFittingDimensionType;
         }
         
+        /// <summary>
+        /// Retrives the Dimension Type based on the element category.
+        /// </summary>
+        /// <param name="styles">The pipeline DimensionStyles.</param>
+        /// <param name="element">A Piping Element.</param>
+        /// <returns>The Dimension Type corresponding to the selected piping element</returns>
         private DimensionType GetElementDimensionType(DimensionStyles styles, Element element)
         {
             if (element == null) return null;
@@ -189,7 +277,11 @@ namespace CarsonsAddins
             if (Utils.ElementCheckUtils.IsPipeAccessory(element)) return styles.secondaryAccessoryDimensionType;
             return null;
         }
-
+        /// <summary>
+        /// Retrieves the Dimension Types for the pipeline
+        /// </summary>
+        /// <param name="doc">The active Document</param>
+        /// <returns>A Struct containing the Dimension Types for each element category within the pipeline.</returns>
         private static DimensionStyles GetDimensionStyles(Document doc)
         {
             DimensionStyles dimensionStyles = new DimensionStyles();
@@ -213,48 +305,67 @@ namespace CarsonsAddins
 
         }
 
-        //Below is an attempt at dimensioning Pipe Lines by retrieving the Geometry Objects of each piping element and compares their direction and endpoint positions to the connectors of their respective elements. Due to the current issues stated above, fixing the below function is put on pause.
-        public void CreateDimensionLinesFromReferences(Document doc, Plane plane, XYZ dimensionPoint, bool secondaryDimension) //can only be called after GetPipeLine is called
+        /// <summary>
+        /// Creates a primary and ( optionally ) a secondary dimension, with the primary dimension ranging from the center points of each of the elements on the end of the pipeline. And the secondary dimension containing each of the individual dimensions for each element in the pipeline. Will not allow the secondary dimension to be created if the pipeline is not parallel with the plane of the active View.
+        /// </summary>
+        /// <param name="doc">The active Document.</param>
+        /// <param name="plane">The plane of the active View</param>
+        /// <param name="dimensionPoint">The point where the primary dimension line will intersect ( i.e. determines where the created dimensions will be placed ).</param>
+        /// <param name="secondaryDimension">Whether or not the secondary dimensions should be created.</param>
+        public void CreateDimensions(Document doc, Plane plane, XYZ dimensionPoint, bool secondaryDimension) //can only be called after GetPipeLine is called
         {
             if (elements == null) return;
             View activeView = doc.ActiveView;
             ElementId[] validStyleIds = GetCenterlineIds(doc);
+
+            //Creates the element line which goes from the center of the element on each end of pipeline.
             XYZ pointA = GetOriginOfElement(elements[0]);
             XYZ pointB = GetOriginOfElement(elements[1]);
             Line elementLine = Line.CreateBound(pointA, pointB);
+
+            //Projects the endpoints and the element line onto the plane of the active activeView.
             XYZ projectedPointA = Utils.GeometryUtils.ProjectPointOntoPlane(plane, pointA);
             XYZ projectedPointB = Utils.GeometryUtils.ProjectPointOntoPlane(plane, pointB);
             Line projectedElementLine = Line.CreateBound(projectedPointA, projectedPointB);
+
+            //if the element line is not parallel with the active activeView, don't create the secondaryDimension.
             if (!elementLine.Direction.IsAlmostEqualTo(projectedElementLine.Direction)) secondaryDimension = false;
+
+            //Retrieves and stores the desired dimension types per element category. This could also be an Dict<BuiltInCategory, DimensionType) + one dimension type for the primary dimension line.
             DimensionStyles dimensionStyles = GetDimensionStyles(doc);
 
+            //Calculates the primary dimension line by creating a line that is parallel with the projected element line and intersects the dimension point.
             Line primaryDimensionLine = CreateDimensionLine(plane, projectedElementLine, dimensionPoint);
 
-            
+            //Calculates the secondary dimension line by creating a line parallel to the primary dimension line but offset a distance based on the dimension type settings
+            //( right now it only checks the pipe dimension type settings, but it should choose the type with the largest text and text offset )
             Line secondaryDimensionLine = CreateSecondaryDimensionLine(doc.ActiveView, dimensionStyles.secondaryPipeDimensionType, projectedElementLine, primaryDimensionLine);
 
+            //Creates a reference array for the primary dimension based on its end point references.
             ReferenceArray primaryReferenceArray = new ReferenceArray();
             primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, elements[0]));
             primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, elements[elements.Count - 1]));
 
-            //ElementId pipeAccessoryStyleId = new FilteredElementCollector(doc).WhereElementIsElementType().OfClass(typeof(GraphicsStyle)).OfCategory(BuiltInCategory.OST_PipeAccessory).FirstElementId();
-
+            //Creates the primary dimension
             doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionStyles.primaryDimensionType );
+
+            //Create a secondary dimension if set to
             if (!secondaryDimension) return;
             for (int i = 0; i < elements.Count; i++)
             {
                 Element element = elements[i];
                 try
                 {
-                    if (Utils.ElementCheckUtils.IsPipe(element))
-                    {
+                    //As Pipe elements have static geometry, a dedicated function is used to retrieve their references and create the dimension.
+                    //Even though the DimensionLinearElement function could be used instead, it would be slower and less efficient.
+                    if (Utils.ElementCheckUtils.IsPipe(element))                     {
                         DimensionPipe(doc, dimensionStyles.secondaryPipeDimensionType, secondaryDimensionLine, element as Pipe);
                         continue;
                     }
-                    if (Utils.ElementCheckUtils.IsPipeFlange(element)) continue;
-                    bool isLinear = Utils.GeometryUtils.IsLinearElement(element);
+                    if (Utils.ElementCheckUtils.IsPipeFlange(element)) continue; //doesn't dimension pipe flanges / unions / bells as they are not relevant to fabrication
+                    bool isLinear = Utils.GeometryUtils.IsLinearElement(element); 
                     DimensionType dimensionType = GetElementDimensionType(dimensionStyles, element);
-                    if (isLinear)
+                    if (isLinear) //Dimensions element based on whether or not it is linear.
                     {
                         DimensionLinearElement(doc, dimensionType, plane, secondaryDimensionLine, element as FamilyInstance);
                     }
@@ -273,7 +384,14 @@ namespace CarsonsAddins
             }
 
         }
-
+        /// <summary>
+        /// Creates a Dimension from each end of a pipe. *Note: DimensionLinearElement could be called instead, but as a pipe has static geometry, a dedicated function ( that should be faster than the generic function ) was used instead.
+        /// </summary>
+        /// <param name="doc">The active Document.</param>
+        /// <param name="dimensionType">The Dimension Type of the created dimension</param>
+        /// <param name="dimensionLine">The line that the created dimension will be located on.</param>
+        /// <param name="pipe">The pipe element within the pipeline that is being dimensioned.</param>
+        /// <returns>a newly created Dimension going from each end of the pipe element</returns>
         private static Dimension DimensionPipe(Document doc, DimensionType dimensionType, Line dimensionLine, Pipe pipe)
         {
             ReferenceArray referenceArray = new ReferenceArray();
@@ -284,33 +402,64 @@ namespace CarsonsAddins
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
 
+        /// <summary>
+        /// Creates a Dimension from each end of a linear element.
+        /// </summary>
+        /// <param name="doc">The active Document.</param>
+        /// <param name="dimensionType">The Dimension Type of the created dimension</param>
+        /// <param name="plane">The plane that the current activeView is located on.</param>
+        /// <param name="dimensionLine">The line that the created dimension will be located on.</param>
+        /// <param name="familyInstance">The Linear element in the pipeline that is being dimensioned.</param>
+        /// <returns>a newly created Dimension going from each end of the linear element</returns>
         private static Dimension DimensionLinearElement(Document doc, DimensionType dimensionType, Plane plane, Line dimensionLine, FamilyInstance familyInstance)
         {
             Connector[] connectors = Utils.ConnectionUtils.GetConnectors(familyInstance);
             ReferenceArray referenceArray = new ReferenceArray();
             foreach (Connector connector in connectors)
             {
+                //Retrieve a reference to the connector. As connectors themselves don't have a reference,
+                //find either a PlanarFace or a Line that has an endpoint that shares that connector's position,
+                //and retrieve that endpoint's reference.
                 Reference reference = Utils.GeometryUtils.GetPseudoReferenceOfConnector(Utils.GeometryUtils.GetGeometryOptions(), plane, connector);
                 if (reference != null) referenceArray.Append(reference);
             }
             if (referenceArray.Size != 2) return null;
+            //Create and return the Dimension based on the pseudo-connector references.
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
+
+        /// <summary>
+        /// Creates a Dimension from the connector apart of the Pipeline to the centerpoint in the element.
+        /// </summary>
+        /// <param name="doc">The active Document.</param>
+        /// <param name="dimensionType">The Dimension Type of the created dimension</param>
+        /// <param name="validStyleIds">Which centerline styles are valid for the purposes of getting a reference to the center of the element.</param>
+        /// <param name="plane">The plane that the current activeView is located on.</param>
+        /// <param name="dimensionLine">The line that the created dimension will be located on.</param>
+        /// <param name="familyInstance">The non-linear element in the pipeline that is being dimensioned.</param>
+        /// <param name="connected">The adjacent element that is within the pipeline. This is used to retrieve the connector of the main element that is located within the pipeline.</param>
+        /// <returns>a newly created Dimension going from the connector of the non-linear element within the pipeline to that element's centerpoint.</returns>
         private static Dimension DimensionNonLinearElement(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Plane plane, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
         {
+            //Get the element's connector that is still within the pipeline
             Connector connector = Utils.ConnectionUtils.TryGetConnection(familyInstance, connected);
+            
+            //Retrieve a reference to the connector. As connectors themselves don't have a reference,
+            //find either a PlanarFace or a Line that has an endpoint that shares that connector's position,
+            //and retrieve that endpoint's reference.
             Reference connectorReference = Utils.GeometryUtils.GetPseudoReferenceOfConnector(Utils.GeometryUtils.GetGeometryOptions(), plane, connector) 
                 ?? Utils.GeometryUtils.GetPseudoReferenceOfConnector(Utils.GeometryUtils.GetGeometryOptions(doc.ActiveView), plane, connector);
             if (connectorReference == null) return null;
+            //Retrieve a reference to the element's centerpoint. As there is no dedicated reference, all of the geometry lines must be checked to see
+            //if there is one with an endpoint that shares a position with the center of the element, and the reference of that endpoint is used instead.
             Reference centerReference = GetCenterReference(validStyleIds, familyInstance);
             if (centerReference == null) return null;
+            //Assembly the References into a ReferenceArray and then create and return the Dimension based on those references.
             ReferenceArray referenceArray = new ReferenceArray();
             referenceArray.Append(centerReference);
             referenceArray.Append(connectorReference);
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
-        //private static Dimension DimensionElement()
-        #endregion
 
 
 
