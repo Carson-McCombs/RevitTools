@@ -51,7 +51,7 @@ namespace CarsonsAddins
                 {
                     
                     Reference elemReference = uidoc.Selection.PickObject(ObjectType.Element, new SelectionFilters.SelectionFilter_PipeFittingPartType(PartType.PipeFlange), "Please select the pipe flange or bell you wish to flip.");
-                    if (elemReference == null)
+                    if (elemReference == null) 
                     {
                         transaction.RollBack();
                         return Result.Cancelled;
@@ -82,9 +82,10 @@ namespace CarsonsAddins
                 }
                 catch (Exception ex)
                 {
-                    message += ex.ToString() + '\n';
                     transaction.RollBack();
-                    return Result.Cancelled;
+                    message += ex.ToString() + '\n';
+                    if (ex is Autodesk.Revit.Exceptions.OperationCanceledException) return Result.Succeeded;
+                    else return Result.Cancelled;
                 }
 
             }
