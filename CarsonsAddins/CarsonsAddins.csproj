@@ -117,7 +117,7 @@
     <Compile Include="Utils\ElementCheckUtils.cs" />
     <Compile Include="Utils\GeometryUtils.cs" />
     <Compile Include="Utils\MediaUtils.cs" />
-    <Compile Include="Utils\PipeLine.cs" />
+    <Compile Include="PipeLine.cs" />
     <Compile Include="MiscCommands\SelectAllElementsOfSystemCommand.cs" />
     <Compile Include="MiscCommands\SelectPipeLineCommand.cs" />
     <Compile Include="Updaters\PipingEndPrepUpdater.cs" />
