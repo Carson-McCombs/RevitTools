@@ -16,11 +16,15 @@ namespace CarsonsAddins
     /// <summary>
     /// An ExternalCommand that is used to flip flanges / unions / bells. It does this by disconnecting selected elements before calling the "FlipHand" function and then reconnecting the element.
     /// </summary>
+    
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     class SmartFlipCommand : IExternalCommand, ISettingsComponent
     {
         public const bool IsWIP = false;
+
+
+        /// <inheritdoc cref="ISettingsComponent"/>
         public PushButtonData RegisterButton(Assembly assembly)
         {
             PushButtonData pushButtonData = new PushButtonData("SmartFlipFittingCommand", "Smart Flip Pipe Fitting", assembly.Location, "CarsonsAddins.SmartFlipCommand")

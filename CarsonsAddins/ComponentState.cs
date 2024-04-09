@@ -110,7 +110,7 @@ namespace CarsonsAddins
         void RegisterUpdater(AddInId addinId);
 
         /// <summary>
-        /// Unregisters the Updater within the Revit context.
+        /// Unregisters the Updater within the Revit context. Called either through UI or on application closing.
         /// </summary>
         void UnregisterUpdater();
     }
@@ -141,7 +141,7 @@ namespace CarsonsAddins
      */
 
 /// <summary>
-/// All commands that require a button on the ribbon panel, and are created by this Addin should implement this interface.
+/// All commands that require a button on the ribbon panel, and are created by this Addin should implement this interface. This interface is used to set which commands are registered with a button.
 /// </summary>
 public interface ISettingsComponent
 {

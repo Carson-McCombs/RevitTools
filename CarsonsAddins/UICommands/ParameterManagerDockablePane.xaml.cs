@@ -72,15 +72,25 @@ namespace CarsonsAddins
             updater = new StaleReferenceUpdater(addinId, ref table.ids);
             updater.Link(this);
         }
-
+        /// <summary>
+        /// Unregisters the Stale Reference Updater
+        /// </summary>
         public void UnregisterUpdater()
         {
             updater.Unregister();
         }
+
+        /// <summary>
+        /// On button press, loads the Elements that the User currently has selected into the Parameter Manager.
+        /// </summary>
         private void LoadSelectionButtonPress(object sender, RoutedEventArgs e)
         {
             LoadSelection();
         }
+
+        /// <summary>
+        /// Loads the Elements that the User currently has selected through Revit into the Parameter Manager.
+        /// </summary>
         public void LoadSelection()
         {
             if (uidoc == null) return;
@@ -88,8 +98,6 @@ namespace CarsonsAddins
             ParameterNameControl.Text = "";
             List<ElementId> elementIds = uidoc.Selection.GetElementIds() as List<ElementId>;
             if (elementIds.Count == 0) return;
-        
-
 
             foreach (ElementId id in elementIds)
             {
@@ -100,13 +108,13 @@ namespace CarsonsAddins
             
         }
 
+
         public void SetupDockablePane(DockablePaneProviderData data)
         {
             data.FrameworkElement = this;
             data.InitialState = new DockablePaneState
             {
                 DockPosition = DockPosition.Floating,
-
             };
         }
 
@@ -123,6 +131,9 @@ namespace CarsonsAddins
             }
         }
 
+        /// <summary>
+        /// Adds a new parameter into the table based on the text currently entered into the ParameterNameControl TextField.
+        /// </summary>
         private void AddParameterButton(object sender, RoutedEventArgs e)
         {
             try

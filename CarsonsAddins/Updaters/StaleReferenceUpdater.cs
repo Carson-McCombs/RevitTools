@@ -60,7 +60,7 @@ namespace CarsonsAddins
             if (parameterManager == null) return;
             List<ElementId> deletedElementIds = data.GetDeletedElementIds() as List<ElementId>;
             ElementId[] filteredDeletedElementIds = deletedElementIds.Where(id => elementIds.Contains(id)).ToArray();
-            parameterManager.RemoveStaleReference(filteredDeletedElementIds);
+            parameterManager.RemoveElements(filteredDeletedElementIds);
         }
 
         public string GetAdditionalInformation()

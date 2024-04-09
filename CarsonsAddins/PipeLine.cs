@@ -48,7 +48,7 @@ namespace CarsonsAddins
         /// <param name="uidoc">The active UIDocument</param>
         /// <param name="pipe">The selected Pipe</param>
         /// <param name="filter">The SelectionFilter</param>
-        /// <returns>An array of elements containing all of the elements in the pipeline.</returns>
+        /// <returns>An array of elements containing all of the elements in the Pipeline.</returns>
         public Element[] GetPipeLine(UIDocument uidoc, Pipe pipe, SelectionFilters.SelectionFilter_PipingElements filter)
         {
             elements = new List<Element>();
@@ -141,9 +141,9 @@ namespace CarsonsAddins
         /// Creates a line that is parallel with the projected element line and intersects the dimension point. This is where the primary dimension will be placed.
         /// </summary>
         /// <param name="plane">The plane of the active View.</param>
-        /// <param name="projectedElementLine">The line ranging from each end of the pipeline and projected onto the active View plane.</param>
+        /// <param name="projectedElementLine">The line ranging from each end of the Pipeline and projected onto the active View plane.</param>
         /// <param name="dimensionPoint">The point that the dimension line intersects and therefore determines the position of the dimension line.</param>
-        /// <returns>A line offset from the pipeline where the primary dimension will be placed.</returns>
+        /// <returns>A line offset from the Pipeline where the primary dimension will be placed.</returns>
         private static Line CreateDimensionLine(Plane plane, Line projectedElementLine, XYZ dimensionPoint)
         {
             Line dimensionLine = Line.CreateUnbound(Utils.GeometryUtils.ProjectPointOntoPlane(plane, dimensionPoint), projectedElementLine.Direction);
@@ -240,7 +240,7 @@ namespace CarsonsAddins
         }
 
         /// <summary>
-        /// Retrieves a reference to the end point of a Piping Element. Meant to be used when dimensioning to a end of the pipeline
+        /// Retrieves a reference to the end point of a Piping Element. Meant to be used when dimensioning to a end of the Pipeline
         /// </summary>
         /// <param name="activeView">The active View.</param>
         /// <param name="validStyleIds">The ElementIds corresponding to the valid centerline line styles.</param>
@@ -253,7 +253,7 @@ namespace CarsonsAddins
         }
 
         /// <summary>
-        /// A list of static Dimension Types corresponding to each element category within the pipeline and one for the Primary Dimension.
+        /// A list of static Dimension Types corresponding to each element category within the Pipeline and one for the Primary Dimension.
         /// </summary>
         private struct DimensionStyles
         {
@@ -266,7 +266,7 @@ namespace CarsonsAddins
         /// <summary>
         /// Retrives the Dimension Type based on the element category.
         /// </summary>
-        /// <param name="styles">The pipeline DimensionStyles.</param>
+        /// <param name="styles">The Pipeline DimensionStyles.</param>
         /// <param name="element">A Piping Element.</param>
         /// <returns>The Dimension Type corresponding to the selected piping element</returns>
         private DimensionType GetElementDimensionType(DimensionStyles styles, Element element)
@@ -278,10 +278,10 @@ namespace CarsonsAddins
             return null;
         }
         /// <summary>
-        /// Retrieves the Dimension Types for the pipeline
+        /// Retrieves the Dimension Types for the Pipeline
         /// </summary>
         /// <param name="doc">The active Document</param>
-        /// <returns>A Struct containing the Dimension Types for each element category within the pipeline.</returns>
+        /// <returns>A Struct containing the Dimension Types for each element category within the Pipeline.</returns>
         private static DimensionStyles GetDimensionStyles(Document doc)
         {
             DimensionStyles dimensionStyles = new DimensionStyles();
@@ -306,7 +306,7 @@ namespace CarsonsAddins
         }
 
         /// <summary>
-        /// Creates a primary and ( optionally ) a secondary dimension, with the primary dimension ranging from the center points of each of the elements on the end of the pipeline. And the secondary dimension containing each of the individual dimensions for each element in the pipeline. Will not allow the secondary dimension to be created if the pipeline is not parallel with the plane of the active View.
+        /// Creates a primary and ( optionally ) a secondary dimension, with the primary dimension ranging from the center points of each of the elements on the end of the Pipeline. And the secondary dimension containing each of the individual dimensions for each element in the Pipeline. Will not allow the secondary dimension to be created if the Pipeline is not parallel with the plane of the active View.
         /// </summary>
         /// <param name="doc">The active Document.</param>
         /// <param name="plane">The plane of the active View</param>
@@ -318,7 +318,7 @@ namespace CarsonsAddins
             View activeView = doc.ActiveView;
             ElementId[] validStyleIds = GetCenterlineIds(doc);
 
-            //Creates the element line which goes from the center of the element on each end of pipeline.
+            //Creates the element line which goes from the center of the element on each end of Pipeline.
             XYZ pointA = GetOriginOfElement(elements[0]);
             XYZ pointB = GetOriginOfElement(elements[1]);
             Line elementLine = Line.CreateBound(pointA, pointB);
@@ -390,7 +390,7 @@ namespace CarsonsAddins
         /// <param name="doc">The active Document.</param>
         /// <param name="dimensionType">The Dimension Type of the created dimension</param>
         /// <param name="dimensionLine">The line that the created dimension will be located on.</param>
-        /// <param name="pipe">The pipe element within the pipeline that is being dimensioned.</param>
+        /// <param name="pipe">The pipe element within the Pipeline that is being dimensioned.</param>
         /// <returns>a newly created Dimension going from each end of the pipe element</returns>
         private static Dimension DimensionPipe(Document doc, DimensionType dimensionType, Line dimensionLine, Pipe pipe)
         {
@@ -403,13 +403,13 @@ namespace CarsonsAddins
         }
 
         /// <summary>
-        /// Creates a Dimension from each end of a linear element.
+        /// Creates a Dimension from each end of a linear element by finding the pseudo-Reference of the connector on each end.
         /// </summary>
         /// <param name="doc">The active Document.</param>
         /// <param name="dimensionType">The Dimension Type of the created dimension</param>
         /// <param name="plane">The plane that the current activeView is located on.</param>
         /// <param name="dimensionLine">The line that the created dimension will be located on.</param>
-        /// <param name="familyInstance">The Linear element in the pipeline that is being dimensioned.</param>
+        /// <param name="familyInstance">The Linear element in the Pipeline that is being dimensioned.</param>
         /// <returns>a newly created Dimension going from each end of the linear element</returns>
         private static Dimension DimensionLinearElement(Document doc, DimensionType dimensionType, Plane plane, Line dimensionLine, FamilyInstance familyInstance)
         {
@@ -436,12 +436,12 @@ namespace CarsonsAddins
         /// <param name="validStyleIds">Which centerline styles are valid for the purposes of getting a reference to the center of the element.</param>
         /// <param name="plane">The plane that the current activeView is located on.</param>
         /// <param name="dimensionLine">The line that the created dimension will be located on.</param>
-        /// <param name="familyInstance">The non-linear element in the pipeline that is being dimensioned.</param>
-        /// <param name="connected">The adjacent element that is within the pipeline. This is used to retrieve the connector of the main element that is located within the pipeline.</param>
-        /// <returns>a newly created Dimension going from the connector of the non-linear element within the pipeline to that element's centerpoint.</returns>
+        /// <param name="familyInstance">The non-linear element in the Pipeline that is being dimensioned.</param>
+        /// <param name="connected">The adjacent element that is within the Pipeline. This is used to retrieve the connector of the main element that is located within the Pipeline.</param>
+        /// <returns>a newly created Dimension going from the connector of the non-linear element within the Pipeline to that element's centerpoint.</returns>
         private static Dimension DimensionNonLinearElement(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Plane plane, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
         {
-            //Get the element's connector that is still within the pipeline
+            //Get the element's connector that is still within the Pipeline
             Connector connector = Utils.ConnectionUtils.TryGetConnection(familyInstance, connected);
             
             //Retrieve a reference to the connector. As connectors themselves don't have a reference,
