@@ -148,7 +148,9 @@ namespace CarsonsAddins
 
             }
         }
-
+        /// <summary>
+        /// Updates the Elements within the ParameterManager.
+        /// </summary>
         private void ApplyButtonPress(object sender, RoutedEventArgs e)
         {
             try
@@ -184,6 +186,11 @@ namespace CarsonsAddins
         {
             return CollectionViewSource.GetDefaultView(SelectionDataGrid.ItemsSource);
         }
+
+        /// <summary>
+        /// Sets the current Parameter that the Elements will be grouped by.
+        /// </summary>
+        /// <param name="groupName">Name of the Parameter to be grouped by.</param>
         private void SetGroup(string groupName)
         {
             ICollectionView collectionView = GetDataGridCollectionView();
@@ -194,6 +201,11 @@ namespace CarsonsAddins
             collectionView.GroupDescriptions.Add(new GroupParameterValueProperty("cells[" + groupName + "]"));
         }
 
+        /// <summary>
+        /// Gets the ColumnHeader of the MenuItem provided. Will show a TaskDialog if the MenuItem is null or the ContextMenu of the MenuItem is null.
+        /// </summary>
+        /// <param name="menuItem">The MenuItem whose ColumnHeader will be returned.</param>
+        /// <returns>the ColumnHeader of the MenuItem or an empty string if the MenuItem or the ContextMenu of the MenuItem is null.</returns>
         private string GetMenuItemColumnHeader(MenuItem menuItem)
         {
             if (menuItem == null)
@@ -210,12 +222,18 @@ namespace CarsonsAddins
             return contextMenu.DataContext.ToString();
         }
 
+        /// <summary>
+        /// Called from a ContextMenu on a Parameter. Sets the table of elements to be grouped by this parameter.
+        /// </summary>
         private void GroupBy_Click(object sender, RoutedEventArgs e)
         {
             string parameterName = GetMenuItemColumnHeader(sender as MenuItem);
             SetGroup(parameterName);
         }
 
+        /// <summary>
+        /// Clears the current groupings from the table.
+        /// </summary>
         private void ClearGroups_Click(object sender, RoutedEventArgs e)
         {
             ICollectionView collectionView = GetDataGridCollectionView();
@@ -223,6 +241,10 @@ namespace CarsonsAddins
             collectionView.GroupDescriptions.Clear();
             currentGroupName = "";
         }
+
+        /// <summary>
+        /// Called from a ContextMenu on a Parameter. Deletes the Parameter that was clicked.
+        /// </summary>
         private void DeleteParameter_Click(object sender, RoutedEventArgs e)
         {
             string parameterName = GetMenuItemColumnHeader(sender as MenuItem);
@@ -293,8 +315,16 @@ namespace CarsonsAddins
             dataGrid.ItemsSource = rows;
         }
 
-        
+        /// <summary>
+        /// Checks if the Table contains a Column with the provided column name.
+        /// </summary>
+        /// <param name="columnName">the name of the Column being checked.</param>
+        /// <returns>True if the Table contains the corresponding Column and false if not.</returns>
         public bool ContainsColumn(string columnName) => columnNames.Contains(columnName);
+
+        /// <summary>
+        /// Clears the Table of all of its data.
+        /// </summary>
         public void Clear()
         {
             ids.Clear();
@@ -310,25 +340,34 @@ namespace CarsonsAddins
                 
             }
         }
+
+        /// <summary>
+        /// Adds an Element to the Table as a Row.
+        /// </summary>
+        /// <param name="element">Element being added to the Table.</param>
         public void AddElement(Element element)
         {
             if (element is null) return;
             if (ids.Contains(element.Id)) return;
             ids.Add(element.Id);
             ParameterRow row = new ParameterRow(element);
-            
            
             foreach (Definition definition in parameterDefinitions)
             {
                 row.AddParameter(definition);
             }
             rows.Add(row);
-            
         }
+        /*
+        /// <summary>
+        /// Not currently used. Adds a Parameter by Definition to the Table as a Column.
+        /// </summary>
+        /// <param name="definition">The Definition of the Parameter being added.</param>
         public void AddParameter(Definition definition)
         {
             if (definition is null) return;
             
+            //Adds the Parameter to each of the Element Rows with its corresponding informations ( such as StorageType, Return Type, and IsReadOnly ).
             for (int i = 0; i < rows.Count; i++)
             {
                 ParameterRow row = rows[i];
@@ -344,14 +383,22 @@ namespace CarsonsAddins
                 }
                 rows[i] = row;
             }
+            //Adds the Parameter to the Table by recording its definiton and name for references.
             columnNames.Add(definition.Name);
             parameterDefinitions.Add(definition);
             AddColumn(definition.Name, parameterReadOnly.Last());
-        }
+        }*/
+
+        /// <summary>
+        /// Adds a Parameter by name to the Table as a Column. WARNING: it is possible that there are two different Parameters with the same name, in which case the one found first is used.
+        /// </summary>
+        /// <param name="parameterName">The name of the Parameter being added.</param>
         public void AddParameter(string parameterName)
         {
             if (parameterName is null) return;
             Definition definition = null;
+
+            //Iterates through each Element in the Table until an Element containing a Parameter sharing the name is found.
             for (int i = 0; i < rows.Count; i++)
             {
                 
@@ -463,7 +510,7 @@ namespace CarsonsAddins
     class ParameterRowsCollection : ObservableCollection<ParameterRow> { }
 
     /// <summary>
-    /// Currently binding and tracking changes via the INotifyPropertyChanged base class. Will eventually move to binding via DependencyProperties for speed increase.
+    /// Stores and References data of a single Element. Currently binding and tracking changes via the INotifyPropertyChanged base class. Will eventually move to binding via DependencyProperties for speed increase.
     /// </summary>
     class ParameterRow : INotifyPropertyChanged // 1 to 1: Element to Row
     {
@@ -491,6 +538,14 @@ namespace CarsonsAddins
             if (element == null) return null;
             Parameter parameter = element.get_Parameter(definition); 
             cells.Add(definition.Name, new ParameterCell(parameter));
+            return parameter;
+        }
+        public Parameter AddParameter(string parameterName)
+        {
+            if (element == null) return null;
+            if (parameterName == null) return null;
+            Parameter parameter = element.LookupParameter(parameterName);
+            cells.Add(parameterName, new ParameterCell(parameter));
             return parameter;
         }
         public void RemoveParameter(string parameterName)
