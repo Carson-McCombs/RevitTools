@@ -129,6 +129,8 @@ namespace CarsonsAddins
             {
                 if (ParameterNameControl.Text == "") return;
                 table.AddParameter(ParameterNameControl.Text);
+                ParameterNameControl.Text = "";
+
             } catch (Exception ex)
             {
                 TaskDialog.Show("Parameter Manager - Error Adding Parameter", ex.Message);
