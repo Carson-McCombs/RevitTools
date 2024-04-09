@@ -18,6 +18,75 @@ namespace CarsonsAddins.Utils
         /// </summary>
         public enum BellOrSpigot { NONE, BELL, SPIGOT };
 
+        public struct EndPrepInfo
+        {
+            public XYZ position;
+            public BellOrSpigot endType;
+            public string endPrep;
+            public bool isTapped;
+            public EndPrepInfo(XYZ position, BellOrSpigot endType, string endPrep, bool tapped)
+            {
+                this.position = position;
+                this.endType = endType;
+                this.endPrep = endPrep;
+                this.isTapped = tapped;
+            }
+
+            public static EndPrepInfo GetEndPrepByConnector(Connector connector)
+            {
+                if (connector == null) return new EndPrepInfo(XYZ.Zero, BellOrSpigot.NONE, "NULL", false);
+                if (!connector.IsConnected) return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, "PE", false);
+
+                Connector adjacent = TryGetConnectedSkipNC(connector);
+                if (adjacent == null) return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, "PE", false);
+
+                string[] descriptionArray = adjacent.Description.Split('-', ';');
+                string endTypeString = descriptionArray[0].Trim().ToUpper();
+                string endPrepString = descriptionArray[1].Trim().ToUpper() ?? "NULL";
+                
+                switch (endTypeString)
+                {
+                    case ("B"):
+                    case ("BELL"):
+                        return new EndPrepInfo(connector.Origin, BellOrSpigot.BELL, endPrepString, false);
+
+                    case ("PE"):
+                    case ("S"):
+                    case ("SPIGOT"):
+                        return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, endPrepString, false);
+
+                    default:
+                        return new EndPrepInfo(connector.Origin, BellOrSpigot.NONE, endPrepString, false);
+                }
+
+
+                
+            }
+        }
+
+
+
+
+        
+        public static bool CheckIfReorder(EndPrepInfo endPrepA, EndPrepInfo endPrepB)
+        {
+            if (endPrepA.endType.Equals(endPrepB.endType)) // same ending types (i.e. either as bell x bell or pe x pe or none x none)
+            {
+                if (endPrepA.endPrep == "PE") return true;
+                else if (endPrepB.endPrep == "PE") return false;
+                else if (endPrepA.endPrep == endPrepB.endPrep && endPrepB.isTapped && !endPrepA.isTapped) return true;
+                else return endPrepA.endPrep.CompareTo(endPrepB.endPrep) > 0;
+
+            }
+            return ((int)endPrepA.endType > (int)endPrepB.endType); //reorders end preps such that a bell will always be before a spigot and a spigot will always be before a 'none' type
+        }
+        public static string GetOrderedCombinedEndPrep(EndPrepInfo endPrepA, EndPrepInfo endPrepB)
+        {
+            if (CheckIfReorder(endPrepA,endPrepB)) return endPrepB.endPrep + " x " + endPrepA.endPrep;
+            return endPrepA.endPrep + " x " + endPrepB.endPrep;
+        }
+
+
         /// <summary>
         /// Gets the connectors from elementA and elementB, then checks each combination of connectors to see if they are connected. 
         /// </summary>
@@ -146,6 +215,25 @@ namespace CarsonsAddins.Utils
                 return GetConnectedFamilyInstanceWithConnector(GetAdjacentConnector(connected));
             };
             return (connected.Owner as FamilyInstance, connected);
+        }
+
+        /// <summary>
+        /// Attempts to find the Connected Family Instance with the joining Connector. If there is a "Non-Connector" that is found, instead return the next connector that joins to the Non-Connector.
+        /// </summary>
+        /// <param name="connector">A Connector Element</param>
+        /// <returns>The joining connector that is connected to the provided connector.</returns>
+        public static Connector TryGetConnectedSkipNC(Connector connector)
+        {
+            if (connector == null) return null;
+            Connector connected = TryGetConnected(connector);
+            if (connected == null) return null;
+            if (connected.Owner == null) return null;
+            if (!(connected.Owner is FamilyInstance familyInstance)) return null;
+            if (familyInstance.get_Parameter(BuiltInParameter.ELEM_FAMILY_PARAM).AsValueString().Equals("Non-Connector")) //Non-Connector Pipe Fitting Element - originally called by the ID for the Non-Connector fitting, but it changes from project to project, so using name as a quick fix
+            {
+                return TryGetConnectedSkipNC(GetAdjacentConnector(connected));
+            };
+            return connected;
         }
 
         /// <summary>

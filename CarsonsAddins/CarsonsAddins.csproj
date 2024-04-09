@@ -91,11 +91,15 @@
     <Compile Include="MiscCommands\GenericComponentCommands.cs" />
     <Compile Include="MyApplicationSettings.cs" />
     <Compile Include="MiscCommands\SelectDimensionsIndividuallyCommand.cs" />
+    <Compile Include="UICommands\PipeEndPrepBCWindow.xaml.cs">
+      <DependentUpon>PipeEndPrepBCWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UICommands\SetDimensionTextEventHandler.cs" />
     <Compile Include="SelectionFilters\SelectionFilter_LinearDimension.cs" />
     <Compile Include="SelectionFilters\SelectionFilter_Pipe.cs" />
     <Compile Include="SelectionFilters\SelectionFilter_PipeFittingPartType.cs" />
     <Compile Include="SelectionFilters\SelectionFilter_PipingElements.cs" />
+    <Compile Include="Updaters\PipeEndPrepBCUpdater.cs" />
     <Compile Include="Updaters\StaleReferenceUpdater.cs" />
     <Compile Include="Controls\ToggleableTextBox.xaml.cs">
       <DependentUpon>ToggleableTextBox.xaml</DependentUpon>
@@ -108,8 +112,8 @@
     </Compile>
     <Compile Include="MiscCommands\FilterPipingElementsCommand.cs" />
     <Compile Include="MiscCommands\GetTotalPipeLengthCommand.cs" />
-    <Compile Include="UICommands\PipeEndPrepPreferencesWindow.xaml.cs">
-      <DependentUpon>PipeEndPrepPreferencesWindow.xaml</DependentUpon>
+    <Compile Include="UICommands\PipeEndPrepWindow.xaml.cs">
+      <DependentUpon>PipeEndPrepWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Utils\ConnectionUtils.cs" />
     <Compile Include="Utils\DatabaseUtils.cs" />
@@ -120,7 +124,7 @@
     <Compile Include="PipeLine.cs" />
     <Compile Include="MiscCommands\SelectAllElementsOfSystemCommand.cs" />
     <Compile Include="MiscCommands\SelectPipeLineCommand.cs" />
-    <Compile Include="Updaters\PipingEndPrepUpdater.cs" />
+    <Compile Include="Updaters\PipeEndPrepUpdater.cs" />
     <Compile Include="Controls\PipingSystemSelectorControl.xaml.cs">
       <DependentUpon>PipingSystemSelectorControl.xaml</DependentUpon>
     </Compile>
@@ -168,7 +172,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UICommands\PipeEndPrepPreferencesWindow.xaml">
+    <Page Include="UICommands\PipeEndPrepBCWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UICommands\PipeEndPrepWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

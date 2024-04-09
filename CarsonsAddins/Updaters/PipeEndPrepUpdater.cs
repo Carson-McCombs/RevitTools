@@ -9,17 +9,17 @@ using System.Threading.Tasks;
 
 namespace CarsonsAddins
 {
-    class PipingEndPrepUpdater : IUpdater
+    class PipeEndPrepUpdater : IUpdater
     {
-        private UpdaterId updaterId;
+        private readonly UpdaterId updaterId;
         private PipeEndPrepWindow pipeEndPrepWindow;
         private bool enabled = false;
-        public PipingEndPrepUpdater(AddInId addinId)
+        public PipeEndPrepUpdater(AddInId addinId)
         {
             //updaterId = new UpdaterId(addinId, ApplicationIds.pipingConnectionsUpdaterId);
             updaterId = new UpdaterId(addinId, ApplicationIds.GetId(GetType()));
             
-            RegisterUpdater();
+            Register();
             RegisterTriggers();
         }
         public void Link(PipeEndPrepWindow pipeEndPrepWindow)
@@ -40,7 +40,7 @@ namespace CarsonsAddins
 
 
         }
-        private void RegisterUpdater()
+        private void Register()
         {
             if (UpdaterRegistry.IsUpdaterRegistered(updaterId)) Unregister();
 
