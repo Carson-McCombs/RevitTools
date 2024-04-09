@@ -111,7 +111,11 @@ namespace CarsonsAddins
         }
 
 
-        public void RemoveStaleReference(ElementId[] elementIds )
+        /// <summary>
+        /// Removes Elements from the Parameter Manager. Called for purposes such as removing stale references.
+        /// </summary>
+        /// <param name="elementIds">array of ElementIds to be removed.</param>
+        public void RemoveElements(ElementId[] elementIds )
         {
             foreach (ElementId id in elementIds)
             {
