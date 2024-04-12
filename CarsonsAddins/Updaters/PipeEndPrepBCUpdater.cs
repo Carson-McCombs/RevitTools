@@ -95,6 +95,8 @@ namespace CarsonsAddins
 
         private void UpdatePipeEndPrep(Document doc, Pipe pipe)
         {
+            const double largestTapDistance = 0.5; //6"
+
             if (pipe == null) return;
             if (pipeEndPrepDefinition == null) return;
             Parameter endPrepParameter = pipe.get_Parameter(pipeEndPrepDefinition);
@@ -109,6 +111,8 @@ namespace CarsonsAddins
             Array.ForEach(intersectionSegments, curves => wallCollarString += " x WC ");
             double closestDistA = GetShortestDistanceToWalls(endPrepA.position, intersectionSegments);
             double closestDistB = GetShortestDistanceToWalls(endPrepB.position, intersectionSegments);
+            endPrepA.isTapped = (closestDistA < largestTapDistance) && (endPrepA.endType.Equals(BellOrSpigot.BELL));
+            endPrepA.isTapped = (closestDistB < largestTapDistance) && (endPrepB.endType.Equals(BellOrSpigot.BELL));
             bool reorder = CheckIfReorder(endPrepA, endPrepB, closestDistA, closestDistB);
             if (reorder)
             {
@@ -121,9 +125,8 @@ namespace CarsonsAddins
             }
             double[] distancesFromPrepA = wallCenters.Select(wallCenter => endPrepA.position.DistanceTo(wallCenter)).ToArray();
             
-            double largestTapDistance = 0.5; //6"
-            string tappedStringA = closestDistA < largestTapDistance ? "T" : "";
-            string tappedStringB = closestDistB < largestTapDistance ? "T" : "";
+            string tappedStringA =  endPrepA.isTapped ? "T" : "";
+            string tappedStringB = endPrepB.isTapped ? "T" : "";
             string comments = "";
 
 
