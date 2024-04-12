@@ -112,7 +112,7 @@ namespace CarsonsAddins
             double closestDistA = GetShortestDistanceToWalls(endPrepA.position, intersectionSegments);
             double closestDistB = GetShortestDistanceToWalls(endPrepB.position, intersectionSegments);
             endPrepA.isTapped = (closestDistA < largestTapDistance) && (endPrepA.endType.Equals(BellOrSpigot.BELL));
-            endPrepA.isTapped = (closestDistB < largestTapDistance) && (endPrepB.endType.Equals(BellOrSpigot.BELL));
+            endPrepB.isTapped = (closestDistB < largestTapDistance) && (endPrepB.endType.Equals(BellOrSpigot.BELL));
             bool reorder = CheckIfReorder(endPrepA, endPrepB, closestDistA, closestDistB);
             if (reorder)
             {
@@ -135,7 +135,7 @@ namespace CarsonsAddins
             //Array.ForEach(distancesFromPrepA,distance => comments += "w/ WC " + UnitFormatUtils.Format(units,SpecTypeId.Length,distance, false) + " FROM " + tappedStringA + endPrepA.endPrep + "; ");
             Array.ForEach(distancesFromPrepA, distance => comments += "w/ WC " + new Utils.UnitUtils.FeetAndInchesFraction(distance, 16).ToString() + " FROM " + tappedStringA + endPrepA.endPrep + "; ");
 
-            string combinedEndPrep = tappedStringA + endPrepA.endPrep + wallCollarString + " x " + tappedStringB + endPrepB.endPrep;
+            string combinedEndPrep = tappedStringA + endPrepA.endPrep + wallCollarString + "x " + tappedStringB + endPrepB.endPrep;
             Parameter commentsParameter = pipe.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS);
             
             if (combinedEndPrep.Equals(currentEndPrep) && (commentsParameter.AsString() == comments)) return;
