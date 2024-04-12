@@ -43,7 +43,7 @@ namespace CarsonsAddins.Utils
 
 
                 double multiple = numerator / (double)highestDenominator;
-                if (multiple % 1 == 0) 
+                if (multiple % 1 == 0 && multiple != 1) 
                 {
                     denominatorValue = highestDenominator / (uint)multiple;
                     numeratorValue = numerator / (uint)multiple;
