@@ -125,7 +125,7 @@ namespace CarsonsAddins
             }
 
 
-            double[] distancesFromPrepA = wallCenters.Select(wallCenter => endPrepA.position.DistanceTo(wallCenter)).OrderByDescending(dist => dist).ToArray();
+            double[] distancesFromPrepA = wallCenters.Select(wallCenter => endPrepA.position.DistanceTo(wallCenter)).OrderBy(dist => dist).ToArray();
 
             List<string> endPrepStrings = new List<string>{endPrepA.ToString() };
             Array.ForEach(intersectionSegments, curves => endPrepStrings.Add("WC"));
