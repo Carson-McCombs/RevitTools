@@ -85,13 +85,13 @@ namespace CarsonsAddins.Utils
         {
             if (endPrepA.endType.Equals(endPrepB.endType)) // same ending types (i.e. either as bell x bell or pe x pe or none x none)
             {
-                if (endPrepA.endPrep == "PE") return true;
-                else if (endPrepB.endPrep == "PE") return false;
-                else if (endPrepA.endPrep == endPrepB.endPrep)
+                if (endPrepA.endPrep == endPrepB.endPrep)
                 {
                     if (endPrepB.isTapped && !endPrepA.isTapped) return true;
                     return (minDistanceToWallB < minDistanceToWallA);
                 }
+                if (endPrepA.endPrep == "PE") return true;
+                else if (endPrepB.endPrep == "PE") return false;
                 else return endPrepA.endPrep.CompareTo(endPrepB.endPrep) > 0;
 
             }
