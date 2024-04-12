@@ -120,6 +120,7 @@
     <Compile Include="Utils\DimensioningUtils.cs" />
     <Compile Include="Utils\ElementCheckUtils.cs" />
     <Compile Include="Utils\GeometryUtils.cs" />
+    <Compile Include="Utils\UnitUtils.cs" />
     <Compile Include="Utils\MediaUtils.cs" />
     <Compile Include="PipeLine.cs" />
     <Compile Include="MiscCommands\SelectAllElementsOfSystemCommand.cs" />
