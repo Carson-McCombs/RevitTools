@@ -80,6 +80,24 @@ namespace CarsonsAddins.Utils
             }
             return ((int)endPrepA.endType > (int)endPrepB.endType); //reorders end preps such that a bell will always be before a spigot and a spigot will always be before a 'none' type
         }
+
+        public static bool CheckIfReorder(EndPrepInfo endPrepA, EndPrepInfo endPrepB, double minDistanceToWallA, double minDistanceToWallB)
+        {
+            if (endPrepA.endType.Equals(endPrepB.endType)) // same ending types (i.e. either as bell x bell or pe x pe or none x none)
+            {
+                if (endPrepA.endPrep == "PE") return true;
+                else if (endPrepB.endPrep == "PE") return false;
+                else if (endPrepA.endPrep == endPrepB.endPrep)
+                {
+                    if (endPrepB.isTapped && !endPrepA.isTapped) return true;
+                    return (minDistanceToWallB < minDistanceToWallA);
+                }
+                else return endPrepA.endPrep.CompareTo(endPrepB.endPrep) > 0;
+
+            }
+            return ((int)endPrepA.endType > (int)endPrepB.endType); //reorders end preps such that a bell will always be before a spigot and a spigot will always be before a 'none' type
+        }
+
         public static string GetOrderedCombinedEndPrep(EndPrepInfo endPrepA, EndPrepInfo endPrepB)
         {
             if (CheckIfReorder(endPrepA,endPrepB)) return endPrepB.endPrep + " x " + endPrepA.endPrep;
