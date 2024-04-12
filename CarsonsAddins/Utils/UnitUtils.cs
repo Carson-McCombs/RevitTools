@@ -20,7 +20,7 @@ namespace CarsonsAddins.Utils
                 double inches = (feetAndInches - feet) * 12;
                 inchesFraction = new Fraction(inches, highestDenominator);
             }
-            public override string ToString() => feet + "\' - " + inchesFraction.ToString() + '"';
+            public override string ToString() => feet + "\'-" + inchesFraction.ToString() + '"';
         }
 
 
@@ -54,7 +54,7 @@ namespace CarsonsAddins.Utils
                     numeratorValue = numerator;
                 }
             }
-            public override string ToString() => integerValue + " " + numeratorValue + " / " + denominatorValue;
+            public override string ToString() => integerValue + " " + numeratorValue + "/" + denominatorValue;
         }
 
 
