@@ -55,7 +55,8 @@ namespace CarsonsAddins.Utils
                     numeratorValue = numerator;
                 }
             }
-            public override string ToString() => integerValue + " " + numeratorValue + "/" + denominatorValue;
+            public override string ToString() => (numeratorValue == 0) ? integerValue.ToString() :  integerValue + " " + numeratorValue + "/" + denominatorValue;
+
         }
 
 
