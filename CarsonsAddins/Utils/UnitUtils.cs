@@ -11,16 +11,23 @@ namespace CarsonsAddins.Utils
 
         public struct FeetAndInchesFraction
         {
-            public int feet;
+            public int feetValue;
             public Fraction inchesFraction;
 
             public FeetAndInchesFraction(double feetAndInches, uint highestDenominator)
             {
-                feet = (int)feetAndInches;
-                double inches = (feetAndInches - feet) * 12;
+                feetValue = (int)feetAndInches;
+                double inches = (feetAndInches - feetValue) * 12;
                 inchesFraction = new Fraction(inches, highestDenominator);
             }
-            public override string ToString() => feet + "\'-" + inchesFraction.ToString() + '"';
+            public override string ToString()
+            {
+                List<string> displayString = new List<string>();
+                if (feetValue != 0) displayString.Add(feetValue + "\'");
+                string fractionString = inchesFraction.ToString();
+                if (fractionString != "") displayString.Add(fractionString + '\"');
+                return string.Join("-", displayString);
+            }
         }
 
 
@@ -29,19 +36,21 @@ namespace CarsonsAddins.Utils
             public int integerValue;
             public uint numeratorValue;
             public uint denominatorValue;  
-
+            
             public Fraction(double value, uint highestDenominator)
             {
                 integerValue = (int)value;
+                
                 int sign = (value >= 0) ? 1 : -1;
                 
                 double decimalValue = (value - integerValue) * sign;
 
-                uint numerator = (uint)(decimalValue * highestDenominator);
-                
-
-
-
+                uint numerator = (uint)(Round(decimalValue * highestDenominator));
+                if (numerator == highestDenominator)
+                {
+                    numerator = 0;
+                    integerValue += sign;
+                }
                 double multiple = numerator / (double)highestDenominator;
                 uint uint_multiple = (uint)multiple;
                 if (multiple % 1 == 0 && uint_multiple > 1) 
@@ -55,12 +64,39 @@ namespace CarsonsAddins.Utils
                     numeratorValue = numerator;
                 }
             }
-            public override string ToString() => (numeratorValue == 0) ? integerValue.ToString() :  integerValue + " " + numeratorValue + "/" + denominatorValue;
+            public override string ToString()
+            {
+                List<string> displayString = new List<string>();
+                if (integerValue != 0) displayString.Add(integerValue.ToString());
+                if (numeratorValue != 0) displayString.Add(numeratorValue + "/" + denominatorValue);
+                return string.Join(" ", displayString);
+            }
 
         }
 
 
+        public static double Round(double value)
+        {
+            int sign = (value >= 0) ? 1 : -1;
+            double decimals = value % 1;
+            value -= decimals;
+            return (decimals >= 0.5) ? value + sign : value;
+        }
         
+        public static int RoundToInt(double value) => (int)Round(value);
 
+        public static double Floor(double value) => value - (value % 1);
+        public static int FloorToInt(double value) => (int)Floor(value); 
+        public static double Ceil(double value) => Floor(value) + 1;
+        public static int CeilToInt(double value) => (int)Ceil(value);
+        public static double RoundIfWithinEpsilon(double value)
+        {
+            double ceiling = Ceil(value);
+            if (ceiling - value <= double.Epsilon) return ceiling;
+            double floor = Floor(value);
+            if (value - floor <= double.Epsilon) return floor;
+            return value;
+        }
+        public static int RoundIfWithinEpsilonToInt(double value) => (int) RoundIfWithinEpsilon(value);
     }
 }

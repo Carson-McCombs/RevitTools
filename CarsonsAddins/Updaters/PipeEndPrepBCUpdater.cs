@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static CarsonsAddins.Utils.ConnectionUtils;
 
 namespace CarsonsAddins
@@ -103,44 +104,43 @@ namespace CarsonsAddins
             if (endPrepParameter == null) return;
             Connector[] connectors = GetConnectors(pipe);
             string currentEndPrep = endPrepParameter.AsString();
+
             EndPrepInfo endPrepA = EndPrepInfo.GetEndPrepByConnector(connectors[0]);
             EndPrepInfo endPrepB = EndPrepInfo.GetEndPrepByConnector(connectors[1]);
+
             Curve[] intersectionSegments = GetIntersectionsBySolids(doc, pipe);
             XYZ[] wallCenters = intersectionSegments.Select(curve => (curve.GetEndPoint(0) + curve.GetEndPoint(1)) / 2).ToArray();
-            string wallCollarString = "";
-            Array.ForEach(intersectionSegments, curves => wallCollarString += " x WC ");
+            
             double closestDistA = GetShortestDistanceToWalls(endPrepA.position, intersectionSegments);
             double closestDistB = GetShortestDistanceToWalls(endPrepB.position, intersectionSegments);
+
             endPrepA.isTapped = (closestDistA < largestTapDistance) && (endPrepA.endType.Equals(BellOrSpigot.BELL));
             endPrepB.isTapped = (closestDistB < largestTapDistance) && (endPrepB.endType.Equals(BellOrSpigot.BELL));
+
             bool reorder = CheckIfReorder(endPrepA, endPrepB, closestDistA, closestDistB);
             if (reorder)
             {
-                EndPrepInfo tmp = endPrepB;
-                endPrepB = endPrepA;
-                endPrepA = tmp;
-                double tmpDistance = closestDistB;
-                closestDistB = closestDistA;
-                closestDistA = tmpDistance;
+                (endPrepA, endPrepB) = (endPrepB, endPrepA);
+                (closestDistA, closestDistB) = (closestDistB, closestDistA);
             }
-            double[] distancesFromPrepA = wallCenters.Select(wallCenter => endPrepA.position.DistanceTo(wallCenter)).ToArray();
-            
-            string tappedStringA =  endPrepA.isTapped ? "T" : "";
-            string tappedStringB = endPrepB.isTapped ? "T" : "";
-            string comments = "";
 
 
-            Units units = new Units(UnitSystem.Imperial) ;
-            FormatValueOptions formatValueOptions = new FormatValueOptions();
-            //Array.ForEach(distancesFromPrepA,distance => comments += "w/ WC " + UnitFormatUtils.Format(units,SpecTypeId.Length,distance, false) + " FROM " + tappedStringA + endPrepA.endPrep + "; ");
-            Array.ForEach(distancesFromPrepA, distance => comments += "w/ WC " + new Utils.UnitUtils.FeetAndInchesFraction(distance, 16).ToString() + " FROM " + tappedStringA + endPrepA.endPrep + "; ");
+            double[] distancesFromPrepA = wallCenters.Select(wallCenter => endPrepA.position.DistanceTo(wallCenter)).OrderByDescending(dist => dist).ToArray();
 
-            string combinedEndPrep = tappedStringA + endPrepA.endPrep + wallCollarString + "x " + tappedStringB + endPrepB.endPrep;
+            List<string> endPrepStrings = new List<string>{endPrepA.ToString() };
+            Array.ForEach(intersectionSegments, curves => endPrepStrings.Add("WC"));
+            endPrepStrings.Add(endPrepB.ToString());
+            string combinedEndPrep = string.Join(" x ", endPrepStrings);
+
+            List<string> commentStrings = new List<string>();
+            distancesFromPrepA.Select(distance => "w/ WC " + new Utils.UnitUtils.FeetAndInchesFraction(distance, 16).ToString() + " FROM " + endPrepA.ToString());
+            string combinedComments = string.Join("; ", commentStrings);
+
             Parameter commentsParameter = pipe.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS);
             
-            if (combinedEndPrep.Equals(currentEndPrep) && (commentsParameter.AsString() == comments)) return;
+            if (combinedEndPrep.Equals(currentEndPrep) && (commentsParameter.AsString() == combinedComments)) return;
             endPrepParameter.Set(combinedEndPrep);
-            commentsParameter.Set(comments);
+            commentsParameter.Set(combinedComments);
         }
         private double GetShortestDistanceToWalls(XYZ endPoint, Curve[] curves)
         {

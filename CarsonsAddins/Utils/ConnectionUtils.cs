@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Security.Cryptography.X509Certificates;
 
 namespace CarsonsAddins.Utils
 {
@@ -24,12 +25,12 @@ namespace CarsonsAddins.Utils
             public BellOrSpigot endType;
             public string endPrep;
             public bool isTapped;
-            public EndPrepInfo(XYZ position, BellOrSpigot endType, string endPrep, bool tapped)
+            public EndPrepInfo(XYZ position, BellOrSpigot endType, string endPrep, bool isTapped)
             {
                 this.position = position;
                 this.endType = endType;
                 this.endPrep = endPrep;
-                this.isTapped = tapped;
+                this.isTapped = isTapped;
             }
 
             public static EndPrepInfo GetEndPrepByConnector(Connector connector)
@@ -59,13 +60,17 @@ namespace CarsonsAddins.Utils
                         return new EndPrepInfo(connector.Origin, BellOrSpigot.NONE, endPrepString, false);
                 }
 
-
                 
+                
+            }
+            public override string ToString()
+            {
+                return (isTapped ? "T" : "") + endPrep;
             }
         }
 
 
-
+        
 
         
         public static bool CheckIfReorder(EndPrepInfo endPrepA, EndPrepInfo endPrepB)
