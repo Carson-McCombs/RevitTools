@@ -238,6 +238,8 @@
   <ItemGroup>
     <Content Include="Resources\cloud_16.png" />
     <Content Include="Resources\cloud_32.png" />
+    <Content Include="UICommands\Refresh_icon.png" />
+    <Resource Include="Resources\Refresh_Icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
 </Project>

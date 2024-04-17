@@ -9,7 +9,6 @@
       
     d:DesignHeight="444" d:DesignWidth="512">
     <Page.Resources>
-        
         <Style x:Key="CheckButtonsStyle" TargetType="Button">
             <Setter Property="Height" Value="28"/>
             <Setter Property="Width" Value="148"/>
@@ -126,7 +125,10 @@
                 </ScrollViewer>
             </Border>
         </Grid>
-        <UniformGrid Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,36,12,0" Rows="8">
+        <UniformGrid Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,36,12,0" Rows="9">
+            <Button Click="RefreshSelectionButtonPress" Width="36" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Image Width="32" Height="32" Source="pack://application:,,,/CarsonsAddins;component/Resources/Refresh_icon.png" />
+            </Button>
             <Button Content="Load Selection" Click="LoadSelectionButtonPress" Style="{StaticResource CheckButtonsStyle}"/>
 
             <Button Content="Select From List" Click="SelectHighlightedElements" Style="{StaticResource CheckButtonsStyle}"/>
@@ -134,7 +136,7 @@
             <Line/>
             
             <Button Content="Add Parameter" Click="AddParameterButton"  Style="{StaticResource CheckButtonsStyle}"/>
-            <TextBox Name="ParameterNameControl" Text="" IsReadOnly="false"/>
+            <TextBox Name="ParameterNameControl" Text="" IsReadOnly="false" VerticalContentAlignment="Center" Height="36" ToolTip="Parameter Name"/>
             <Line/>
 
         </UniformGrid>

@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Configuration;
 using System.Configuration.Assemblies;
 using System.Data;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -26,10 +27,6 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 using Binding = System.Windows.Data.Binding;
 
@@ -51,13 +48,14 @@ namespace CarsonsAddins
         {
             InitializeComponent();
             table = new ParameterTable(SelectionDataGrid);
+            
         }
         
         public void Init(UIDocument uidoc)
         {
             table.Clear();
             this.uidoc = uidoc;
-            new ParametersByTypeId(uidoc);
+            //new ParametersByTypeId(uidoc);
         }
         public PushButtonData RegisterButton(Assembly assembly)
         {
@@ -78,6 +76,11 @@ namespace CarsonsAddins
         public void UnregisterUpdater()
         {
             updater.Unregister();
+        }
+
+        private void RefreshSelectionButtonPress(object sender, RoutedEventArgs e)
+        {
+            table.Refresh();
         }
 
         /// <summary>
@@ -341,6 +344,15 @@ namespace CarsonsAddins
             }
         }
 
+
+        public void Refresh()
+        {
+            foreach (ParameterRow row in rows)
+            {
+                row.Refresh();
+            }
+        }
+
         /// <summary>
         /// Adds an Element to the Table as a Row.
         /// </summary>
@@ -533,6 +545,15 @@ namespace CarsonsAddins
             this.element = element;
             Id = element.Id;
         }
+
+        public void Refresh()
+        {
+            foreach (ParameterCell cell in cells.Values)
+            {
+                cell.Refresh();
+            }
+        }
+
         public Parameter AddParameter(Definition definition)
         {
             if (element == null) return null;
@@ -648,22 +669,32 @@ namespace CarsonsAddins
         {
             if (parameter == null) return null;
             IsSynced = true;
-            switch (parameter.StorageType)
+            return parameter.AsValueString();
+            /*switch (parameter.StorageType)
             {
                 case StorageType.String: return parameter.AsValueString();
                 case StorageType.Integer: return parameter.AsInteger().ToString();
                 case StorageType.Double: return parameter.AsDouble().ToString();
                 case StorageType.ElementId: return parameter.AsValueString().ToString();
                 default: return null;
-            }
+            }*/
 
+        }
+        public void Refresh()
+        {
+            if (IsNull) return;
+            ParameterValue = GetParameterValue(parameter);
+            IsSynced = true;
         }
         public Parameter PushValueToParameter()
         {
             if (IsNull) return null;
             IsSynced = true;
+            
             try
             {
+                parameter.SetValueString(ParameterValue);
+                /*
                 switch (parameter.StorageType)
                 {
                     case StorageType.String:
@@ -690,8 +721,9 @@ namespace CarsonsAddins
                             return parameter;
                         }
                     default: return parameter;
-                }
-            }catch (Exception ex) {
+                }*/
+            }
+            catch (Exception ex) {
                 TaskDialog.Show("ParameterCell Error", ex.Message);
             }
             return parameter;
