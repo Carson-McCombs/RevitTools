@@ -136,7 +136,7 @@
             <Line/>
             
             <Button Content="Add Parameter" Click="AddParameterButton"  Style="{StaticResource CheckButtonsStyle}"/>
-            <TextBox Name="ParameterNameControl" Text="" IsReadOnly="false" VerticalContentAlignment="Center" Height="36" ToolTip="Parameter Name"/>
+            <TextBox Name="ParameterNameControl" Text="" IsReadOnly="false" FontSize="14" FontFamily="Arial" Margin="4" Padding="4" VerticalContentAlignment="Center" ToolTip="Parameter Name"/>
             <Line/>
 
         </UniformGrid>
