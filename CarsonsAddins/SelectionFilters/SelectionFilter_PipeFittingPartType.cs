@@ -14,18 +14,19 @@ namespace CarsonsAddins.SelectionFilters
     /// </summary>
     public class SelectionFilter_PipeFittingPartType : ISelectionFilter
     {
-        private readonly PartType partType = PartType.Undefined;
-        public SelectionFilter_PipeFittingPartType(PartType partType)
+        private readonly PartType[] partTypes;
+        public SelectionFilter_PipeFittingPartType(params PartType[] partTypes)
         {
-            this.partType = partType;
+            this.partTypes = partTypes;
         }
+
         public bool AllowElement(Element elem)
         {
             if (elem == null) return false;
             if (ElementCheckUtils.IsPipe(elem)) return false;
             FamilyInstance familyInstance = elem as FamilyInstance;
             PartType pt = ElementCheckUtils.GetPartType(familyInstance);
-            return (partType.Equals(pt));
+            return (partTypes.Contains(pt));
         }
 
         public bool AllowReference(Reference reference, XYZ position)
