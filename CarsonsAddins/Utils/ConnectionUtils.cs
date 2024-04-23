@@ -67,7 +67,7 @@ namespace CarsonsAddins.Utils
             }
             public override string ToString()
             {
-                return (isTapped ? "T" : "") + (isDomestic ? "D": "") + endPrep;
+                return (endPrep == "PE") ? "PE" : (isTapped ? "T" : "") + (isDomestic ? "D": "") + endPrep;
             }
         }
 

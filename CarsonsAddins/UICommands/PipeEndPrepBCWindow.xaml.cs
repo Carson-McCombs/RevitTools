@@ -22,30 +22,72 @@ namespace CarsonsAddins
     {
         public const bool IsWIP = false;
 
-        
         private PipeEndPrepBCUpdater updater;
         private bool isRunning = false;
 
         private Brush redBrush = new SolidColorBrush(Colors.Red);
         private Brush greenBrush = new SolidColorBrush(Colors.Green);
 
-        private bool isDomestic = false;
-        private bool IsDomestic { get => isDomestic; set  => isDomestic = value; }
+        public static readonly DependencyProperty IsDomesticProperty =
+           DependencyProperty.Register(
+           name: "IsDomestic",
+           propertyType: typeof(bool),
+           ownerType: typeof(PipeEndPrepBCWindow),
+           typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
 
-        private bool checkIfTapped = false;
-        private bool CheckIfTapped { get => checkIfTapped; set => checkIfTapped = value; }
+        public static readonly DependencyProperty CheckIfTappedProperty =
+           DependencyProperty.Register(
+           name: "CheckIfTapped",
+           propertyType: typeof(bool),
+           ownerType: typeof(PipeEndPrepBCWindow),
+           typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
+        public static readonly DependencyProperty CheckPipeClassProperty =
+           DependencyProperty.Register(
+           name: "CheckPipeClass",
+           propertyType: typeof(bool),
+           ownerType: typeof(PipeEndPrepBCWindow),
+           typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
+        public static readonly DependencyProperty CheckPipePenetrationsProperty =
+           DependencyProperty.Register(
+           name: "CheckPipePenetrations",
+           propertyType: typeof(bool),
+           ownerType: typeof(PipeEndPrepBCWindow),
+           typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
+        public static readonly DependencyProperty ForceUpdateProperty =
+           DependencyProperty.Register(
+           name: "ForceUpdate",
+           propertyType: typeof(bool),
+           ownerType: typeof(PipeEndPrepBCWindow),
+           typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
+
+        private bool IsDomestic
+        {
+            get => (bool)GetValue(IsDomesticProperty);
+            set => SetValue(IsDomesticProperty, value);
+        }
+        private bool CheckIfTapped
+        {
+            get => (bool)GetValue(CheckIfTappedProperty);
+            set => SetValue(CheckIfTappedProperty, value);
+        }
+        private bool CheckPipeClass
+        {
+            get => (bool)GetValue(CheckPipeClassProperty);
+            set => SetValue(CheckPipeClassProperty, value);
+        }
+        private bool CheckPipePenetrations
+        {
+            get => (bool)GetValue(CheckPipePenetrationsProperty);
+            set => SetValue(CheckPipePenetrationsProperty, value);
+        }
+        private bool ForceUpdate
+        {
+            get => (bool)GetValue(ForceUpdateProperty);
+            set => SetValue(ForceUpdateProperty, value);
+        }
 
 
-        private bool checkClass = false;
-        private bool CheckClass { get => checkClass; set => checkClass = value; }
 
-
-        private bool checkPenetrations = false;
-        private bool CheckPenetrations { get => checkPenetrations; set => checkPenetrations = value; }
-
-
-        private bool forceUpdate = false;
-        private bool ForceUpdate { get => forceUpdate; set => forceUpdate = value; }
 
         private Definition pipeEndPrepDefinition;
 
@@ -110,10 +152,14 @@ namespace CarsonsAddins
         {
             Hide();
             Document doc = uidoc.Document;
+            Transaction transaction = new Transaction(doc);
+            transaction.Start("Update PEP");
             List<Reference> references = uidoc.Selection.PickObjects(Autodesk.Revit.UI.Selection.ObjectType.Element, new SelectionFilters.SelectionFilter_Pipe()).ToList();
             Element[] elements = references.Select(reference => doc.GetElement(reference)).ToArray();
             Pipe[] pipes = elements.Where(element => element != null && element is Pipe).Cast<Pipe>().ToArray();
             UpdatePipeEndPreps(doc, pipes);
+            transaction.Commit();
+
             Show();
         }
 
@@ -133,13 +179,11 @@ namespace CarsonsAddins
        
         private void UpdatePipeEndPreps(Document doc, Pipe[] pipes)
         {
-            Transaction transaction = new Transaction(doc);
-            transaction.Start("Update PEP");
+            
             foreach (Pipe pipe in pipes)
             {
                 UpdatePipeEndPrep(doc, pipe);
             }
-            transaction.Commit();
         }
 
         private void UpdatePipeEndPrep(Document doc, Pipe pipe)
@@ -158,8 +202,8 @@ namespace CarsonsAddins
                 EndPrepInfo endPrepA = EndPrepInfo.GetEndPrepByConnector(connectors[0]);
                 EndPrepInfo endPrepB = EndPrepInfo.GetEndPrepByConnector(connectors[1]);
 
-                endPrepA.isDomestic = isDomestic;
-                endPrepB.isDomestic = isDomestic;
+                endPrepA.isDomestic = IsDomestic;
+                endPrepB.isDomestic = IsDomestic;
 
                 Curve[] intersectionSegments = GetIntersectionsBySolids(doc, pipe);
                 XYZ[] wallCenters = intersectionSegments.Select(curve => (curve.GetEndPoint(0) + curve.GetEndPoint(1)) / 2).ToArray();
@@ -167,8 +211,8 @@ namespace CarsonsAddins
                 double closestDistA = GetShortestDistanceToWalls(endPrepA.position, intersectionSegments);
                 double closestDistB = GetShortestDistanceToWalls(endPrepB.position, intersectionSegments);
 
-                endPrepA.isTapped = (closestDistA < largestTapDistance) && (endPrepA.endType.Equals(BellOrSpigot.BELL)) && checkIfTapped;
-                endPrepB.isTapped = (closestDistB < largestTapDistance) && (endPrepB.endType.Equals(BellOrSpigot.BELL)) && checkIfTapped;
+                endPrepA.isTapped = (closestDistA < largestTapDistance) && (endPrepA.endType.Equals(BellOrSpigot.BELL)) && CheckIfTapped;
+                endPrepB.isTapped = (closestDistB < largestTapDistance) && (endPrepB.endType.Equals(BellOrSpigot.BELL)) && CheckIfTapped;
 
                 bool reorder = CheckIfReorder(endPrepA, endPrepB, closestDistA, closestDistB);
                 if (reorder)
@@ -176,12 +220,12 @@ namespace CarsonsAddins
                     (endPrepA, endPrepB) = (endPrepB, endPrepA);
                     (closestDistA, closestDistB) = (closestDistB, closestDistA);
                 }
-                string wcString = isDomestic ? "DWC" : "WC";
+                string wcString = IsDomestic ? "DWC" : "WC";
 
                 double[] distancesFromPrepA = wallCenters.Select(wallCenter => endPrepA.position.DistanceTo(wallCenter)).OrderBy(dist => dist).ToArray();
 
                 List<string> endPrepStrings = new List<string> { endPrepA.ToString() };
-                if (checkPenetrations) Array.ForEach(intersectionSegments, curves => endPrepStrings.Add(wcString));
+                if (CheckPipePenetrations) Array.ForEach(intersectionSegments, curves => endPrepStrings.Add(wcString));
                 endPrepStrings.Add(endPrepB.ToString());
                 string combinedEndPrep = string.Join(" x ", endPrepStrings);
 
@@ -189,7 +233,7 @@ namespace CarsonsAddins
                 string combinedComments = string.Join("; ", commentStrings);
                 Parameter commentsParameter = pipe.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS);
 
-                if (combinedEndPrep.Equals(currentEndPrep) && (commentsParameter.AsString() == combinedComments) && forceUpdate) return;
+                if (combinedEndPrep.Equals(currentEndPrep) && (commentsParameter.AsString() == combinedComments) && ForceUpdate) return;
 
                 commentsParameter.Set(combinedComments);
                 endPrepParameter.Set(combinedEndPrep);

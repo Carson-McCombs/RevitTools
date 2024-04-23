@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CarsonsAddins"
              mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="400" Width="400" Height="400" WindowState="Normal" ResizeMode="NoResize" Title="PEP By Connectors" FontFamily="Arial" FontSize="12">
+             d:DesignHeight="400" d:DesignWidth="400" Width="400" Height="400" WindowState="Normal" ResizeMode="NoResize" Title="PEP By Connectors" FontFamily="Arial" FontSize="12" x:Name="root">
     
     <Grid Background="White" Margin="16">
         <Grid.ColumnDefinitions>
@@ -19,17 +19,17 @@
         </Grid.RowDefinitions>
             
         <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
-            <CheckBox Content="AIS ( Domestic )" Margin="4" IsChecked="{Binding Path=IsDomestic}"/>
-            <CheckBox Content="Check if Tapped" Margin="4" IsChecked="{Binding Path=CheckIfTapped}"/>
-            <CheckBox Content="Check Pipe Class" Margin="4" IsChecked="{Binding Path=CheckPipeClass}"/>
-            <CheckBox Content="Check Pipe Penetrations" Margin="4" IsChecked="{Binding Path=CheckPenetrations}"/>
+            <CheckBox Content="AIS ( Domestic )" Margin="4" IsChecked="{Binding Path=IsDomestic, ElementName=root}"/>
+            <CheckBox Content="Check if Tapped" Margin="4" IsChecked="{Binding Path=CheckIfTapped, ElementName=root}"/>
+            <CheckBox Content="Check Pipe Class" Margin="4" IsChecked="{Binding Path=CheckPipeClass, ElementName=root}"/>
+            <CheckBox Content="Check Pipe Penetrations" Margin="4" IsChecked="{Binding Path=CheckPenetrations, ElementName=root}"/>
         </StackPanel>
 
         <Button Content="Update Selection" Width="150" Height="30"  Grid.Column="1" Grid.Row="0" VerticalAlignment="Top" Click="UpdateSelection_Click"/>
         <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="To use this addin, please ensure that all pipe flanges / bells and any elements with pipe connectors ( other than 'Fittings' ) have their Conenctor Description filled in in the format 'BS-End_Prep'.   Example: 'B-HDSSB' and the other end would be 'S-HDSSPE'." TextWrapping="Wrap" VerticalAlignment="Bottom" Margin="8" Foreground="#FF171717"/>
         <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" BorderBrush="Gray" BorderThickness="1">
             <StackPanel Orientation="Vertical" Margin="16">
-                <CheckBox Content="Force Update" HorizontalAlignment="Center" IsChecked="{Binding Path=ForceUpdate}"/>
+                <CheckBox Content="Force Update" HorizontalAlignment="Center" IsChecked="{Binding Path=ForceUpdate, ElementName=root}"/>
                 <Button x:Name="ToggleStatusButton" Content="Enable" Width="180" Height="30" Margin="8" Click="ToggleStatus_Click"/>
                 <TextBlock Name="StatusTextBlock" Text="Status: Not Started" HorizontalAlignment="Center" FontSize="14" />
             </StackPanel>
