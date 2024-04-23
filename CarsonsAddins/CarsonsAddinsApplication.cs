@@ -131,9 +131,9 @@ namespace CarsonsAddins
                 }
             }
         }
-        
-
     }
+
+
     
     public class Availability_NoActiveUIDocument : IExternalCommandAvailability
     {

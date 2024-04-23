@@ -25,21 +25,23 @@ namespace CarsonsAddins.Utils
             public BellOrSpigot endType;
             public string endPrep;
             public bool isTapped;
-            public EndPrepInfo(XYZ position, BellOrSpigot endType, string endPrep, bool isTapped)
+            public bool isDomestic;
+            public EndPrepInfo(XYZ position, BellOrSpigot endType, string endPrep, bool isTapped, bool isDomestic)
             {
                 this.position = position;
                 this.endType = endType;
                 this.endPrep = endPrep;
                 this.isTapped = isTapped;
+                this.isDomestic = isDomestic;
             }
 
             public static EndPrepInfo GetEndPrepByConnector(Connector connector)
             {
-                if (connector == null) return new EndPrepInfo(XYZ.Zero, BellOrSpigot.NONE, "NULL", false);
-                if (!connector.IsConnected) return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, "PE", false);
+                if (connector == null) return new EndPrepInfo(XYZ.Zero, BellOrSpigot.NONE, "NULL", false, false);
+                if (!connector.IsConnected) return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, "PE", false, false);
 
                 Connector adjacent = TryGetConnectedSkipNC(connector);
-                if (adjacent == null) return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, "PE", false);
+                if (adjacent == null) return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, "PE", false, false);
 
                 string[] descriptionArray = adjacent.Description.Split('-', ';');
                 string endTypeString = descriptionArray[0].Trim().ToUpper();
@@ -49,15 +51,15 @@ namespace CarsonsAddins.Utils
                 {
                     case ("B"):
                     case ("BELL"):
-                        return new EndPrepInfo(connector.Origin, BellOrSpigot.BELL, endPrepString, false);
+                        return new EndPrepInfo(connector.Origin, BellOrSpigot.BELL, endPrepString, false, false);
 
                     case ("PE"):
                     case ("S"):
                     case ("SPIGOT"):
-                        return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, endPrepString, false);
+                        return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, endPrepString, false, false);
 
                     default:
-                        return new EndPrepInfo(connector.Origin, BellOrSpigot.NONE, endPrepString, false);
+                        return new EndPrepInfo(connector.Origin, BellOrSpigot.NONE, endPrepString, false, false);
                 }
 
                 
@@ -65,7 +67,7 @@ namespace CarsonsAddins.Utils
             }
             public override string ToString()
             {
-                return (isTapped ? "T" : "") + endPrep;
+                return (isTapped ? "T" : "") + (isDomestic ? "D": "") + endPrep;
             }
         }
 

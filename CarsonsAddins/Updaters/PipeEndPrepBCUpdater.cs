@@ -15,8 +15,11 @@ namespace CarsonsAddins
 {
     class PipeEndPrepBCUpdater : IUpdater
     {
+
+        public delegate void UpdateEndPrepEvent(Document doc, Pipe[] pipes);
+        public UpdateEndPrepEvent UpdateEndPrep;
         private readonly UpdaterId updaterId;
-        private static Definition pipeEndPrepDefinition;
+        private bool isRunning = false;
         public PipeEndPrepBCUpdater(AddInId addinId)
         {
             updaterId = new UpdaterId(addinId, ApplicationIds.GetId(GetType()));
@@ -25,18 +28,9 @@ namespace CarsonsAddins
             RegisterTriggers();
         }
 
-
-        private static bool SetDefinitions(Document doc)
+        public void SetState(bool state)
         {
-            DefinitionBindingMapIterator iterator = doc.ParameterBindings.ForwardIterator();
-            while (iterator.MoveNext())
-            {
-                string parameterName = iterator.Key.Name;
-                if (!"Pipe End Prep".Equals(parameterName)) continue;
-                pipeEndPrepDefinition = iterator.Key;
-                return true;
-            }
-            return false;
+            isRunning = state;
         }
         
         private void Register()
@@ -59,118 +53,18 @@ namespace CarsonsAddins
             UpdaterRegistry.RemoveAllTriggers(updaterId);
             UpdaterRegistry.UnregisterUpdater(updaterId);
         }
-        private Solid[] GetIntersectingSolids(Document doc, Pipe pipe)
-        {
-            Options options = new Options { DetailLevel = ViewDetailLevel.Undefined, IncludeNonVisibleObjects = false, ComputeReferences = true };
-            BuiltInCategory[] validCategories = new BuiltInCategory[] { BuiltInCategory.OST_StructuralFoundation, BuiltInCategory.OST_Walls, BuiltInCategory.OST_Floors };
-            ElementMulticategoryFilter categoryFilter = new ElementMulticategoryFilter(validCategories);
-            ElementIntersectsElementFilter intersectionFilter = new ElementIntersectsElementFilter(pipe);
-            List<Solid> solids = new List<Solid>();
-            Element[] intersectingElements = new FilteredElementCollector(doc).WherePasses(categoryFilter).WherePasses(intersectionFilter).ToElements().ToArray();
-            Array.ForEach(intersectingElements, element => solids.AddRange(element.get_Geometry(options).OfType<Solid>()));
-            return solids.ToArray();
-        }
-        private Curve[] GetIntersectionsBySolids(Document doc, Pipe pipe)
-        {
-            List<Curve> intersectionSegments = new List<Curve>();
-            Curve pipeCurve = (pipe.Location as LocationCurve).Curve;
-            Solid[] intersectingSolids = GetIntersectingSolids(doc, pipe);
-
-            if (intersectingSolids.Length == 0) return new Curve[0];
-            SolidCurveIntersectionOptions solidCurveIntersectionOptions = new SolidCurveIntersectionOptions { ResultType = SolidCurveIntersectionMode.CurveSegmentsInside };
-            foreach (Solid solid in intersectingSolids)
-            {
-                SolidCurveIntersection solidIntersection = solid.IntersectWithCurve(pipeCurve, solidCurveIntersectionOptions);
-                for (int i = 0; i < solidIntersection.SegmentCount; i++)
-                {
-                    Curve curve = solidIntersection.GetCurveSegment(i);
-                    if (curve == null) continue;
-                    intersectionSegments.Add(curve);
-                }
-
-            }
-            
-            return intersectionSegments.ToArray();
-        }
-
-
-        private void UpdatePipeEndPrep(Document doc, Pipe pipe)
-        {
-            const double largestTapDistance = 0.5; //6"
-
-            if (pipe == null) return;
-            if (pipeEndPrepDefinition == null) return;
-            Parameter endPrepParameter = pipe.get_Parameter(pipeEndPrepDefinition);
-            if (endPrepParameter == null) return;
-            Connector[] connectors = GetConnectors(pipe);
-            string currentEndPrep = endPrepParameter.AsString();
-
-            EndPrepInfo endPrepA = EndPrepInfo.GetEndPrepByConnector(connectors[0]);
-            EndPrepInfo endPrepB = EndPrepInfo.GetEndPrepByConnector(connectors[1]);
-
-            Curve[] intersectionSegments = GetIntersectionsBySolids(doc, pipe);
-            XYZ[] wallCenters = intersectionSegments.Select(curve => (curve.GetEndPoint(0) + curve.GetEndPoint(1)) / 2).ToArray();
-            
-            double closestDistA = GetShortestDistanceToWalls(endPrepA.position, intersectionSegments);
-            double closestDistB = GetShortestDistanceToWalls(endPrepB.position, intersectionSegments);
-
-            endPrepA.isTapped = (closestDistA < largestTapDistance) && (endPrepA.endType.Equals(BellOrSpigot.BELL));
-            endPrepB.isTapped = (closestDistB < largestTapDistance) && (endPrepB.endType.Equals(BellOrSpigot.BELL));
-
-            bool reorder = CheckIfReorder(endPrepA, endPrepB, closestDistA, closestDistB);
-            if (reorder)
-            {
-                (endPrepA, endPrepB) = (endPrepB, endPrepA);
-                (closestDistA, closestDistB) = (closestDistB, closestDistA);
-            }
-
-
-            double[] distancesFromPrepA = wallCenters.Select(wallCenter => endPrepA.position.DistanceTo(wallCenter)).OrderBy(dist => dist).ToArray();
-
-            List<string> endPrepStrings = new List<string>{endPrepA.ToString() };
-            Array.ForEach(intersectionSegments, curves => endPrepStrings.Add("WC"));
-            endPrepStrings.Add(endPrepB.ToString());
-            string combinedEndPrep = string.Join(" x ", endPrepStrings);
-
-            List<string> commentStrings = new List<string>();
-            distancesFromPrepA.Select(distance => "w/ WC " + new Utils.UnitUtils.FeetAndInchesFraction(distance, 16).ToString() + " FROM " + endPrepA.ToString());
-            string combinedComments = string.Join("; ", commentStrings);
-
-            Parameter commentsParameter = pipe.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS);
-            
-            if (combinedEndPrep.Equals(currentEndPrep) && (commentsParameter.AsString() == combinedComments)) return;
-            endPrepParameter.Set(combinedEndPrep);
-            commentsParameter.Set(combinedComments);
-        }
-        private double GetShortestDistanceToWalls(XYZ endPoint, Curve[] curves)
-        {
-            double shortestDistance = double.MaxValue;
-            foreach (Curve curve in curves)
-            {
-                for (int i = 0; i < 2;  i++)
-                {
-                    shortestDistance = Math.Min(shortestDistance, endPoint.DistanceTo(curve.GetEndPoint(i)));
-                    
-                }
-            }
-            return shortestDistance;
-        }
-
-
-
         
 
         public void Execute(UpdaterData data)
         {
+            if (!isRunning) return;
             try
             {
                 Document doc = data.GetDocument();
-                if (pipeEndPrepDefinition == null)
-                    if (!SetDefinitions(doc)) return;
                 List<ElementId> elementIds = data.GetAddedElementIds().ToList();
                 elementIds.AddRange(data.GetModifiedElementIds());
                 Pipe[] pipes = elementIds.Select(id => doc.GetElement(id)).Cast<Pipe>().ToArray();
-                Array.ForEach(pipes, pipe => UpdatePipeEndPrep(doc, pipe));
+                UpdateEndPrep?.Invoke(doc, pipes);
             }
             catch (Exception ex)
             {

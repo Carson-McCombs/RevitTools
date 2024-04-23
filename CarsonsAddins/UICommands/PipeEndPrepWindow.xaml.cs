@@ -142,13 +142,13 @@ namespace CarsonsAddins
 
         public EndPrepInfo GetEndPrep(Connector connector)
         {
-            if (connector == null) return new EndPrepInfo(XYZ.Zero, BellOrSpigot.NONE, "NULL", false);
+            if (connector == null) return new EndPrepInfo(XYZ.Zero, BellOrSpigot.NONE, "NULL", false , false);
             (FamilyInstance, Connector) connection = GetConnectedFamilyInstanceWithConnector(connector);
-            if (connection.Item1 == null) return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, "PE", false);
+            if (connection.Item1 == null) return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, "PE", false, false);
             PipeEndPrepPreferences prefs = GetPreferences(connection.Item1);
             BellOrSpigot bos = GetPipeEnd(connection.Item2);
             string pipeEndPrep = prefs.GetPipeEndPrep(bos);
-            return new EndPrepInfo(connector.Origin, bos, pipeEndPrep, false);
+            return new EndPrepInfo(connector.Origin, bos, pipeEndPrep, false , false);
         }
 
         
