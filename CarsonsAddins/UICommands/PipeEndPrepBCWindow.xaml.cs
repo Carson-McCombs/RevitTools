@@ -188,14 +188,29 @@ namespace CarsonsAddins
 
         private void UpdatePipeEndPrep(Document doc, Pipe pipe)
         {
+            SubTransaction subtransaction = new SubTransaction(doc);
+            subtransaction.Start();
             try
             {
                 const double largestTapDistance = 0.5; //6"
                 if (pipeEndPrepDefinition == null && SetDefinitions(doc) == false) return;
-                if (pipe == null) return;
-                if (pipeEndPrepDefinition == null) return;
+                if (pipe == null) 
+                { 
+                    subtransaction.RollBack();
+                    return;
+                }
+                
+                if (pipeEndPrepDefinition == null)
+                {
+                    subtransaction.RollBack();
+                    return;
+                }
                 Parameter endPrepParameter = pipe.get_Parameter(pipeEndPrepDefinition);
-                if (endPrepParameter == null) return;
+                if (endPrepParameter == null)
+                {
+                    subtransaction.RollBack();
+                    return;
+                }
                 Connector[] connectors = GetConnectors(pipe);
                 string currentEndPrep = endPrepParameter.AsString();
 
@@ -233,15 +248,19 @@ namespace CarsonsAddins
                 string combinedComments = string.Join("; ", commentStrings);
                 Parameter commentsParameter = pipe.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS);
 
-                if (combinedEndPrep.Equals(currentEndPrep) && (commentsParameter.AsString() == combinedComments) && ForceUpdate) return;
+                if (combinedEndPrep.Equals(currentEndPrep) && (commentsParameter.AsString() == combinedComments) && ForceUpdate)
+                {
+                    subtransaction.RollBack();
+                }
 
                 commentsParameter.Set(combinedComments);
                 endPrepParameter.Set(combinedEndPrep);
-
+                subtransaction.Commit();
 
 
             } catch (Exception ex)
             {
+                subtransaction.RollBack();
                 TaskDialog.Show("Error Updating PEP By Connectors", ex.Message);
             }
             
