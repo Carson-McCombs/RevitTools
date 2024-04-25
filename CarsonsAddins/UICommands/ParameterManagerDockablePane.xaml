@@ -52,6 +52,7 @@
                         <Expander IsExpanded="True" BorderBrush="#FF002255" >
                             <Expander.Header>
                                 <StackPanel Orientation="Horizontal">
+                                    <CheckBox Checked="SelectGroup_CheckBox" Unchecked="SelectGroup_CheckBox"/>
                                     <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,15,0" />
                                     <TextBlock FontWeight="Bold" Text="{Binding Path=ItemCount, StringFormat=Item Count: {0}}" HorizontalAlignment="Right" TextAlignment="Right"/>
                                 </StackPanel>
@@ -96,6 +97,7 @@
                             <Style TargetType="DataGridColumnHeader">
                                 <Setter Property="ContextMenu" Value="{StaticResource DataGridColumnHeaderContextMenu}"/>
                             </Style>
+                            
                         </DataGrid.Resources>
                         <DataGrid.GroupStyle>
                             <GroupStyle ContainerStyle="{StaticResource DataGridGroupHeaderStyle}">
@@ -107,28 +109,14 @@
                             </GroupStyle>
                         </DataGrid.GroupStyle>
                         <DataGrid.Columns>
+                            <DataGridCheckBoxColumn Header="IsSelected" Binding="{Binding IsSelected, Mode=TwoWay}" IsReadOnly="false" Width="32" CanUserResize="False" CanUserReorder="False"/>
                             <DataGridTextColumn Header="ElementId" Binding="{Binding Id, Mode=OneWay}" IsReadOnly="True" Width="64" CanUserResize="False" CanUserReorder="False"/>
-                                
-                            <!--DataGridTemplateColumn Width="24" IsReadOnly="False" >
-                                <DataGridTemplateColumn.CellTemplate >
-                                    <DataTemplate>
-                                        <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Checked="Category_Checked" Unchecked="Category_Unchecked" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn-->
-                            <!--DataGridTextColumn Width="*" Header="Category:" Binding="{Binding CategoryName}" IsReadOnly="True"/>
-                            <DataGridTextColumn Width="auto" MinWidth="64" Header="Count:" Binding="{Binding Count}" IsReadOnly="True"/-->
-
-
                         </DataGrid.Columns>
                     </DataGrid>
                 </ScrollViewer>
             </Border>
         </Grid>
         <UniformGrid Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,36,12,0" Rows="9">
-            <Button Click="RefreshSelectionButtonPress" Width="36" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Image Width="32" Height="32" Source="pack://application:,,,/CarsonsAddins;component/Resources/Refresh_icon.png" />
-            </Button>
             <Button Content="Load Selection" Click="LoadSelectionButtonPress" Style="{StaticResource CheckButtonsStyle}"/>
 
             <Button Content="Select From List" Click="SelectHighlightedElements" Style="{StaticResource CheckButtonsStyle}"/>

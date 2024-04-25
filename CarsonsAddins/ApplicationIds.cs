@@ -30,7 +30,8 @@ namespace CarsonsAddins
                 { typeof(ParameterManagerDockablePane), new Guid("{DEF29C25-F7BA-4BE6-A9CD-B1702328043E}") },
                 { typeof(StaleReferenceUpdater), new Guid("E00DAD85-B1A0-4C8D-84A8-CEE2BFBBB2E5") },
                 { typeof(PipeEndPrepBCWindow), new Guid("89C5BB50-B5E9-457E-9A51-F27318BF2DEA") },
-                { typeof(PipeEndPrepBCUpdater), new Guid("E1D40627-EB12-4814-8B01-FE328B15EBCB") }
+                { typeof(PipeEndPrepBCUpdater), new Guid("E1D40627-EB12-4814-8B01-FE328B15EBCB") },
+                { typeof(ParameterManagerUpdater), new Guid("834B46C1-63CD-48ED-8500-6C6CC0219FF4") }
             };
             
         }
