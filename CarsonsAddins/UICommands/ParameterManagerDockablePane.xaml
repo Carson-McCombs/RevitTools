@@ -109,7 +109,7 @@
                             </GroupStyle>
                         </DataGrid.GroupStyle>
                         <DataGrid.Columns>
-                            <DataGridCheckBoxColumn Header="IsSelected" Binding="{Binding IsSelected, Mode=TwoWay}" IsReadOnly="false" Width="32" CanUserResize="False" CanUserReorder="False"/>
+                            <DataGridCheckBoxColumn Header=" " Binding="{Binding IsSelected, Mode=TwoWay}" IsReadOnly="false" Width="32" CanUserResize="False" CanUserReorder="False"/>
                             <DataGridTextColumn Header="ElementId" Binding="{Binding Id, Mode=OneWay}" IsReadOnly="True" Width="64" CanUserResize="False" CanUserReorder="False"/>
                         </DataGrid.Columns>
                     </DataGrid>
