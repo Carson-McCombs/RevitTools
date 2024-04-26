@@ -66,6 +66,9 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        
+
     </Page.Resources>
 
     <Grid Background="WhiteSmoke">

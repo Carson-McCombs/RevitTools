@@ -52,7 +52,6 @@ namespace CarsonsAddins
         {
             table.Clear();
             this.uidoc = uidoc;
-            //new ParametersByTypeId(uidoc);
         }
         public PushButtonData RegisterButton(Assembly assembly)
         {
@@ -265,8 +264,9 @@ namespace CarsonsAddins
         {
             if (! (sender is CheckBox checkbox)) return;
             if (checkbox.IsChecked == null) return;
-            if (! (checkbox.DataContext is string groupName )) return;
-            table.SetSelectedStateOfElements(currentGroupName, groupName, (bool) checkbox.IsChecked);
+            if (! (checkbox.DataContext is CollectionViewGroup group)) return;
+            if (group.Items is null) return;
+            table.SetSelectedStateOfElements(group.Items.Cast<ElementRow>().ToArray(), (bool) checkbox.IsChecked);
         }
         
     }

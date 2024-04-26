@@ -80,13 +80,18 @@ namespace CarsonsAddins.UICommands
                 row.Refresh();
             }
         }
+        public void SetSelectedStateOfElements(ElementRow[] elementRows, bool isSelected)
+        {
+            Array.ForEach(elementRows, row => row.IsSelected = isSelected);
+        }
+        /*
         public void SetSelectedStateOfElements(string parameterName, string valueString, bool isSelected)
         {
             foreach (ElementRow row in rows)
             {
                 if (row.HasParameterValue(parameterName, valueString)) row.IsSelected = isSelected;
             }
-        }
+        }*/
         public ElementId[] GetSelectedElements()
         {
             return rows.Where(row => row.IsSelected && !ElementId.InvalidElementId.Equals(row.Id)).Select(row => row.Id).ToArray();
@@ -270,11 +275,14 @@ namespace CarsonsAddins.UICommands
         public bool HasParameterValue(string parameterName, string valueString)
         {
             if (valueString is null) return false;
+            if (parameterName == "IsSelected") return (GroupIsSelectedProperty.GetGroupName(IsSelected) == valueString);
             if (!cells.ContainsKey(parameterName)) return false;
             ParameterCell cell = cells[parameterName];
             if (cell is null) return false;
             return valueString.Equals(GroupParameterValueProperty.GetGroupName(cell));
         }
+
+       
 
         public Parameter AddParameter(Definition definition)
         {
@@ -459,8 +467,6 @@ namespace CarsonsAddins.UICommands
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
         }
     }
-
-
     class GroupParameterValueProperty : PropertyGroupDescription
     {
         public GroupParameterValueProperty(string groupName) : base(groupName) { }
@@ -492,6 +498,10 @@ namespace CarsonsAddins.UICommands
         {
             var baseItem = base.GroupNameFromItem(item, level, culture);
             if (!(baseItem is bool isSelected) ) return "NULL";
+            return GetGroupName(isSelected);
+        }
+        public static string GetGroupName(bool isSelected) 
+        {
             return isSelected ? "Selected" : "Not Selected";
         }
     }
