@@ -197,7 +197,7 @@ namespace CarsonsAddins
                 return "";
             }
             if (contextMenu.DataContext != null && contextMenu.DataContext.ToString() != null) return contextMenu.DataContext.ToString(); 
-            return contextMenu.DataContext.ToString() ?? "";
+            return "IsSelected";
         }
 
         /// <summary>
