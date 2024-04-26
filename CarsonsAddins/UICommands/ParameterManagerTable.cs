@@ -31,10 +31,14 @@ namespace CarsonsAddins.UICommands
         private readonly List<bool> parameterReadOnly = new List<bool>();
         private readonly List<StorageType> parameterReturnTypes = new List<StorageType>();
         private readonly DataGrid dataGrid;
-        public ParameterTable(DataGrid dataGrid)
+        private readonly CollectionViewSource collectionViewSource;
+        private string currentGroupName = "";
+        public ParameterTable(DataGrid dataGrid, CollectionViewSource collectionViewSource)
         {
             this.dataGrid = dataGrid;
-            dataGrid.ItemsSource = rows;
+            this.collectionViewSource = collectionViewSource;
+            //dataGrid.ItemsSource = rows;
+            collectionViewSource.Source = rows;
         }
 
         /// <summary>
@@ -54,13 +58,40 @@ namespace CarsonsAddins.UICommands
             columnNames.Clear();
             parameterDefinitions.Clear();
             parameterReadOnly.Clear();
-
-            CollectionViewSource.GetDefaultView(rows).GroupDescriptions.Clear();
+            collectionViewSource.GroupDescriptions.Clear();
+            currentGroupName = "";
+            //CollectionViewSource.GetDefaultView(rows).GroupDescriptions.Clear();
             for (int i = dataGrid.Columns.Count - 1; i >= 2; i--)
             {
                 dataGrid.Columns.RemoveAt(i);
 
             }
+        }
+        public void SetGroup(string groupName)
+        {
+            if (groupName == "ElementId") return;
+            if (collectionViewSource == null) return;
+
+
+            ClearGroups();
+            PropertyGroupDescription groupDescription;
+            if ((groupName == "IsSelected"))
+            {
+                groupDescription = (new GroupIsSelectedProperty());
+            }
+            else
+            {
+                groupDescription = (new GroupParameterValueProperty("cells[" + groupName + "]"));
+            }
+
+            collectionViewSource.GroupDescriptions.Add(groupDescription);
+            currentGroupName = groupName;
+        }
+        public void ClearGroups()
+        {
+            if (collectionViewSource == null) return;
+            currentGroupName = "";
+            collectionViewSource.GroupDescriptions.Clear();
         }
         public void RefreshElements(params ElementId[] elementIds)
         {
@@ -84,14 +115,6 @@ namespace CarsonsAddins.UICommands
         {
             Array.ForEach(elementRows, row => row.IsSelected = isSelected);
         }
-        /*
-        public void SetSelectedStateOfElements(string parameterName, string valueString, bool isSelected)
-        {
-            foreach (ElementRow row in rows)
-            {
-                if (row.HasParameterValue(parameterName, valueString)) row.IsSelected = isSelected;
-            }
-        }*/
         public ElementId[] GetSelectedElements()
         {
             return rows.Where(row => row.IsSelected && !ElementId.InvalidElementId.Equals(row.Id)).Select(row => row.Id).ToArray();
@@ -180,6 +203,8 @@ namespace CarsonsAddins.UICommands
             column.CellStyle = style;
             dataGrid.Columns.Add(column);
         }
+
+
         /// <summary>
         /// Removes a parameter column from the datagrid.
         /// </summary>
@@ -187,6 +212,7 @@ namespace CarsonsAddins.UICommands
         public void RemoveParameter(string parameterName)
         {
             if (!columnNames.Contains(parameterName)) return;
+            if (currentGroupName == parameterName) return;
             int parameterIndex = columnNames.IndexOf(parameterName);
             DataGridColumn column = dataGrid.Columns.Where(col => col.Header != null && GroupParameterValueProperty.GetGroupName(parameterName).Equals(col.Header.ToString())).First();
             if (column is null) return;
@@ -469,7 +495,10 @@ namespace CarsonsAddins.UICommands
     }
     class GroupParameterValueProperty : PropertyGroupDescription
     {
-        public GroupParameterValueProperty(string groupName) : base(groupName) { }
+        public GroupParameterValueProperty(string propertyName) : base(propertyName) 
+        { 
+            PropertyName = propertyName; 
+        }
 
         public override object GroupNameFromItem(object item, int level, CultureInfo culture)
         {

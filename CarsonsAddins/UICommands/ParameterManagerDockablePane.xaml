@@ -46,7 +46,6 @@
         </DataTemplate>
         <Style x:Key="DataGridGroupHeaderStyle" TargetType="GroupItem">
             <Setter Property="Margin" Value="0,0,0,5"/>
-            <!--Setter Property="DataContext" Value="{Binding }"/-->
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type GroupItem}">
@@ -67,7 +66,7 @@
             </Setter>
         </Style>
 
-        
+        <CollectionViewSource x:Key="ElementRowCollectionViewSource" IsLiveGroupingRequested="True" IsLiveSortingRequested="True"/>
 
     </Page.Resources>
 
@@ -84,7 +83,7 @@
             </Grid.RowDefinitions>
             <Border Grid.Row="1" BorderBrush="DarkGray" BorderThickness="1">
                 <ScrollViewer  HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <DataGrid Name="SelectionDataGrid" Background="White" AutoGenerateColumns="False" GridLinesVisibility="None" CanUserResizeRows="False">
+                    <DataGrid Name="SelectionDataGrid" Background="White" AutoGenerateColumns="False" GridLinesVisibility="None" CanUserResizeRows="False" ItemsSource="{Binding Source={StaticResource ElementRowCollectionViewSource}, UpdateSourceTrigger=PropertyChanged}">
                         <DataGrid.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Clear Groups" Click="ClearGroups_Click"/>

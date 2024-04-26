@@ -40,11 +40,12 @@ namespace CarsonsAddins
         
         private readonly ParameterTable table;
         private ParameterManagerUpdater updater;
-        private string currentGroupName = "";
+        //private CollectionViewSource collectionViewSource;
         public ParameterManagerDockablePane()
         {
             InitializeComponent();
-            table = new ParameterTable(SelectionDataGrid);
+            CollectionViewSource collectionViewSource = FindResource("ElementRowCollectionViewSource") as CollectionViewSource;
+            table = new ParameterTable(SelectionDataGrid, collectionViewSource);
             
         }
         
@@ -173,38 +174,9 @@ namespace CarsonsAddins
             ElementId[] selectedIds = table.GetSelectedElements();
             if (selectedIds != null && selectedIds.Length != 0)uidoc.Selection.SetElementIds(selectedIds);
         }
-        private ICollectionView GetDataGridCollectionView()
-        {
-            return CollectionViewSource.GetDefaultView(SelectionDataGrid.ItemsSource);
-        }
 
-        /// <summary>
-        /// Sets the current Parameter that the Elements will be grouped by.
-        /// </summary>
-        /// <param name="groupName">Name of the Parameter to be grouped by.</param>
-        private void SetGroup(string groupName)
-        {
-            if (groupName == "ElementId") return;
 
-            ICollectionView collectionView = GetDataGridCollectionView();
-            if (collectionView == null) return;
-            
 
-            currentGroupName = groupName;
-            collectionView.GroupDescriptions.Clear();
-
-            PropertyGroupDescription groupDescription;
-            if ((groupName == "IsSelected"))
-            {
-                groupDescription = (new GroupIsSelectedProperty());
-            }
-            else
-            {
-                groupDescription = (new GroupParameterValueProperty("cells[" + groupName + "]"));
-            }
-
-            collectionView.GroupDescriptions.Add(groupDescription);
-        }
 
         /// <summary>
         /// Gets the ColumnHeader of the MenuItem provided. Will show a TaskDialog if the MenuItem is null or the ContextMenu of the MenuItem is null.
@@ -234,7 +206,7 @@ namespace CarsonsAddins
         private void GroupBy_Click(object sender, RoutedEventArgs e)
         {
             string parameterName = GetMenuItemColumnHeader(sender as MenuItem);
-            SetGroup(parameterName);
+            table.SetGroup(parameterName);
         }
 
         /// <summary>
@@ -242,11 +214,7 @@ namespace CarsonsAddins
         /// </summary>
         private void ClearGroups_Click(object sender, RoutedEventArgs e)
         {
-
-            ICollectionView collectionView = GetDataGridCollectionView();
-            if (collectionView == null) return;
-            collectionView.GroupDescriptions.Clear();
-            currentGroupName = "";
+            table.ClearGroups();
         }
 
         /// <summary>
@@ -255,7 +223,6 @@ namespace CarsonsAddins
         private void DeleteParameter_Click(object sender, RoutedEventArgs e)
         {
             string parameterName = GetMenuItemColumnHeader(sender as MenuItem);
-            if (currentGroupName ==  parameterName) return;
             if (string.IsNullOrEmpty(parameterName)) return;
             table.RemoveParameter(parameterName);
                 
