@@ -237,7 +237,7 @@ namespace CarsonsAddins.UICommands
         public event PropertyChangedEventHandler PropertyChanged;
 
         public Element element { get; private set; }
-        private ElementId id = ElementId.InvalidElementId;
+        private readonly ElementId id = ElementId.InvalidElementId;
         public ElementId Id { get => id; }
         private bool isSelected = false;
         public bool IsSelected
@@ -335,8 +335,6 @@ namespace CarsonsAddins.UICommands
     class ParameterCell : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-
-
 
         private bool isSynced = true;
         public bool IsSynced
@@ -489,12 +487,12 @@ namespace CarsonsAddins.UICommands
 
     class GroupIsSelectedProperty : PropertyGroupDescription
     {
-        public GroupIsSelectedProperty() : base(" ") { }
+        public GroupIsSelectedProperty() : base("IsSelected") { }
         public override object GroupNameFromItem(object item, int level, CultureInfo culture)
         {
             var baseItem = base.GroupNameFromItem(item, level, culture);
-            if (!(baseItem is CheckBox checkbox) ) return "IsSelected: NULL";
-            return (bool)checkbox.IsChecked ? "IsSelected: TRUE" : "IsSelected: FALSE";
+            if (!(baseItem is bool isSelected) ) return "NULL";
+            return isSelected ? "Selected" : "Not Selected";
         }
     }
 

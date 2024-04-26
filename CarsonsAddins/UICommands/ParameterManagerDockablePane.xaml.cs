@@ -189,9 +189,11 @@ namespace CarsonsAddins
 
             ICollectionView collectionView = GetDataGridCollectionView();
             if (collectionView == null) return;
+            
 
             currentGroupName = groupName;
             collectionView.GroupDescriptions.Clear();
+
             PropertyGroupDescription groupDescription;
             if ((groupName == "IsSelected"))
             {
@@ -241,6 +243,7 @@ namespace CarsonsAddins
         /// </summary>
         private void ClearGroups_Click(object sender, RoutedEventArgs e)
         {
+
             ICollectionView collectionView = GetDataGridCollectionView();
             if (collectionView == null) return;
             collectionView.GroupDescriptions.Clear();
