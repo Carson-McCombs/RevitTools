@@ -16,7 +16,7 @@ namespace CarsonsAddins
     /// </summary>
     class ParameterManagerUpdater : IUpdater
     {
-        private UpdaterId updaterId;
+        private readonly UpdaterId updaterId;
         private List<ElementId> elementIds;
         private List<ElementId> parameterIds;
         private ParameterManagerDockablePane parameterManager = null;

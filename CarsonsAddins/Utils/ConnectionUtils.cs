@@ -277,7 +277,6 @@ namespace CarsonsAddins.Utils
                 Connector parallelConnector = GetParallelConnector(connector);
                 if (parallelConnector != null) return parallelConnector;
                 return adjacentConnectors.FirstOrDefault();
-                }
             }
             catch
             {

@@ -40,7 +40,7 @@ namespace CarsonsAddins
             transaction.Start("FilterPipingElementsCommand");
             try
             {
-                SelectionFilters.SelectionFilter_PipingElements filter = new SelectionFilters.SelectionFilter_PipingElements(true, true, true, true, true);
+                SelectionFilters.SelectionFilter_PipingElements filter = new SelectionFilters.SelectionFilter_PipingElements(false);
                 List<ElementId> selectedIds = uidoc.Selection.GetElementIds() as List<ElementId>;
                 List<Element> selectedElements = selectedIds.Select<ElementId, Element>(id => doc.GetElement(id)).ToList();
                 List<ElementId> filteredIds = new List<ElementId>();

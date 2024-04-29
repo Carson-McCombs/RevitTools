@@ -42,15 +42,15 @@ namespace CarsonsAddins.Utils
         }
 
         /// <summary>
-        /// Checks if the Element provided is a Family Instance with the PartType of a Pipe Bend or Junction (i.e. Tee, Wye, Cross, etc. )
+        /// Checks if the Element provided is a Family Instance with the PartType of a Pipe Junction (i.e. Tee, Wye, Cross, etc. )
         /// </summary>
         /// <param name="element">Element to be checked.</param>
-        /// <returns>Returns true if the element is a Family Instance with the PartType Elbow, Tee, Wye, Lateral Tee, Cross, or Lateral Cross. Returns false otherwise. </returns>
-        public static bool IsPipeBend(Element element)
+        /// <returns>Returns true if the element is a Family Instance with the PartType Tee, Wye, Lateral Tee, Cross, or Lateral Cross. Returns false otherwise. </returns>
+        public static bool IsPipeJunction(Element element)
         {
             if (element == null) return false;
-            if (!(element is FamilyInstance)) return false;
-            return BendPartTypes.Contains(GetPartType(element as FamilyInstance));
+            if (!(element is FamilyInstance familyInstance)) return false;
+            return JunctionPartTypes.Contains(GetPartType(familyInstance));
         }
 
         /// <summary>
@@ -85,6 +85,7 @@ namespace CarsonsAddins.Utils
         /// <summary>
         /// Part Types that are considered a "Bend" ( or junction )
         /// </summary>
-        public static readonly List<PartType> BendPartTypes = new List<PartType>() { PartType.Elbow, PartType.Cross, PartType.Tee, PartType.Wye, PartType.LateralTee, PartType.LateralCross };
+        public static readonly List<PartType> JunctionPartTypes = new List<PartType>() { PartType.Cross, PartType.Tee, PartType.Wye, PartType.LateralTee, PartType.LateralCross };
+
     }
 }
