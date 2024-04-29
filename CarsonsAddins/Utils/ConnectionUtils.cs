@@ -271,11 +271,12 @@ namespace CarsonsAddins.Utils
             try
             {
                 if (connector.ConnectorManager == null) return null;
-                foreach (Connector other in connector.ConnectorManager.Connectors)
-                {
-
-                    if (connector.Id.Equals(other.Id)) continue;
-                    return other;
+                Connector[] adjacentConnectors = GetConnectors(connector.ConnectorManager).Where(con => con.Id != connector.Id).ToArray();
+                if (adjacentConnectors.Length == 0) return null;
+                if (adjacentConnectors.Length == 1) return adjacentConnectors[0];
+                Connector parallelConnector = GetParallelConnector(connector);
+                if (parallelConnector != null) return parallelConnector;
+                return adjacentConnectors.FirstOrDefault();
                 }
             }
             catch
