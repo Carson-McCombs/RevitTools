@@ -29,7 +29,7 @@ namespace CarsonsAddins
     /// </summary>
     public class PipeLine
     {
-        readonly private ISelectionFilter filter = null;
+        readonly private SelectionFilters.SelectionFilter_PipingElements filter = null;
         readonly private Element[] elements;
         
         public PipeLine(Pipe pipe)
@@ -103,7 +103,7 @@ namespace CarsonsAddins
             if (next.Owner == null) return false;
             if (next.Id.Equals(ElementId.InvalidElementId)) return false;
             if (!next.IsValidObject) return false;
-            if (!filter.AllowElement(next.Owner)) return false;
+            if (!filter.AllowElement(next.Owner, next)) return false;
             return true;
         }
 
@@ -333,7 +333,7 @@ namespace CarsonsAddins
             Line projectedElementLine = Line.CreateBound(projectedPointA, projectedPointB);
 
             //if the element line is not parallel with the active activeView, don't create the secondaryDimension.
-            if (!elementLine.Direction.IsAlmostEqualTo(projectedElementLine.Direction)) secondaryDimension = false;
+            if (!elementLine.Direction.IsAlmostEqualTo(projectedElementLine.Direction, 0.00001)) secondaryDimension = false;
 
             //Retrieves and stores the desired dimension types per element category. This could also be an Dict<BuiltInCategory, DimensionType) + one dimension type for the primary dimension line.
             DimensionStyles dimensionStyles = GetDimensionStyles(doc);
@@ -349,21 +349,8 @@ namespace CarsonsAddins
             ReferenceArray primaryReferenceArray = new ReferenceArray();
             //primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, elements[0]));
             //primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, elements[elements.Length - 1]));
-            if(elements.Length == 0) return;
-            /*elements
-                .Where(elem =>
-                    !Utils.ConnectionUtils.IsLinearElement(elem))
-                .Select(elem =>
-                    GetCenterReference(validStyleIds, elem as FamilyInstance))
-                .Where( reference => 
-                    reference != null )
-                .ToList().ForEach(reference => 
-                    primaryReferenceArray.Append(reference));*/
+
             
-            
-            
-            //Create a secondary dimension if set to
-            if (!secondaryDimension) return;
             for (int i = 0; i < elements.Length; i++)
             {
                 Element element = elements[i];
@@ -374,7 +361,7 @@ namespace CarsonsAddins
                     //Even though the DimensionLinearElement function could be used instead, it would be slower and less efficient.
                     if (Utils.ElementCheckUtils.IsPipe(element))                     {
                         if (isEdge) primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, element));
-                        DimensionPipe(doc, dimensionStyles.secondaryPipeDimensionType, secondaryDimensionLine, element as Pipe);
+                        if (secondaryDimension) DimensionPipe(doc, dimensionStyles.secondaryPipeDimensionType, secondaryDimensionLine, element as Pipe);
                         continue;
                     }
                     if (Utils.ElementCheckUtils.IsPipeFlange(element)) continue; //doesn't dimension pipe flanges / unions / bells as they are not relevant to fabrication
@@ -383,7 +370,7 @@ namespace CarsonsAddins
                     if (isLinear) //Dimensions element based on whether or not it is linear.
                     {
                         if (isEdge) primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, element));
-                        DimensionLinearElement(doc, dimensionType, plane, secondaryDimensionLine, element as FamilyInstance);
+                        if (secondaryDimension) DimensionLinearElement(doc, dimensionType, plane, secondaryDimensionLine, element as FamilyInstance);
                     }
                     else
                     {

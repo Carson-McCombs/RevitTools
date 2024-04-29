@@ -68,7 +68,25 @@ namespace CarsonsAddins.SelectionFilters
             }
             return invert;
         }
+        public bool AllowElement(Element elem, Connector connector)
+        {
+            if (elem == null || elem.Category == null) return invert;
+            if (linearOnly && ConnectionUtils.GetParallelConnector(connector) == null) return invert;
+            if (allowPipes && ElementCheckUtils.IsPipe(elem)) { return !invert; }
+            if (allowAccessories && ElementCheckUtils.IsPipeAccessory(elem)) return !invert;
+            if (elem.Category.BuiltInCategory.Equals(BuiltInCategory.OST_PipeFitting))
+            {
+                if (!(elem is FamilyInstance)) return invert;
+                FamilyInstance familyInstance = elem as FamilyInstance;
+                PartType partType = ElementCheckUtils.GetPartType(familyInstance);
+                if (ElementCheckUtils.FlangePartTypes.Contains(partType)) return allowFlanges ^ invert;
+                else if (PartType.Elbow.Equals(partType)) return allowElbows ^ invert;
+                else if (ElementCheckUtils.JunctionPartTypes.Contains(partType)) return allowJunctions ^ invert;
+                else return allowOtherFittings;
 
+            }
+            return invert;
+        }
         public bool AllowReference(Reference reference, XYZ position)
         {
             return true;
