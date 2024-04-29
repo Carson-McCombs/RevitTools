@@ -40,6 +40,7 @@ namespace CarsonsAddins.Utils
 
         public static T[] GetGeometryObjectFromSymbolGeometry<T>(Options geometryOptions, Element element) where T : GeometryObject
         {
+            if (element == null) return null;
             GeometryElement geometry = element.get_Geometry(geometryOptions);
             List<T> geometryObjects = new List<T>();
             foreach (GeometryObject goA in geometry)
@@ -55,6 +56,7 @@ namespace CarsonsAddins.Utils
         }
         public static T[] GetGeometryObjectFromInstanceGeometry<T>(Options geometryOptions, Element element) where T : GeometryObject
         {
+            if (element == null) return null;
             GeometryElement geometry = element.get_Geometry(geometryOptions);
             List<T> gos = new List<T>();
             foreach (GeometryObject goA
@@ -70,6 +72,7 @@ namespace CarsonsAddins.Utils
         }
         public static T[] GetGeometryObjectFromGeometry<T>(GeometryElement geometry) where T : GeometryObject
         {
+            if (geometry == null) return null;
             List<T> geometryObjects = new List<T>();
             foreach (GeometryObject go in geometry)
             {
@@ -110,6 +113,7 @@ namespace CarsonsAddins.Utils
 
         public static Reference GetPseudoReferenceOfConnector(Options geometryOptions, Plane plane, Connector connector)
         {
+            if (connector == null) return null;
             XYZ projectedOrigin = ProjectPointOntoPlane(plane, connector.Origin);
             if (projectedOrigin == null) return null;
             PlanarFace[] instancePlanarFaces = GetGeometryObjectFromInstanceGeometry<PlanarFace>(geometryOptions, connector.Owner);
@@ -122,6 +126,7 @@ namespace CarsonsAddins.Utils
         }
         public static GeometryObject[] GetGeometryLinesOfBend(View activeView, Element element, ElementId validStyleId)
         {
+            if (element == null) return null;
             if (ElementId.InvalidElementId.Equals(validStyleId)) return null;
             GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
             List<GeometryObject> references = new List<GeometryObject>();
@@ -141,6 +146,7 @@ namespace CarsonsAddins.Utils
         }
         public static T GetInstanceGeometryObjectFromId<T>(Options geometryOptions, Element element, int geometryId) where T : GeometryObject
         {
+            if (element == null) return null;
             GeometryElement geometry = element.get_Geometry(geometryOptions);
             foreach (GeometryObject goA in geometry)
             {
@@ -158,6 +164,7 @@ namespace CarsonsAddins.Utils
         }
         public static T[] GetExposedGeometryObjects<T>(Options geometryOptions, Element element) where T : GeometryObject
         {
+            if (element == null) return null;
             List<T> geometryObjects = new List<T>();
             GeometryElement geometry = element.get_Geometry(geometryOptions);
             foreach (GeometryObject go in geometry)
@@ -170,7 +177,7 @@ namespace CarsonsAddins.Utils
         }
         public static T GetSymbolGeometryObjectFromId<T>(Options geometryOptions, Element element, int geometryId) where T : GeometryObject
         {
-
+            if (element == null) return null;
             GeometryElement geometry = element.get_Geometry(geometryOptions);
             foreach (GeometryObject goA in geometry)
             {
@@ -189,7 +196,7 @@ namespace CarsonsAddins.Utils
         }
         public static T[] GetSymbolGeometryObjectFromId<T>(Options geometryOptions, Element element, int[] geometryIds) where T : GeometryObject
         {
-
+            if (element == null) return null;
             GeometryElement geometry = element.get_Geometry(geometryOptions);
             List<T> symbolGeometry = new List<T>();
             foreach (GeometryObject goA in geometry)
@@ -210,6 +217,7 @@ namespace CarsonsAddins.Utils
         }
         public static T[] GetSymbolGeometryObjectsWithStyleIds<T>(Options geometryOptions, Element element, ElementId[] validStyleIds) where T : GeometryObject
         {
+            if (element == null) return null;
             if (validStyleIds == null || validStyleIds.Length == 0) return null;
             GeometryElement geometry = element.get_Geometry(geometryOptions);
 
@@ -237,6 +245,7 @@ namespace CarsonsAddins.Utils
 
         public static T[] GetInstanceGeometryObjectsWithStyleIds<T>(Options geometryOptions, Element element, ElementId[] validStyleIds) where T : GeometryObject
         {
+            if (element == null) return null;
             if (validStyleIds == null || validStyleIds.Length == 0) return null;
             GeometryElement geometry = element.get_Geometry(geometryOptions);
 
@@ -373,6 +382,8 @@ namespace CarsonsAddins.Utils
             }
             public static IdWithReference[] BreakdownGeometryObjects(GeometryObject[] geometryObjects)
             {
+                if (geometryObjects == null) return new IdWithReference[0];
+                if (geometryObjects.Length == 0) return new IdWithReference[0];
                 List<IdWithReference> IdsWithReferences = new List<IdWithReference>();
                 foreach (GeometryObject geometryObject in geometryObjects)
                 {
@@ -398,6 +409,7 @@ namespace CarsonsAddins.Utils
 
         public static Element[] GetConnectedElements(Connector[] connectors)
         {
+            if (connectors == null || connectors.Length == 0) return null;
             List<Element> connected = new List<Element>();
             foreach (Connector connector in connectors)
             {
@@ -412,6 +424,7 @@ namespace CarsonsAddins.Utils
         }
         public static PlanarFace[] GetPlanarFacesOfBend(View activeView, Element element)
         {
+            if (element == null) return null;
             GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
             List<PlanarFace> faces = new List<PlanarFace>();
             foreach (GeometryObject goA in geometry)
@@ -437,6 +450,7 @@ namespace CarsonsAddins.Utils
         }
         public static PlanarFace GetPlanarFaceOfBend(View activeView, Element element, Line line)
         {
+            if (element == null) return null;
             GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
             foreach (GeometryObject goA in geometry)
             {
@@ -462,6 +476,7 @@ namespace CarsonsAddins.Utils
 
         public static PlanarFace[] GetGeometryObjectsOfPipe(View activeView, Element element)
         {
+            if (element == null) return null;
             GeometryElement geometry = element.get_Geometry(GetGeometryOptions(activeView));
             List<PlanarFace> faces = new List<PlanarFace>();
             foreach (GeometryObject go in geometry)
@@ -480,27 +495,16 @@ namespace CarsonsAddins.Utils
         }
         public static Line GetGeometryLineOfPipe(View activeView, Pipe pipe)
         {
+            if (pipe == null) return null;
             return pipe.get_Geometry(GetGeometryOptions(activeView)).OfType<Line>().Where(line => line.Id.Equals(0)).FirstOrDefault();
         }
         public static Reference[] GetEndPointReferences(Line line)
         {
+            if (line == null) return null;
             Reference refA = line.GetEndPointReference(0);
             Reference refB = line.GetEndPointReference(1);
             return new Reference[2] { refA, refB };
         }
-        public static bool IsLinearElement(Element element)
-        {
-            if (element == null) return false;
-            if (ElementCheckUtils.IsPipe(element) || ElementCheckUtils.IsPipeFlange(element)) return true;
-            if (!(element is FamilyInstance familyInstance)) return false;
-            XYZ[] connectorOrigins = ConnectionUtils.GetConnectors(familyInstance).Select(connector => connector.Origin).ToArray();
-            if (connectorOrigins == null) return false;
-            if (connectorOrigins.Length != 2) return false;
-            XYZ origin = (element.Location as LocationPoint).Point;
-            Line line = Line.CreateBound(connectorOrigins[0], connectorOrigins[1]);
-            line.MakeUnbound();
-            IntersectionResult intersectionResult = line.Project(origin);
-            return (origin.IsAlmostEqualTo(intersectionResult.XYZPoint));
-        }
+        
     }
 }

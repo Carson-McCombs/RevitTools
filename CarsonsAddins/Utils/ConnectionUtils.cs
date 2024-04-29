@@ -299,6 +299,22 @@ namespace CarsonsAddins.Utils
             BellOrSpigot bos = connectorInfo.IsPrimary ? BellOrSpigot.BELL : BellOrSpigot.SPIGOT;
             return bos;
         }
+
+
+        public static bool IsLinearElement(Element element)
+        {
+            if (element == null) return false;
+            if (ElementCheckUtils.IsPipe(element) || ElementCheckUtils.IsPipeFlange(element)) return true;
+            if (!(element is FamilyInstance familyInstance)) return false;
+            XYZ[] connectorOrigins = ConnectionUtils.GetConnectors(familyInstance).Select(connector => connector.Origin).ToArray();
+            if (connectorOrigins == null) return false;
+            if (connectorOrigins.Length != 2) return false;
+            XYZ origin = (element.Location as LocationPoint).Point;
+            Line line = Line.CreateBound(connectorOrigins[0], connectorOrigins[1]);
+            line.MakeUnbound();
+            IntersectionResult intersectionResult = line.Project(origin);
+            return (origin.IsAlmostEqualTo(intersectionResult.XYZPoint));
+        }
     }
 
    
