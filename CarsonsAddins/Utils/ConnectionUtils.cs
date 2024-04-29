@@ -315,6 +315,35 @@ namespace CarsonsAddins.Utils
             IntersectionResult intersectionResult = line.Project(origin);
             return (origin.IsAlmostEqualTo(intersectionResult.XYZPoint));
         }
+        public static Connector GetParallelConnector(Connector connector)
+        {
+            if (connector == null) return null;
+            if (connector.Owner == null) return null;
+            Element element = connector.Owner;
+            
+            Connector[] connectors = GetConnectors(connector.ConnectorManager).Where(con=> con.Id != connector.Id && (connector.Angle - con.Angle < 0.0001) && (connector.Angle - con.Angle > -0.0001)).ToArray();
+            return connectors.FirstOrDefault();  
+
+        }
+        public static bool HasParallelConnectors(Element element)
+        {
+            if (element == null) return false;
+            
+            if (element is Pipe pipe) return true;
+            if (!(element is FamilyInstance familyInstance)) return false;
+            double[] angles = GetConnectors(familyInstance).Select(con => con.Angle).ToArray();
+            for(int i = 0; i < angles.Length; i++)
+            {
+                for (int j = 0; j < angles.Length; j++)
+                {
+                    if (i == j) continue;
+                    if (angles[i] - angles[j] < 0.0001) return true;
+                    if (angles[j] - angles[i] < 0.0001) return true;
+                }
+            }
+            return false;
+
+        }
     }
 
    
