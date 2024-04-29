@@ -49,8 +49,8 @@ namespace CarsonsAddins
                     transaction.RollBack();
                     return Result.Cancelled;
                 }
-                PipeLine pipeLine = new PipeLine();
-                Element[] elementList = pipeLine.GetPipeLine(uidoc, pipe);
+                PipeLine pipeLine = new PipeLine(pipe);
+                Element[] elementList = pipeLine.GetElements();
 
                 ElementId[] elementIds = elementList.Select(element => element.Id).ToArray();
                 Array.ForEach(elementList, element => elements.Insert(element));

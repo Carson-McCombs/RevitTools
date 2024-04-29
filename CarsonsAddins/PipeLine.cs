@@ -29,19 +29,21 @@ namespace CarsonsAddins
     /// </summary>
     public class PipeLine
     {
-        private ISelectionFilter filter = null;
-        private List<Element> elements;
-        public Element[] GetPipeLine(UIDocument uidoc, Pipe pipe)
+        readonly private ISelectionFilter filter = null;
+        readonly private Element[] elements;
+        
+        public PipeLine(Pipe pipe)
         {
-            elements = new List<Element>();
-            filter = new SelectionFilters.SelectionFilter_PipingElements(true, true, false, true, true, true);
+            List<Element> elementList = new List<Element>();
+            filter = new SelectionFilters.SelectionFilter_PipingElements(false, true, true, false, true, true, true);
             Connector[] connectors = Utils.ConnectionUtils.GetConnectors(pipe);
-            AddNextElement_Left(uidoc, connectors[0]);
-            elements.Add(pipe);
-            AddNextElement_Right(uidoc, connectors[1]);
-            
-            return elements.ToArray();
+            AddNextElement_Left(connectors[0], ref elementList);
+            elementList.Add(pipe);
+            AddNextElement_Right(connectors[1], ref elementList);
+            elements = elementList.ToArray();
         }
+
+        public Element[] GetElements() => elements;
         /// <summary>
         /// 
         /// </summary>
@@ -49,15 +51,15 @@ namespace CarsonsAddins
         /// <param name="pipe">The selected Pipe</param>
         /// <param name="filter">The SelectionFilter</param>
         /// <returns>An array of elements containing all of the elements in the Pipeline.</returns>
-        public Element[] GetPipeLine(UIDocument uidoc, Pipe pipe, SelectionFilters.SelectionFilter_PipingElements filter)
+        public PipeLine( Pipe pipe, SelectionFilters.SelectionFilter_PipingElements filter)
         {
-            elements = new List<Element>();
             this.filter = filter;
+            List<Element> elementList = new List<Element>();
             Connector[] connectors = Utils.ConnectionUtils.GetConnectors(pipe);
-            AddNextElement_Left(uidoc, connectors[0]);
-            elements.Add(pipe);
-            AddNextElement_Right(uidoc, connectors[1]);
-            return elements.ToArray();
+            AddNextElement_Left(connectors[0], ref elementList);
+            elementList.Add(pipe);
+            AddNextElement_Right(connectors[1], ref elementList);
+            elements = elementList.ToArray();
         }
 
         /// <summary>
@@ -65,13 +67,13 @@ namespace CarsonsAddins
         /// </summary>
         /// <param name="uidoc">The active UIDocument</param>
         /// <param name="current">The current connector/ </param>
-        private void AddNextElement_Left(UIDocument uidoc, Connector current)
+        private void AddNextElement_Left(Connector current, ref List<Element> elementList)
         {
             Connector adjacent = Utils.ConnectionUtils.GetAdjacentConnector(current);
             if (adjacent == null) return;
             Connector next = Utils.ConnectionUtils.TryGetConnected(adjacent);
-            if (CanContinue(next)) AddNextElement_Left(uidoc, next);
-            if (adjacent.IsConnected) elements.Add(next.Owner);
+            if (CanContinue(next)) AddNextElement_Left(next, ref elementList);
+            if (adjacent.IsConnected) elementList.Add(next.Owner);
         }
 
         /// <summary>
@@ -79,14 +81,14 @@ namespace CarsonsAddins
         /// </summary>
         /// <param name="uidoc">The active UIDocument</param>
         /// <param name="current">The current connector/ </param>
-        private void AddNextElement_Right(UIDocument uidoc, Connector current)
+        private void AddNextElement_Right(Connector current, ref List<Element> elementList)
         {
             Connector adjacent = Utils.ConnectionUtils.GetAdjacentConnector(current);
             if (adjacent == null) return;
             Connector next = Utils.ConnectionUtils.TryGetConnected(adjacent);
-            if (adjacent.IsConnected) elements.Add(next.Owner);
+            if (adjacent.IsConnected) elementList.Add(next.Owner);
 
-            if (CanContinue(next)) AddNextElement_Right(uidoc, next);
+            if (CanContinue(next)) AddNextElement_Right(next, ref elementList);
             
         }
 
@@ -173,6 +175,8 @@ namespace CarsonsAddins
         {
             Line[] instanceLines = Utils.GeometryUtils.GetInstanceGeometryObjectsWithStyleIds<Line>(Utils.GeometryUtils.GetGeometryOptions(), element, validStyleIds);
             Line[] symbolLines = Utils.GeometryUtils.GetSymbolGeometryObjectsWithStyleIds<Line>(Utils.GeometryUtils.GetGeometryOptions(), element, validStyleIds);
+            if (instanceLines == null || symbolLines == null) return null;
+            if (instanceLines.Length == 0 || symbolLines.Length == 0) return null;
             XYZ origin = GetOriginOfElement(element);
             int id = -1;
             int endIndex = -1;
@@ -343,15 +347,24 @@ namespace CarsonsAddins
 
             //Creates a reference array for the primary dimension based on its end point references.
             ReferenceArray primaryReferenceArray = new ReferenceArray();
-            primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, elements[0]));
-            primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, elements[elements.Count - 1]));
-
-            //Creates the primary dimension
-            doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionStyles.primaryDimensionType );
-
+            //primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, elements[0]));
+            //primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, elements[elements.Length - 1]));
+            if(elements.Length == 0) return;
+            /*elements
+                .Where(elem =>
+                    !Utils.ConnectionUtils.IsLinearElement(elem))
+                .Select(elem =>
+                    GetCenterReference(validStyleIds, elem as FamilyInstance))
+                .Where( reference => 
+                    reference != null )
+                .ToList().ForEach(reference => 
+                    primaryReferenceArray.Append(reference));*/
+            
+            
+            
             //Create a secondary dimension if set to
             if (!secondaryDimension) return;
-            for (int i = 0; i < elements.Count; i++)
+            for (int i = 0; i < elements.Length; i++)
             {
                 Element element = elements[i];
                 try
@@ -363,7 +376,7 @@ namespace CarsonsAddins
                         continue;
                     }
                     if (Utils.ElementCheckUtils.IsPipeFlange(element)) continue; //doesn't dimension pipe flanges / unions / bells as they are not relevant to fabrication
-                    bool isLinear = Utils.GeometryUtils.IsLinearElement(element); 
+                    bool isLinear = Utils.ConnectionUtils.IsLinearElement(element); 
                     DimensionType dimensionType = GetElementDimensionType(dimensionStyles, element);
                     if (isLinear) //Dimensions element based on whether or not it is linear.
                     {
@@ -371,8 +384,10 @@ namespace CarsonsAddins
                     }
                     else
                     {
-                        FamilyInstance connected = (i == 0) ? elements[1] as FamilyInstance : elements[elements.Count - 2] as FamilyInstance;
-                        DimensionNonLinearElement(doc, dimensionType, validStyleIds, plane, secondaryDimensionLine, element as FamilyInstance, connected);
+                        bool isEdge = i == 0 || i == elements.Length - 1;
+                        FamilyInstance connected = i < elements.Length - 1 ? elements[i + 1] as FamilyInstance : elements[i - 1] as FamilyInstance;
+                        DimensionNonLinearElement(doc, dimensionType, validStyleIds, plane, secondaryDimensionLine, element as FamilyInstance, connected, isEdge);
+                        primaryReferenceArray.Append(GetCenterReference(validStyleIds, element));
                     }
                 }
                 catch (Exception ex)
@@ -382,8 +397,10 @@ namespace CarsonsAddins
 
                 
             }
-
+            //Creates the primary dimension
+            doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionStyles.primaryDimensionType);
         }
+
         /// <summary>
         /// Creates a Dimension from each end of a pipe. *Note: DimensionLinearElement could be called instead, but as a pipe has static geometry, a dedicated function ( that should be faster than the generic function ) was used instead.
         /// </summary>
@@ -439,8 +456,9 @@ namespace CarsonsAddins
         /// <param name="familyInstance">The non-linear element in the Pipeline that is being dimensioned.</param>
         /// <param name="connected">The adjacent element that is within the Pipeline. This is used to retrieve the connector of the main element that is located within the Pipeline.</param>
         /// <returns>a newly created Dimension going from the connector of the non-linear element within the Pipeline to that element's centerpoint.</returns>
-        private static Dimension DimensionNonLinearElement(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Plane plane, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected)
+        private static Dimension DimensionNonLinearElement(Document doc, DimensionType dimensionType, ElementId[] validStyleIds, Plane plane, Line dimensionLine, FamilyInstance familyInstance, FamilyInstance connected, bool isEdge)
         {
+            ReferenceArray referenceArray = new ReferenceArray();
             //Get the element's connector that is still within the Pipeline
             Connector connector = Utils.ConnectionUtils.TryGetConnection(familyInstance, connected);
             
@@ -450,18 +468,29 @@ namespace CarsonsAddins
             Reference connectorReference = Utils.GeometryUtils.GetPseudoReferenceOfConnector(Utils.GeometryUtils.GetGeometryOptions(), plane, connector) 
                 ?? Utils.GeometryUtils.GetPseudoReferenceOfConnector(Utils.GeometryUtils.GetGeometryOptions(doc.ActiveView), plane, connector);
             if (connectorReference == null) return null;
+            referenceArray.Append(connectorReference);
             //Retrieve a reference to the element's centerpoint. As there is no dedicated reference, all of the geometry lines must be checked to see
             //if there is one with an endpoint that shares a position with the center of the element, and the reference of that endpoint is used instead.
             Reference centerReference = GetCenterReference(validStyleIds, familyInstance);
             if (centerReference == null) return null;
-            //Assembly the References into a ReferenceArray and then create and return the Dimension based on those references.
-            ReferenceArray referenceArray = new ReferenceArray();
             referenceArray.Append(centerReference);
-            referenceArray.Append(connectorReference);
+            if (!isEdge)
+            {
+                Connector adjacent = Utils.ConnectionUtils.GetAdjacentConnector(connector);
+                if (adjacent == null) return null;
+                Reference adjacentReference = Utils.GeometryUtils.GetPseudoReferenceOfConnector(Utils.GeometryUtils.GetGeometryOptions(), plane, adjacent)
+                    ?? Utils.GeometryUtils.GetPseudoReferenceOfConnector(Utils.GeometryUtils.GetGeometryOptions(doc.ActiveView), plane, adjacent);
+                if (adjacentReference == null) return null;
+                referenceArray.Append(adjacentReference);
+            }
+            
+
+            
+            
+            
+            //Assembly the References into a ReferenceArray and then create and return the Dimension based on those references.
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
-
-
 
     }
 }
