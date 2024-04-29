@@ -369,9 +369,11 @@ namespace CarsonsAddins
                 Element element = elements[i];
                 try
                 {
+                    bool isEdge = i == 0 || i == elements.Length - 1;
                     //As Pipe elements have static geometry, a dedicated function is used to retrieve their references and create the dimension.
                     //Even though the DimensionLinearElement function could be used instead, it would be slower and less efficient.
                     if (Utils.ElementCheckUtils.IsPipe(element))                     {
+                        if (isEdge) primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, element));
                         DimensionPipe(doc, dimensionStyles.secondaryPipeDimensionType, secondaryDimensionLine, element as Pipe);
                         continue;
                     }
@@ -380,11 +382,12 @@ namespace CarsonsAddins
                     DimensionType dimensionType = GetElementDimensionType(dimensionStyles, element);
                     if (isLinear) //Dimensions element based on whether or not it is linear.
                     {
+                        if (isEdge) primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, element));
                         DimensionLinearElement(doc, dimensionType, plane, secondaryDimensionLine, element as FamilyInstance);
                     }
                     else
                     {
-                        bool isEdge = i == 0 || i == elements.Length - 1;
+                        
                         FamilyInstance connected = i < elements.Length - 1 ? elements[i + 1] as FamilyInstance : elements[i - 1] as FamilyInstance;
                         DimensionNonLinearElement(doc, dimensionType, validStyleIds, plane, secondaryDimensionLine, element as FamilyInstance, connected, isEdge);
                         primaryReferenceArray.Append(GetCenterReference(validStyleIds, element));
