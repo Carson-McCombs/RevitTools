@@ -7,8 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-
+using CarsonsAddins.Utils;
 
 namespace CarsonsAddins
 {
@@ -59,6 +58,7 @@ namespace CarsonsAddins
             AddNextElement_Left(connectors[0], ref elementList);
             elementList.Add(pipe);
             AddNextElement_Right(connectors[1], ref elementList);
+
             elements = elementList.ToArray();
         }
 
@@ -173,8 +173,8 @@ namespace CarsonsAddins
         /// <returns>a Reference to the center of the piping element.</returns>
         private static Reference GetCenterReference(ElementId[] validStyleIds, Element element)
         {
-            Line[] instanceLines = Utils.GeometryUtils.GetInstanceGeometryObjectsWithStyleIds<Line>(Utils.GeometryUtils.GetGeometryOptions(), element, validStyleIds);
-            Line[] symbolLines = Utils.GeometryUtils.GetSymbolGeometryObjectsWithStyleIds<Line>(Utils.GeometryUtils.GetGeometryOptions(), element, validStyleIds);
+            Line[] instanceLines = GeometryUtils.GetInstanceGeometryObjectsWithStyleIds<Line>(Utils.GeometryUtils.GetGeometryOptions(), element, validStyleIds);
+            Line[] symbolLines = GeometryUtils.GetSymbolGeometryObjectsWithStyleIds<Line>(Utils.GeometryUtils.GetGeometryOptions(), element, validStyleIds);
             if (instanceLines == null || symbolLines == null) return null;
             if (instanceLines.Length == 0 || symbolLines.Length == 0) return null;
             XYZ origin = GetOriginOfElement(element);
@@ -196,7 +196,8 @@ namespace CarsonsAddins
             
             return symbolLines.Where(line => line.Id.Equals(id)).FirstOrDefault().GetEndPointReference(endIndex);
         }
-        
+
+
         /// <summary>
         /// Retrieves the Reference for unused connector of the pipe.
         /// </summary>
@@ -221,6 +222,13 @@ namespace CarsonsAddins
                 if (line.GetEndPoint(i).IsAlmostEqualTo(position)) return line.GetEndPointReference(i);
             }
             return null;
+        }
+
+        private static Reference GetMechanicalEquipmentEndReference(Plane plane, FamilyInstance mechanicalEquipment, FamilyInstance connected)
+        {
+            Connector connector = ConnectionUtils.TryGetConnection(mechanicalEquipment, connected);
+            if (connector == null) return null;
+            return GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, connector);
         }
 
         /// <summary>
@@ -252,10 +260,9 @@ namespace CarsonsAddins
         /// <returns>a Reference corresponding to the endpoint of the Piping Element.</returns>
         private static Reference GetEndReference(View activeView, ElementId[] validStyleIds, Element element)
         {
-            if (Utils.ElementCheckUtils.IsPipe(element)) return GetPipeEndReference(activeView, element as Pipe);
+            if (ElementCheckUtils.IsPipe(element)) return GetPipeEndReference(activeView, element as Pipe);
             return GetCenterReference(validStyleIds, element);
         }
-
         /// <summary>
         /// A list of static Dimension Types corresponding to each element category within the Pipeline and one for the Primary Dimension.
         /// </summary>
@@ -276,9 +283,9 @@ namespace CarsonsAddins
         private DimensionType GetElementDimensionType(DimensionStyles styles, Element element)
         {
             if (element == null) return null;
-            if (Utils.ElementCheckUtils.IsPipe(element)) return styles.secondaryPipeDimensionType;
+            if (ElementCheckUtils.IsPipe(element)) return styles.secondaryPipeDimensionType;
             if (BuiltInCategory.OST_PipeFitting.Equals(element.Category.BuiltInCategory)) return styles.secondaryFittingDimensionType;
-            if (Utils.ElementCheckUtils.IsPipeAccessory(element)) return styles.secondaryAccessoryDimensionType;
+            if (ElementCheckUtils.IsPipeAccessory(element)) return styles.secondaryAccessoryDimensionType;
             return null;
         }
         /// <summary>
@@ -356,6 +363,7 @@ namespace CarsonsAddins
                 Element element = elements[i];
                 try
                 {
+                    bool isMechanicalEquipment = BuiltInCategory.OST_MechanicalEquipment.Equals(element.Category.BuiltInCategory);
                     bool isEdge = i == 0 || i == elements.Length - 1;
                     //As Pipe elements have static geometry, a dedicated function is used to retrieve their references and create the dimension.
                     //Even though the DimensionLinearElement function could be used instead, it would be slower and less efficient.
@@ -364,7 +372,7 @@ namespace CarsonsAddins
                         if (secondaryDimension) DimensionPipe(doc, dimensionStyles.secondaryPipeDimensionType, secondaryDimensionLine, element as Pipe);
                         continue;
                     }
-                    if (Utils.ElementCheckUtils.IsPipeFlange(element)) continue; //doesn't dimension pipe flanges / unions / bells as they are not relevant to fabrication
+                    if (!isEdge && Utils.ElementCheckUtils.IsPipeFlange(element)) continue; //doesn't dimension pipe flanges / unions / bells as they are not relevant to fabrication
                     bool isLinear = Utils.ConnectionUtils.IsLinearElement(element); 
                     DimensionType dimensionType = GetElementDimensionType(dimensionStyles, element);
                     if (isLinear) //Dimensions element based on whether or not it is linear.
@@ -374,10 +382,10 @@ namespace CarsonsAddins
                     }
                     else
                     {
-                        
                         FamilyInstance connected = i < elements.Length - 1 ? elements[i + 1] as FamilyInstance : elements[i - 1] as FamilyInstance;
-                        DimensionNonLinearElement(doc, dimensionType, validStyleIds, plane, secondaryDimensionLine, element as FamilyInstance, connected, isEdge);
-                        primaryReferenceArray.Append(GetCenterReference(validStyleIds, element));
+                        if (secondaryDimension && !isMechanicalEquipment) DimensionNonLinearElement(doc, dimensionType, validStyleIds, plane, secondaryDimensionLine, element as FamilyInstance, connected, isEdge);
+                        if (isMechanicalEquipment) primaryReferenceArray.Append(GetMechanicalEquipmentEndReference(plane, element as FamilyInstance, connected));
+                        else primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, element));
                     }
                 }
                 catch (Exception ex)
