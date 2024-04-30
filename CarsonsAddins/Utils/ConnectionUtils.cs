@@ -134,6 +134,21 @@ namespace CarsonsAddins.Utils
             return null;
 
         }
+
+        public static Connector TryGetConnection(Element elementA, Element elementB)
+        {
+            Connector[] connectorsA = ( elementA is FamilyInstance familyInstanceA) ? GetConnectors(familyInstanceA) : GetConnectors(elementA as Pipe);
+            Connector[] connectorsB = (elementB is FamilyInstance familyInstanceB) ? GetConnectors(familyInstanceB) : GetConnectors(elementB as Pipe);
+            foreach (Connector conA in connectorsA)
+            {
+                foreach (Connector conB in connectorsB)
+                {
+                    if (conA.IsConnectedTo(conB)) return conA;
+
+                }
+            }
+            return null;
+        }
         /// <summary>
         /// Calls the TryGetConnection function to retrieve the connector from elementA that connects to elementB. Then getting the direction from the center of elementA to the connector.
         /// </summary>

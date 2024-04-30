@@ -139,6 +139,12 @@ namespace CarsonsAddins
             return null;
         }
 
+        private static XYZ TryGetConnectionPosition(Element element, Element other)
+        {
+            Connector connector = ConnectionUtils.TryGetConnection(element, other);
+            return connector?.Origin;
+        }
+
         /// <summary>
         /// Creates a line that is parallel with the projected element line and intersects the dimension point. This is where the primary dimension will be placed.
         /// </summary>
@@ -330,13 +336,15 @@ namespace CarsonsAddins
             ElementId[] validStyleIds = GetCenterlineIds(doc);
 
             //Creates the element line which goes from the center of the element on each end of Pipeline.
-            XYZ pointA = GetOriginOfElement(elements[0]);
-            XYZ pointB = GetOriginOfElement(elements[1]);
+
+            XYZ pointA = TryGetConnectionPosition(elements[0], elements[1]) ?? GetOriginOfElement(elements[0]);
+
+            XYZ pointB = TryGetConnectionPosition(elements[elements.Length - 2], elements[elements.Length - 1]) ?? GetOriginOfElement(elements[elements.Length - 1]);
             Line elementLine = Line.CreateBound(pointA, pointB);
 
             //Projects the endpoints and the element line onto the plane of the active activeView.
-            XYZ projectedPointA = Utils.GeometryUtils.ProjectPointOntoPlane(plane, pointA);
-            XYZ projectedPointB = Utils.GeometryUtils.ProjectPointOntoPlane(plane, pointB);
+            XYZ projectedPointA = GeometryUtils.ProjectPointOntoPlane(plane, pointA);
+            XYZ projectedPointB = GeometryUtils.ProjectPointOntoPlane(plane, pointB);
             Line projectedElementLine = Line.CreateBound(projectedPointA, projectedPointB);
             
             //if the element line is not parallel with the active activeView, don't create the secondaryDimension.
