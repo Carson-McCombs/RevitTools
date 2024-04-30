@@ -331,9 +331,9 @@ namespace CarsonsAddins
             XYZ projectedPointA = Utils.GeometryUtils.ProjectPointOntoPlane(plane, pointA);
             XYZ projectedPointB = Utils.GeometryUtils.ProjectPointOntoPlane(plane, pointB);
             Line projectedElementLine = Line.CreateBound(projectedPointA, projectedPointB);
-
+            
             //if the element line is not parallel with the active activeView, don't create the secondaryDimension.
-            if (!elementLine.Direction.IsAlmostEqualTo(projectedElementLine.Direction, 0.00001)) secondaryDimension = false;
+            if (!elementLine.Direction.IsAlmostEqualTo(projectedElementLine.Direction, 0.001)) secondaryDimension = false;
 
             //Retrieves and stores the desired dimension types per element category. This could also be an Dict<BuiltInCategory, DimensionType) + one dimension type for the primary dimension line.
             DimensionStyles dimensionStyles = GetDimensionStyles(doc);
