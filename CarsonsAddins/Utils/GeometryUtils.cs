@@ -118,7 +118,7 @@ namespace CarsonsAddins.Utils
             if (projectedOrigin == null) return null;
             PlanarFace[] instancePlanarFaces = GetGeometryObjectFromInstanceGeometry<PlanarFace>(geometryOptions, connector.Owner);
             Lookup<int, PlanarFace> symbolPlanarFacesLookup = GetGeometryObjectFromSymbolGeometry<PlanarFace>(geometryOptions, connector.Owner).ToLookup(planarFace => planarFace.Id) as Lookup<int, PlanarFace>;
-            PlanarFace instanceConnectorFace = instancePlanarFaces.Where(planarFace => ProjectPointOntoPlane(plane, planarFace.Origin).IsAlmostEqualTo(projectedOrigin)).FirstOrDefault();
+            PlanarFace instanceConnectorFace = instancePlanarFaces.Where(planarFace => ProjectPointOntoPlane(plane, planarFace.Origin).IsAlmostEqualTo(projectedOrigin, 0.000001)).FirstOrDefault();
             if (instanceConnectorFace == default(PlanarFace)) return null;
             PlanarFace symbolFace = symbolPlanarFacesLookup[instanceConnectorFace.Id].FirstOrDefault();
             Reference referenceConnectorFace = symbolFace.Reference;
