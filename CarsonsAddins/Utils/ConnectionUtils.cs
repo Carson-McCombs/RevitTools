@@ -164,6 +164,16 @@ namespace CarsonsAddins.Utils
         }
 
 
+
+        public static Connector[] GetConnectors(Element element)
+        {
+            if (element == null) return null;
+            if (element is FamilyInstance familyInstance) return GetConnectors(familyInstance);
+            if (element is MEPCurve mepCurve) return GetConnectors(mepCurve.ConnectorManager);
+            return null;
+            
+        }
+
         /// <summary>
         /// Gets all of the Connector Elements within the ConnectorManager.
         /// </summary>
@@ -184,9 +194,9 @@ namespace CarsonsAddins.Utils
         /// </summary>
         /// <param name="pipe"></param>
         /// <returns>an array connecting all of the Connector Elements within the provided Pipe's ConnectorManager</returns>
-        public static Connector[] GetConnectors(Pipe pipe)
+        public static Connector[] GetConnectors(MEPCurve mepCurve)
         {
-            return GetConnectors(pipe.ConnectorManager);
+            return GetConnectors(mepCurve.ConnectorManager);
         }
 
         /// <summary>
