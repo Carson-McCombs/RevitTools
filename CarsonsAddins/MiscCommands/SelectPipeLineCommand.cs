@@ -49,7 +49,7 @@ namespace CarsonsAddins
                     transaction.RollBack();
                     return Result.Cancelled;
                 }
-                PipeLine pipeLine = new PipeLine(pipe);
+                PipeLine pipeLine = new PipeLine(doc.ActiveView, pipe);
                 Element[] elementList = pipeLine.GetElements();
 
                 ElementId[] elementIds = elementList.Select(element => element.Id).ToArray();

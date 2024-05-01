@@ -54,7 +54,7 @@ namespace CarsonsAddins
                     elements.Insert(pipeElement);
                     return Result.Cancelled;
                 }
-                PipeLine pipeLine = new PipeLine(pipe);
+                PipeLine pipeLine = new PipeLine(doc.ActiveView, pipe);
                 pipeLine.GetElements();
                 Plane plane = null;
                 if (doc.ActiveView.SketchPlane == null)
