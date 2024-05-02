@@ -1,27 +1,12 @@
 ﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
-using CarsonsAddins;
-using CarsonsAddins.Properties;
 using CarsonsAddins.UICommands;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Configuration;
-using System.Configuration.Assemblies;
 using System.Data;
-using System.Drawing;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -37,9 +22,10 @@ namespace CarsonsAddins
         public const bool IsWIP = false;
 
         private UIDocument uidoc;
-        
+
         private readonly ParameterTable table;
         private ParameterManagerUpdater updater;
+
         //private CollectionViewSource collectionViewSource;
         public ParameterManagerDockablePane()
         {
@@ -48,7 +34,7 @@ namespace CarsonsAddins
             table = new ParameterTable(SelectionDataGrid, collectionViewSource);
             
         }
-        
+
         public void Init(UIDocument uidoc)
         {
             table.Clear();
@@ -75,10 +61,6 @@ namespace CarsonsAddins
             updater.Unregister();
         }
 
-        private void RefreshSelectionButtonPress(object sender, RoutedEventArgs e)
-        {
-            table.Refresh();
-        }
 
         /// <summary>
         /// On button press, loads the Elements that the User currently has selected into the Parameter Manager.
@@ -105,7 +87,7 @@ namespace CarsonsAddins
                 if (elem == null) continue;
                 table.AddElement(elem);
             }
-            
+
         }
 
 
@@ -127,7 +109,7 @@ namespace CarsonsAddins
         /// Removes Elements from the Parameter Manager. Called for purposes such as removing stale references.
         /// </summary>
         /// <param name="elementIds">array of ElementIds to be removed.</param>
-        public void RemoveElements(ElementId[] elementIds )
+        public void RemoveElements(ElementId[] elementIds)
         {
             foreach (ElementId id in elementIds)
             {
@@ -146,7 +128,8 @@ namespace CarsonsAddins
                 table.AddParameter(ParameterNameControl.Text);
                 ParameterNameControl.Text = "";
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 TaskDialog.Show("Parameter Manager - Error Adding Parameter", ex.Message);
 
@@ -172,7 +155,7 @@ namespace CarsonsAddins
             //List<ElementId> selectedIds = SelectionDataGrid.SelectedItems.Cast<ElementRow>().Select(row => row.Id).ToList();
 
             ElementId[] selectedIds = table.GetSelectedElements();
-            if (selectedIds != null && selectedIds.Length != 0)uidoc.Selection.SetElementIds(selectedIds);
+            if (selectedIds != null && selectedIds.Length != 0) uidoc.Selection.SetElementIds(selectedIds);
         }
 
 
@@ -196,7 +179,7 @@ namespace CarsonsAddins
                 TaskDialog.Show("Context Menu is Null", "");
                 return "";
             }
-            if (contextMenu.DataContext != null && contextMenu.DataContext.ToString() != null) return contextMenu.DataContext.ToString(); 
+            if (contextMenu.DataContext != null && contextMenu.DataContext.ToString() != null) return contextMenu.DataContext.ToString();
             return "IsSelected";
         }
 
@@ -225,16 +208,26 @@ namespace CarsonsAddins
             string parameterName = GetMenuItemColumnHeader(sender as MenuItem);
             if (string.IsNullOrEmpty(parameterName)) return;
             table.RemoveParameter(parameterName);
-                
+
         }
         private void SelectGroup_CheckBox(object sender, RoutedEventArgs e)
         {
-            if (! (sender is CheckBox checkbox)) return;
+            if (!(sender is CheckBox checkbox)) return;
             if (checkbox.IsChecked == null) return;
-            if (! (checkbox.DataContext is CollectionViewGroup group)) return;
+            if (!(checkbox.DataContext is CollectionViewGroup group)) return;
             if (group.Items is null) return;
-            table.SetSelectedStateOfElements(group.Items.Cast<ElementRow>().ToArray(), (bool) checkbox.IsChecked);
+            table.SetSelectedStateOfElements(group.Items.Cast<ElementRow>().ToArray(), (bool)checkbox.IsChecked);
         }
+
+
         
+        
+    }
+
+    class ParameterTracker
+    {
+        private List<Parameter> allPossibleParameters = new List<Parameter>();
+        private ObservableCollection<Parameter> filteredParameterList = new ObservableCollection<Parameter>();
+        public ParameterTracker() { }
     }
 }

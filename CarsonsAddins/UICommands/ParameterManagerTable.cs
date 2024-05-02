@@ -188,7 +188,11 @@ namespace CarsonsAddins.UICommands
             DataGridTextColumn column = new DataGridTextColumn
             {
                 //Sets the parameter column generic binding to each table cell in the column to show its parameter value
-                Binding = new Binding("cells[" + parameterName + "].ParameterValue"),
+                Binding = new Binding("cells[" + parameterName + "].ParameterValue")
+                {
+                    Mode= BindingMode.TwoWay,
+                    UpdateSourceTrigger= UpdateSourceTrigger.PropertyChanged
+                },
                 Header = parameterName,
                 IsReadOnly = isReadOnly
             };
@@ -297,6 +301,10 @@ namespace CarsonsAddins.UICommands
                 cell.Refresh();
             }
         }
+        public void Refresh(string parameterName)
+        {
+            if (cells.ContainsKey(parameterName)) cells[parameterName].Refresh();
+        }
 
         public bool HasParameterValue(string parameterName, string valueString)
         {
@@ -336,24 +344,29 @@ namespace CarsonsAddins.UICommands
             if (!cells.TryGetValue(parameterName, out ParameterCell cell)) return "";
             return cell.ParameterValue;
         }
-
-        public void PushUpdatesToElement()
+        public void PushUpdatesToElement(string parameterName)
         {
             try
             {
-                foreach (string parameterName in cells.Keys)
-                {
-
-
-                    ParameterCell cell = cells[parameterName];
-                    if (cell.IsSynced) continue;
-                    if (cell.IsNull) continue;
-                    Parameter parameter = cell.PushValueToParameter();
-                }
+                if (!cells.ContainsKey(parameterName)) return;
+                ParameterCell cell = cells[parameterName];
+                if (cell.IsSynced) return;
+                if (cell.IsNull) return;
+                Parameter parameter = cell.PushValueToParameter();
+                
             }
             catch (Exception ex)
             {
                 TaskDialog.Show("Parameter Row Error", ex.Message);
+            }
+        }
+        public void PushUpdatesToElement()
+        {
+            foreach (string parameterName in cells.Keys)
+            {
+                PushUpdatesToElement(parameterName);
+
+
             }
         }
 
@@ -409,6 +422,7 @@ namespace CarsonsAddins.UICommands
                 parameterValue = value;
                 BackgroundColor = Brushes.Orange;
                 IsSynced = false;
+                PushValueToParameter();
                 OnNotifyPropertyChanged();
             }
         }
