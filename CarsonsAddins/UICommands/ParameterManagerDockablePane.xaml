@@ -134,6 +134,5 @@
             <Line/>
 
         </UniformGrid>
-        <Button  Grid.Column="1" VerticalAlignment="Bottom" Content="Apply" Click="ApplyButtonPress" Style="{StaticResource FilterButtonsStyle}"/>
     </Grid>
 </Page>
