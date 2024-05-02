@@ -31,16 +31,15 @@ namespace CarsonsAddins
         /// </summary>
         public Type ComponentType;
 
+        private readonly string componentName;
+        
+
         /// <summary>
         /// Name of the Component.
         /// </summary>
         public string ComponentName
         {
-            get
-            {
-                if (ComponentType == null) return "Null Type";
-                return ComponentType.Name + ((IsWIP) ? " ( WIP )" : "");
-            }
+            get => componentName;
         }
 
         /// <summary>
@@ -73,11 +72,13 @@ namespace CarsonsAddins
         public ComponentState(Type componentType, bool isEnabled, bool isWIP)
         {
             ComponentType = componentType;
+            componentName = componentType == null ? "Null Type" : ComponentType.Name + ( (IsWIP) ? " ( WIP )" : "");
             IsEnabled = isEnabled;
             IsWIP = isWIP;
         }
-
-
+        public void ClearTypeReference() => ComponentType = null;
+        public void UpdateTypeReference (Type type) { ComponentType = type; }
+        
         /* Below was considered to be held within the ComponentState class such that a more generic method of registering a component ( a class and their respective buttons, updates, and windows ), 
          * but the added complexity using lowered readability. Thus just loading in the Command's buttons, updaters, windows, etc. are now located within the ThisApplication class
          * 

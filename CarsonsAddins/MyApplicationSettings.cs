@@ -31,13 +31,24 @@ namespace CarsonsAddins
             return settingsState.ToList();
         }
 
+        private Dictionary<string, bool> GetNameIsEnabledDictionary() 
+        {
+            Dictionary<string, bool> dictionary = new Dictionary<string, bool>();
+            foreach (ComponentState state in settingsState)
+            {
+                dictionary.Add(state.ComponentName, state.IsEnabled);
+            }
+            
+            return dictionary;
+        }
+
         /// <summary>
         /// Saves the current settingsState as a JSON within the user preferences in Revit.
         /// </summary>
         public void SaveToDB()
         {
             if (settingsState == null || settingsState.Count == 0) return;
-            MySettings.Default.ComponentState_Preferences = JsonConvert.SerializeObject(settingsState.ToList());
+            MySettings.Default.ComponentState_Preferences = JsonConvert.SerializeObject(GetNameIsEnabledDictionary());
             MySettings.Default.Save();
         }
 
@@ -70,10 +81,12 @@ namespace CarsonsAddins
         private void SetToDefault(Assembly assembly)
         {
             settingsState.Clear();
+
             List<Type> types = FindComponentsInNamespace(assembly);
             string log = "";
             foreach (Type type in types)
             {
+
                 try
                 {
                     bool? isWIP = type.GetField("IsWIP", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy).GetRawConstantValue() as bool?;
@@ -84,6 +97,7 @@ namespace CarsonsAddins
                 {
                     log = log + type.FullName + '\n';
                 }
+
             }
             if (!string.IsNullOrEmpty(log)) TaskDialog.Show("Types Missing IsWIP Check", log);
         }
@@ -99,10 +113,11 @@ namespace CarsonsAddins
                 settingsState.Clear();
                 if (!string.IsNullOrWhiteSpace(MySettings.Default.ComponentState_Preferences))
                 {
-                    List<ComponentState> states = JsonConvert.DeserializeObject<List<ComponentState>>(MySettings.Default.ComponentState_Preferences);
-                    foreach (ComponentState state in states)
+                    Dictionary<string,bool> stateDictionary = JsonConvert.DeserializeObject<Dictionary<string, bool>>(MySettings.Default.ComponentState_Preferences);
+                    SetToDefault(assembly);
+                    foreach (ComponentState state in settingsState)
                     {
-                        settingsState.Add(state);
+                        if (stateDictionary.ContainsKey(state.ComponentName)) state.IsEnabled = stateDictionary[state.ComponentName]; 
                     }
                 }
                 else
