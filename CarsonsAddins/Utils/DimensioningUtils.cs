@@ -21,29 +21,60 @@ namespace CarsonsAddins.Utils
         {
             Dictionary<XYZ, (Dimension, DimensionSegment)> dimensionSegmentsByOrigin = new Dictionary<XYZ, (Dimension, DimensionSegment)>();
             List<Reference> refList = ReferenceArrayToList(dimension.References);
+            Line line = dimension.Curve as Line;
             XYZ direction = (dimension.Curve as Line).Direction;
             for (int i = 0; i < dimension.Segments.Size; i++)
             {
                 DimensionSegment segment = dimension.Segments.get_Item(i);
                 dimensionSegmentsByOrigin.Add(segment.Origin, (null, segment));
-                Line line = GetDimensionSegmentLine(segment, direction);
 
                 ReferenceArray ary = new ReferenceArray();
 
                 ary.Append(refList[i]);
                 ary.Append(refList[i + 1]);
-                Dimension dim = doc.Create.NewDimension(doc.ActiveView, line, ary);
-                dim.ValueOverride = segment.ValueOverride;
-                dim.Above = segment.Above;
-                dim.Below = segment.Below;
-                dim.Prefix = segment.Prefix;
-                dim.Suffix = segment.Suffix;
-                dim.TextPosition = segment.TextPosition;
-                dim.LeaderEndPosition = segment.LeaderEndPosition;
+                try
+                {
+                    Dimension dim = doc.Create.NewDimension(doc.ActiveView, line, ary);
+                    CopySegmentDataToDimension(dim, segment);
+                } 
+                catch
+                {
+                    Line segmentLine = GetDimensionSegmentLine(segment, direction);
+                    
+                    DetailCurve detailCurve = doc.Create.NewDetailCurve(doc.ActiveView, segmentLine);
+                    
+                    ary.Clear();
+                    ary.Append(detailCurve.GeometryCurve.GetEndPointReference(0));
+                    ary.Append(detailCurve.GeometryCurve.GetEndPointReference(1));
+                    try
+                    {
+                        Dimension dim = doc.Create.NewDimension(doc.ActiveView, line, ary);
+                        CopySegmentDataToDimension(dim, segment);
+                    }
+                    catch 
+                    {
+
+                    }
+                    continue;
+                }
+
+
+
 
             }
             return dimensionSegmentsByOrigin;
         }
+        public static void CopySegmentDataToDimension(Dimension dimension, DimensionSegment segment)
+        {
+            dimension.ValueOverride = segment.ValueOverride;
+            dimension.Above = segment.Above;
+            dimension.Below = segment.Below;
+            dimension.Prefix = segment.Prefix;
+            dimension.Suffix = segment.Suffix;
+            dimension.TextPosition = segment.TextPosition;
+            //dim.LeaderEndPosition = segment.LeaderEndPosition;
+        }
+
         public static List<Reference> ReferenceArrayToList(ReferenceArray referenceArray)
         {
             List<Reference> references = new List<Reference>();

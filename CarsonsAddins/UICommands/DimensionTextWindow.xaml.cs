@@ -217,8 +217,8 @@ namespace CarsonsAddins
             bool similarPrefixText = true;
             bool similarSuffixText = true;
 
-            Utils.DimensioningUtils.DimensionAndSegment current;
-            Utils.DimensioningUtils.DimensionAndSegment next = new Utils.DimensioningUtils.DimensionAndSegment(selected[0]);
+            DimensionAndSegment current;
+            DimensionAndSegment next = new DimensionAndSegment(selected[0]);
             if (selected.Count > 1)
             {
                 for (int i = 0; i < selected.Count - 1; i++)
