@@ -441,6 +441,7 @@ namespace CarsonsAddins.UICommands
         {
             if (parameter == null) return null;
             IsSynced = true;
+            if (parameter.IsReadOnly) return null;
             return parameter.AsValueString();
             /*switch (parameter.StorageType)
             {
