@@ -61,6 +61,7 @@ namespace CarsonsAddins
         private void ApplyButtonClick(object sender, RoutedEventArgs e)
         {
             MyApplicationSettings.Instance.SaveToDB();
+            TaskDialog.Show("Preferences Updated", "Please restart Revit to apply changes to preferences.");
         }
 
         /// <summary>
