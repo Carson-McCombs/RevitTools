@@ -42,7 +42,10 @@ namespace CarsonsAddins.Utils
 
                 Connector adjacent = TryGetConnectedSkipNC(connector);
                 if (adjacent == null) return new EndPrepInfo(connector.Origin, BellOrSpigot.SPIGOT, "PE", false, false);
-
+                if (string.IsNullOrEmpty( adjacent.Description)) 
+                {
+                    return new EndPrepInfo(connector.Origin, BellOrSpigot.NONE, "PE", false, false);
+                }
                 string[] descriptionArray = adjacent.Description.Split('-', ';');
                 string endTypeString = descriptionArray[0].Trim().ToUpper();
                 string endPrepString = descriptionArray[1].Trim().ToUpper() ?? "NULL";

@@ -6,8 +6,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -18,8 +20,11 @@ namespace CarsonsAddins
     /// <summary>
     /// Interaction logic for PipeEndPrepBCWindow.xaml
     /// </summary>
-    public partial class PipeEndPrepBCWindow : Window, ISettingsUIComponent, ISettingsUpdaterComponent
+    public partial class PipeEndPrepBCWindow : Window, ISettingsUIComponent, ISettingsUpdaterComponent, INotifyPropertyChanged
     {
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public const bool IsWIP = false;
 
         private PipeEndPrepBCUpdater updater;
@@ -28,68 +33,68 @@ namespace CarsonsAddins
         private Brush redBrush = new SolidColorBrush(Colors.Red);
         private Brush greenBrush = new SolidColorBrush(Colors.Green);
 
-        public static readonly DependencyProperty IsDomesticProperty =
-           DependencyProperty.Register(
-           name: "IsDomestic",
-           propertyType: typeof(bool),
-           ownerType: typeof(PipeEndPrepBCWindow),
-           typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
 
-        public static readonly DependencyProperty CheckIfTappedProperty =
-           DependencyProperty.Register(
-           name: "CheckIfTapped",
-           propertyType: typeof(bool),
-           ownerType: typeof(PipeEndPrepBCWindow),
-           typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
-        public static readonly DependencyProperty CheckPipeClassProperty =
-           DependencyProperty.Register(
-           name: "CheckPipeClass",
-           propertyType: typeof(bool),
-           ownerType: typeof(PipeEndPrepBCWindow),
-           typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
-        public static readonly DependencyProperty CheckPipePenetrationsProperty =
-           DependencyProperty.Register(
-           name: "CheckPipePenetrations",
-           propertyType: typeof(bool),
-           ownerType: typeof(PipeEndPrepBCWindow),
-           typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
-        public static readonly DependencyProperty ForceUpdateProperty =
-           DependencyProperty.Register(
-           name: "ForceUpdate",
-           propertyType: typeof(bool),
-           ownerType: typeof(PipeEndPrepBCWindow),
-           typeMetadata: new FrameworkPropertyMetadata(defaultValue: false));
-
+        private bool isDomestic = false;
         private bool IsDomestic
         {
-            get => (bool)GetValue(IsDomesticProperty);
-            set => SetValue(IsDomesticProperty, value);
+            get => isDomestic;
+            set
+            {
+                if (isDomestic == value) return;
+                isDomestic = value;
+                OnNotifyPropertyChanged();
+            }
+
         }
+        private bool checkIfTapped = false;
         private bool CheckIfTapped
         {
-            get => (bool)GetValue(CheckIfTappedProperty);
-            set => SetValue(CheckIfTappedProperty, value);
+            get => checkIfTapped;
+            set
+            {
+                if (checkIfTapped == value) return;
+                checkIfTapped = value;
+                OnNotifyPropertyChanged();
+            }
         }
+        private bool checkPipeClass = false;
         private bool CheckPipeClass
         {
-            get => (bool)GetValue(CheckPipeClassProperty);
-            set => SetValue(CheckPipeClassProperty, value);
+            get => checkPipeClass;
+            set
+            {
+                if (checkPipeClass == value) return;
+                checkPipeClass = value;
+                OnNotifyPropertyChanged();
+            }
         }
+        private bool checkPipePenetrations = false;
         private bool CheckPipePenetrations
         {
-            get => (bool)GetValue(CheckPipePenetrationsProperty);
-            set => SetValue(CheckPipePenetrationsProperty, value);
+            get => checkPipePenetrations;
+            set
+            {
+                if (checkPipePenetrations == value) return;
+                checkPipePenetrations = value;
+                OnNotifyPropertyChanged();
+            }
         }
+        private bool forceUpdate;
         private bool ForceUpdate
         {
-            get => (bool)GetValue(ForceUpdateProperty);
-            set => SetValue(ForceUpdateProperty, value);
+            get => forceUpdate;
+            set
+            {
+                if (forceUpdate == value) return;
+                forceUpdate = value;
+                OnNotifyPropertyChanged();
+            }
         }
 
 
 
 
-        private Definition pipeEndPrepDefinition;
+        private static Definition pipeEndPrepDefinition;
 
         private UIDocument uidoc;
 
@@ -179,37 +184,41 @@ namespace CarsonsAddins
        
         private void UpdatePipeEndPreps(Document doc, Pipe[] pipes)
         {
-            
+            bool err = false;
             foreach (Pipe pipe in pipes)
             {
-                UpdatePipeEndPrep(doc, pipe);
+                if (!UpdatePipeEndPrep(doc, pipe)) err = true;
+            }
+            if (err)
+            {
+                TaskDialog.Show("Update PEP By Connectors Error", "Please ensure that connectors have their description set in the format \"A-B\" where A is either \"B\" / \"Bell\" or \"S\" / \"Spigot\" and B is the label for that pipe end prep.");
             }
         }
 
-        private void UpdatePipeEndPrep(Document doc, Pipe pipe)
+        private bool UpdatePipeEndPrep(Document doc, Pipe pipe)
         {
             SubTransaction subtransaction = new SubTransaction(doc);
             subtransaction.Start();
             try
             {
                 const double largestTapDistance = 0.5; //6"
-                if (pipeEndPrepDefinition == null && SetDefinitions(doc) == false) return;
+                if (pipeEndPrepDefinition == null && SetDefinitions(doc) == false) return false;
                 if (pipe == null) 
                 { 
                     subtransaction.RollBack();
-                    return;
+                    return false;
                 }
                 
                 if (pipeEndPrepDefinition == null)
                 {
                     subtransaction.RollBack();
-                    return;
+                    return false;
                 }
                 Parameter endPrepParameter = pipe.get_Parameter(pipeEndPrepDefinition);
                 if (endPrepParameter == null)
                 {
                     subtransaction.RollBack();
-                    return;
+                    return false;
                 }
                 Connector[] connectors = GetConnectors(pipe);
                 string currentEndPrep = endPrepParameter.AsString();
@@ -217,6 +226,10 @@ namespace CarsonsAddins
                 EndPrepInfo endPrepA = EndPrepInfo.GetEndPrepByConnector(connectors[0]);
                 EndPrepInfo endPrepB = EndPrepInfo.GetEndPrepByConnector(connectors[1]);
 
+                if (endPrepA.endType == BellOrSpigot.NONE || endPrepB.endType == BellOrSpigot.NONE)
+                {
+                    return false;
+                }
                 endPrepA.isDomestic = IsDomestic;
                 endPrepB.isDomestic = IsDomestic;
 
@@ -257,11 +270,12 @@ namespace CarsonsAddins
                 endPrepParameter.Set(combinedEndPrep);
                 subtransaction.Commit();
 
-
+                return true;
             } catch (Exception ex)
             {
                 subtransaction.RollBack();
                 TaskDialog.Show("Error Updating PEP By Connectors", ex.Message);
+                return false;
             }
             
         }
@@ -313,6 +327,9 @@ namespace CarsonsAddins
             return intersectionSegments.ToArray();
         }
 
-
+        protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
+        }
     }
 }

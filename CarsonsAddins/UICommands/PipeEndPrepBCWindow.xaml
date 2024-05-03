@@ -19,10 +19,10 @@
         </Grid.RowDefinitions>
             
         <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
-            <CheckBox Content="AIS ( Domestic )" Margin="4" IsChecked="{Binding Path=IsDomestic, ElementName=root}"/>
-            <CheckBox Content="Check if Tapped" Margin="4" IsChecked="{Binding Path=CheckIfTapped, ElementName=root}"/>
-            <CheckBox Content="Check Pipe Class" Margin="4" IsChecked="{Binding Path=CheckPipeClass, ElementName=root}"/>
-            <CheckBox Content="Check Pipe Penetrations" Margin="4" IsChecked="{Binding Path=CheckPenetrations, ElementName=root}"/>
+            <CheckBox Content="AIS ( Domestic )" Margin="4" IsChecked="{Binding Path=IsDomestic, Mode=TwoWay}"/>
+            <CheckBox Content="Check if Tapped" Margin="4" IsChecked="{Binding Path=CheckIfTapped, Mode=TwoWay}"/>
+            <CheckBox Content="Check Pipe Class" Margin="4" IsChecked="{Binding Path=CheckPipeClass, Mode=TwoWay}"/>
+            <CheckBox Content="Check Pipe Penetrations" Margin="4" IsChecked="{Binding Path=CheckPipePenetrations, Mode=TwoWay}"/>
         </StackPanel>
 
         <Button Content="Update Selection" Width="150" Height="30"  Grid.Column="1" Grid.Row="0" VerticalAlignment="Top" Click="UpdateSelection_Click"/>
