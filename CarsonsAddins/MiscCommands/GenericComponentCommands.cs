@@ -112,6 +112,7 @@ namespace CarsonsAddins.GenericCommands
     [Transaction(TransactionMode.Manual)]
     public class ShowWindow<T> : IExternalCommand where T : Window, ISettingsUIComponent, new()
     {
+        
         /// <summary>
         /// Static instance of the generic type. One instance exists seperately for each type.
         /// </summary>
@@ -120,10 +121,14 @@ namespace CarsonsAddins.GenericCommands
         {
             try
             {
-                instance = new T();
-                instance.Init(commandData.Application.ActiveUIDocument);
-                instance.ShowDialog();
+                if (instance == null)
+                {
+                    instance = new T();
+                    instance.Init(commandData.Application.ActiveUIDocument);
+                    instance.Closing += Window_Closing;
+                }
 
+                if (instance.Visibility != System.Windows.Visibility.Visible) instance.ShowDialog();
                 return Result.Succeeded;
 
             }
@@ -133,6 +138,12 @@ namespace CarsonsAddins.GenericCommands
                 return Result.Failed;
             }
 
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            (sender as Window).Hide();
+            e.Cancel = true;
         }
     }
 }
