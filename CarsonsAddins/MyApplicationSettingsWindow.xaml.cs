@@ -50,6 +50,8 @@ namespace CarsonsAddins
         {
             PushButtonData pushButtonData = new PushButtonData("Carsons Addins Settings", "Carson's Addins Settings", assembly.Location, typeof(ShowSettingsWindow).FullName)
             {
+                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.settings_icon_16.png"),
+                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.settings_icon_32.png"),
                 ToolTip = "Opens Carson's Addins Settings Window"
             };
             return pushButtonData;

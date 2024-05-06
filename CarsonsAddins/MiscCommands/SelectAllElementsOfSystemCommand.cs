@@ -19,6 +19,7 @@ namespace CarsonsAddins
     [Regeneration(RegenerationOption.Manual)]
     class SelectAllElementsOfSystemCommand : IExternalCommand, ISettingsComponent
     {
+        public const string FolderName = "Misc";
         public const bool IsWIP = false;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {

@@ -31,6 +31,7 @@ namespace CarsonsAddins
     /// </summary>
     public partial class DimensionTextWindow : Window, ISettingsUIComponent
     {
+        public const string FolderName = "Dimensioning";
         public const bool IsWIP = false;
 
         public static readonly DependencyProperty DimensionTextOptionsProperty =

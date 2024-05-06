@@ -32,6 +32,7 @@ namespace CarsonsAddins
     /// </summary>
     public partial class SimpleFilterDockablePane : Page, IDockablePaneProvider
     {
+        public const string FolderName = "Misc";
         public const bool IsWIP = true;
 
         UIDocument uidoc;

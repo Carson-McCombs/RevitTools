@@ -89,13 +89,15 @@ namespace CarsonsAddins
 
                 try
                 {
+                    string folderName = type.GetField("FolderName", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy).GetRawConstantValue() as string;
+                    if (string.IsNullOrWhiteSpace(folderName)) folderName = "";
                     bool? isWIP = type.GetField("IsWIP", BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy).GetRawConstantValue() as bool?;
                     bool isEnabled = isWIP == null || !(bool)isWIP;
-                    settingsState.Add(new ComponentState(type, isEnabled, !isEnabled));
+                    settingsState.Add(new ComponentState(type, folderName, isEnabled, !isEnabled));
                 }
-                catch
+                catch (Exception ex)
                 {
-                    log = log + type.FullName + '\n';
+                    log = log + type.FullName + '\n' + ex.Message + "\n\n";
                 }
 
             }

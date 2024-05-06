@@ -47,7 +47,7 @@ namespace CarsonsAddins
         {
             ApplicationIds.Init();
             app.CreateRibbonTab("Carsons Addins");
-            RibbonPanel panel = app.CreateRibbonPanel("Carsons Addins", "Piping Preferences");
+            RibbonPanel panel = app.CreateRibbonPanel("Carsons Addins", "Tools");
             Assembly assembly = Assembly.GetExecutingAssembly();
 
             MyApplicationSettings.Instance = new MyApplicationSettings();
@@ -57,26 +57,35 @@ namespace CarsonsAddins
 
             // Then loads in ComponentStates based on the user's saved preference on which Component should be enabled at launch ( or loads in whichever is not a work in progress component by default )
             componentStates = MyApplicationSettings.Instance.InitComponentStates(assembly);
+            Dictionary<string, PulldownButton> pulldownButtonDictionary = new Dictionary<string, PulldownButton>();
 
-            // Includes all components with UI, such as Windows and DockablePanes
-            PulldownButtonData uiComponentsPulldownButtonData = new PulldownButtonData("UIComponentsPullDownButton", "Windows")
+            PulldownButtonData automationPullDownButtonData = new PulldownButtonData("AutomationPullDownButton", "Automation")
             {
                 ToolTip = "All tools with their own dedicated window or dockable pane.",
-                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.blockC_32.png"),
-                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.blockC_32.png")
+                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.automation_icon_16.png"),
+                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.automation_icon_32.png")
             };
-            PulldownButton uiComponentsPulldownButton = panel.AddItem(uiComponentsPulldownButtonData) as PulldownButton;
-
+            PulldownButton automationPullDownButton = panel.AddItem(automationPullDownButtonData) as PulldownButton;
+            pulldownButtonDictionary.Add("Automation", automationPullDownButton);
+            // Includes all components with UI, such as Windows and DockablePanes
+            PulldownButtonData dimensioningPulldownButtonData = new PulldownButtonData("UIComponentsPullDownButton", "Dimensioning")
+            {
+                ToolTip = "All tools with their own dedicated window or dockable pane.",
+                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.dimension_icon_32.png"),
+                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.dimension_icon_32.png")
+            };
+            PulldownButton dimensioningPulldownButton = panel.AddItem(dimensioningPulldownButtonData) as PulldownButton;
+            pulldownButtonDictionary.Add("Dimensioning", dimensioningPulldownButton);
             // Includes all components without UI
-            PulldownButtonData miscComponentsPulldownButtonData = new PulldownButtonData("MiscComponentsPullDownButton", "Misc Tools")
+            PulldownButtonData miscComponentsPulldownButtonData = new PulldownButtonData("MiscComponentsPullDownButton", "Misc")
             {
                 ToolTip = "All tools without their own dedicated window or dockable pane.",
                 Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.blockA_16.png"),
                 LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.blockA_32.png")
             };
             PulldownButton miscComponentsPulldownButton = panel.AddItem(miscComponentsPulldownButtonData) as PulldownButton;
-
-            RegisterComponentPushButtons(assembly, uiComponentsPulldownButton, miscComponentsPulldownButton);
+            pulldownButtonDictionary.Add("Misc", miscComponentsPulldownButton);
+            RegisterComponentPushButtons(assembly, panel, pulldownButtonDictionary);
 
             app.ControlledApplication.ApplicationInitialized += RegisterDockablePanes;
             return Result.Succeeded;
@@ -94,11 +103,10 @@ namespace CarsonsAddins
         /// <param name="assembly">Assembly where the Addin is located.</param>
         /// <param name="uiComponentsPulldownButton">Pulldown Button for classes with a UI component such as Windows or DockablePanes.</param>
         /// <param name="miscComponentsPulldownButton">Pulldown Button for classes without a UI component.</param>
-        private void RegisterComponentPushButtons(Assembly assembly, PulldownButton uiComponentsPulldownButton, PulldownButton miscComponentsPulldownButton)
+        private void RegisterComponentPushButtons(Assembly assembly, RibbonPanel panel, Dictionary<string, PulldownButton> pulldownButtonDictionary)
         {
             foreach (ComponentState state in componentStates)
             {
-
                 if (state == null) continue;
                 if (state.IsEnabled)
                 {
@@ -108,8 +116,11 @@ namespace CarsonsAddins
 
                     settingsComponents.Add(component);
                     PushButtonData buttonData = component.RegisterButton(assembly);
-                    if (component is ISettingsUIComponent) uiComponentsPulldownButton.AddPushButton(buttonData);
-                    else miscComponentsPulldownButton.AddPushButton(buttonData);
+                    if (pulldownButtonDictionary.ContainsKey(state.FolderName))
+                    {
+                        pulldownButtonDictionary[state.FolderName].AddPushButton(buttonData);
+                    }
+                    else panel.AddItem(buttonData);
                 }
             }
         }

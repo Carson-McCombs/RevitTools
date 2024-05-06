@@ -22,12 +22,15 @@ namespace CarsonsAddins
     [Regeneration(RegenerationOption.Manual)]
     class GetTotalPipeLengthCommand : IExternalCommand, ISettingsComponent
     {
+        public const string FolderName = "";
         public const bool IsWIP = false;
         //private static double nominalLength = 17.5;
         public PushButtonData RegisterButton(Assembly assembly)
         {
             PushButtonData pushButtonData = new PushButtonData("GetTotalPipeLengthCommand", "Get Total Pipe Length", assembly.Location, "CarsonsAddins.GetTotalPipeLengthCommand")
             {
+                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.total_pipe_length_16.png"),
+                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.total_pipe_length_32.png"),
                 ToolTip = "Gets the total length of all selected pipe."
             };
             return pushButtonData;

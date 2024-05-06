@@ -30,6 +30,7 @@ namespace CarsonsAddins
     /// </summary>
     public partial class PipingLCDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingsUpdaterComponent
     {
+        public const string FolderName = "Automation";
         public const bool IsWIP = true;
         //private readonly PipingLCUpdater updater;
         public delegate void ToggleLCUpdaterEvent(bool enabled);

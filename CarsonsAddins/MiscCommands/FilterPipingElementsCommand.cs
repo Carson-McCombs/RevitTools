@@ -17,6 +17,7 @@ namespace CarsonsAddins
     [Regeneration(RegenerationOption.Manual)]
     class FilterPipingElementsCommand : IExternalCommand, ISettingsComponent
     {
+        public const string FolderName = "Misc";
         public const bool IsWIP = false;
         public PushButtonData RegisterButton(Assembly assembly)
         {

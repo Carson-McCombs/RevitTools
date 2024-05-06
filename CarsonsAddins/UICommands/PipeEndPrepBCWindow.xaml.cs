@@ -23,9 +23,9 @@ namespace CarsonsAddins
     public partial class PipeEndPrepBCWindow : Window, ISettingsUIComponent, ISettingsUpdaterComponent, INotifyPropertyChanged
     {
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
+        public const string FolderName = "Automation";
         public const bool IsWIP = false;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         private PipeEndPrepBCUpdater updater;
         private bool isRunning = false;

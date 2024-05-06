@@ -18,6 +18,7 @@ namespace CarsonsAddins
     [Regeneration(RegenerationOption.Manual)]
     class SelectPipeLineCommand : IExternalCommand, ISettingsComponent
     {
+        public const string FolderName = "";
         public const bool IsWIP = false;
 
         public PushButtonData RegisterButton(Assembly assembly)

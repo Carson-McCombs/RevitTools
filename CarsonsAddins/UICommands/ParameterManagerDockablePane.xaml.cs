@@ -20,6 +20,7 @@ namespace CarsonsAddins
     public partial class ParameterManagerDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingsUpdaterComponent
     {
         public const bool IsWIP = false;
+        public const string FolderName = "";
 
         private UIDocument uidoc;
 

@@ -24,7 +24,7 @@ namespace CarsonsAddins
         /// <summary>
         /// Name of the location where the Component's button is located.
         /// </summary>
-        public string ParentName;
+        public string FolderName;
 
         /// <summary>
         /// Type of the Component.
@@ -69,10 +69,11 @@ namespace CarsonsAddins
         /// <param name="componentType">Type of the Component.</param>
         /// <param name="isEnabled">Determines if the Component should be loaded in on application launch. Value is either loaded from preferences and equals the opposite of isWIP by default.</param>
         /// <param name="isWIP">Whether or not the Component is a "Work in Progress"</param>
-        public ComponentState(Type componentType, bool isEnabled, bool isWIP)
+        public ComponentState(Type componentType, string folderName, bool isEnabled, bool isWIP)
         {
             ComponentType = componentType;
             componentName = componentType == null ? "Null Type" : ComponentType.Name + ( (IsWIP) ? " ( WIP )" : "");
+            FolderName = folderName;
             IsEnabled = isEnabled;
             IsWIP = isWIP;
         }

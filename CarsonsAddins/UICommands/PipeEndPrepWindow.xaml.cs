@@ -20,8 +20,8 @@ namespace CarsonsAddins
     /// </summary>
     public partial class PipeEndPrepWindow : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingsUpdaterComponent
     {
+        public const string FolderName = "Automation";
         public const bool IsWIP = false;
-
         public delegate void ToggleEventUpdaterEvent(bool enabled);
         public event ToggleEventUpdaterEvent ToggleUpdater;
         private static PipeEndPrepUpdater updater;

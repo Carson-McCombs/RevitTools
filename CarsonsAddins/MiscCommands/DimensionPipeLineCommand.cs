@@ -22,6 +22,7 @@ namespace CarsonsAddins
     [Regeneration(RegenerationOption.Manual)]
     class DimensionPipeLineCommand : IExternalCommand, ISettingsComponent
     {
+        public const string FolderName = "Dimensioning";
         public const bool IsWIP = false;
         public PushButtonData RegisterButton(Assembly assembly)
         {

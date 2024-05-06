@@ -221,26 +221,23 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\blockA_16.png" />
-    <EmbeddedResource Include="Resources\blockA_32.png" />
-    <EmbeddedResource Include="Resources\blockB_16.png" />
-    <EmbeddedResource Include="Resources\blockB_32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\blockC_16.png" />
-    <EmbeddedResource Include="Resources\blockC_32.png" />
-    <EmbeddedResource Include="Resources\coin_16.png" />
-    <EmbeddedResource Include="Resources\coin_32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\default_16.png" />
-    <EmbeddedResource Include="Resources\default_32.png" />
     <EmbeddedResource Include="Resources\flip_32.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\cloud_16.png" />
-    <Content Include="Resources\cloud_32.png" />
     <Resource Include="Resources\Refresh_Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\automation_icon_16.png" />
+    <EmbeddedResource Include="Resources\automation_icon_32.png" />
+    <EmbeddedResource Include="Resources\settings_icon_16.png" />
+    <EmbeddedResource Include="Resources\settings_icon_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\dimension_icon_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\total_pipe_length_16.png" />
+    <EmbeddedResource Include="Resources\total_pipe_length_32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
 </Project>

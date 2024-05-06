@@ -21,6 +21,7 @@ namespace CarsonsAddins
     [Regeneration(RegenerationOption.Manual)]
     class SmartFlipCommand : IExternalCommand, ISettingsComponent
     {
+        public const string FolderName = "";
         public const bool IsWIP = false;
 
 
