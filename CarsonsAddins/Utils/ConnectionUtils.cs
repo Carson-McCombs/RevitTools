@@ -46,7 +46,20 @@ namespace CarsonsAddins.Utils
                 {
                     return new EndPrepInfo(connector.Origin, BellOrSpigot.NONE, "PE", false, false);
                 }
-                string[] descriptionArray = adjacent.Description.Split('-', ';');
+                string endPrepCombinedString = "";
+                if (PipeSystemType.Fitting.Equals(connector.PipeSystemType))
+                {
+                    if (connector.Owner == null) return new EndPrepInfo(connector.Origin, BellOrSpigot.NONE, "PE", false, false);
+                    Element fitting = connector.Owner;
+                    Parameter parameter = fitting.LookupParameter("Adjacent End Prep");
+                    if (parameter == null) return new EndPrepInfo(connector.Origin, BellOrSpigot.NONE, "PE", false, false);
+                    endPrepCombinedString = parameter.AsValueString();
+                }
+                else
+                {
+                    endPrepCombinedString = adjacent.Description;
+                }
+                string[] descriptionArray = endPrepCombinedString.Split('-', ';');
                 string endTypeString = descriptionArray[0].Trim().ToUpper();
                 string endPrepString = descriptionArray[1].Trim().ToUpper() ?? "NULL";
                 
@@ -68,6 +81,7 @@ namespace CarsonsAddins.Utils
                 
                 
             }
+            
             public override string ToString()
             {
                 return (endPrep == "PE") ? "PE" : (isTapped ? "T" : "") + (isDomestic ? "D": "") + endPrep;
