@@ -45,6 +45,8 @@ namespace CarsonsAddins
         {
             PushButtonData pushButtonData = new PushButtonData("Parameter Manager", "Parameter Manager", assembly.Location, typeof(GenericCommands.ShowDockablePane<ParameterManagerDockablePane>).FullName)
             {
+                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.parameter_manager_icon_32.png"),
+                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.parameter_manager_icon_32.png"),
                 ToolTip = "An element parameter manager which can be used to sort and set element parameter values."
             };
             return pushButtonData;
