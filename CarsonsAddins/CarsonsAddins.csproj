@@ -239,5 +239,11 @@
     <EmbeddedResource Include="Resources\total_pipe_length_16.png" />
     <EmbeddedResource Include="Resources\total_pipe_length_32.png" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\select_pipeline_icon_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\parameter_manager_icon_32.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
 </Project>
