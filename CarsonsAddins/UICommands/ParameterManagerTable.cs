@@ -14,6 +14,8 @@ using System.Windows.Data;
 using System.Windows;
 using System.Drawing;
 using Binding = System.Windows.Data.Binding;
+using CarsonsAddins.Utils;
+using System.Windows.Media;
 
 namespace CarsonsAddins.UICommands
 {
@@ -146,38 +148,33 @@ namespace CarsonsAddins.UICommands
         {
             if (parameterName is null) return;
             Definition definition = null;
-
+            bool isReadOnly = false;
+            StorageType st = StorageType.None;
+            int definitionFoundIndex = -1;
             //Iterates through each Element in the Table until an Element containing a Parameter sharing the name is found.
             for (int i = 0; i < rows.Count; i++)
             {
-
-                ElementRow row = rows[i];
-                if (definition == null)
-                {
-                    Parameter parameter = row.element.LookupParameter(parameterName);
-                    if (parameter == null) continue;
-                    definition = parameter.Definition;
-                    row.AddParameter(definition);
-                    rows[i] = row;
-                    StorageType st = parameter.StorageType;
-                    bool readOnly = (st == StorageType.ElementId) || parameter.IsReadOnly;
-                    parameterReadOnly.Add(readOnly);
-                    parameterReturnTypes.Add(st);
-                    parameterDefinitions.Add(definition);
-                }
-                else
-                {
-                    Parameter parameter = row.AddParameter(definition);
-                    if (parameter == null) continue;
-
-                }
-                rows[i] = row;
+                Parameter parameter = rows[i].element.LookupParameter(parameterName);
+                if (parameter == null) continue;
+                definitionFoundIndex = i;
+                st = parameter.StorageType;
+                definition = parameter.Definition;
+                parameterReadOnly.Add((st == StorageType.ElementId) || (parameter.IsReadOnly));
+                parameterReturnTypes.Add(st);
+                parameterDefinitions.Add(definition);
+                break;
             }
             if (definition == null) return;
+            for (int i = 0; i < rows.Count; i++)
+            {
+                rows[i].AddParameter(parameterName);
+            }
+            
             columnNames.Add(definition.Name);
             parameterDefinitions.Add(definition);
             AddColumn(definition.Name, parameterReadOnly.Last());
         }
+
         /// <summary>
         /// Adds a new column to the datagrid. This new column will be bound to a specific parameter, such that each cell within that column corresponds to a different element's parameter value.
         /// </summary>
@@ -185,26 +182,46 @@ namespace CarsonsAddins.UICommands
         /// <param name="isReadOnly">Whether or not the Parameter being bound to is readonly.</param>
         private void AddColumn(string parameterName, bool isReadOnly)
         {
+            
+            Style style = new Style();
+            Setter backgroundSetter = new Setter
+            {
+                Property = System.Windows.Controls.Control.BackgroundProperty,
+                Value = new Binding("cells[" + parameterName + "].BackgroundColor")
+                {
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                }
+            };
+            style.Setters.Add(backgroundSetter);
+            Setter fontColorSetter = new Setter
+            {
+                Property = System.Windows.Controls.Control.ForegroundProperty,
+                Value = new Binding("cells[" + parameterName + "].FontColor")
+                {
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+                }
+            };
+            style.Setters.Add(fontColorSetter);
+
             DataGridTextColumn column = new DataGridTextColumn
             {
                 //Sets the parameter column generic binding to each table cell in the column to show its parameter value
                 Binding = new Binding("cells[" + parameterName + "].ParameterValue")
                 {
-                    Mode= BindingMode.TwoWay,
-                    UpdateSourceTrigger= UpdateSourceTrigger.PropertyChanged
+                    Mode = BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
                 },
+                
                 Header = parameterName,
-                IsReadOnly = isReadOnly
-            };
-            Style style = new Style();
-            Setter backgroundSetter = new Setter
-            {
-                Property = DataGridCell.BackgroundProperty,
-                Value = new Binding("cells[" + parameterName + "].BackgroundColor")
-            };
+                IsReadOnly = isReadOnly,
+                CellStyle = style,
+                //ElementStyle = style,
+                //EditingElementStyle = style,
 
-            style.Setters.Add(backgroundSetter);
-            column.CellStyle = style;
+
+            };
             dataGrid.Columns.Add(column);
         }
 
@@ -352,7 +369,7 @@ namespace CarsonsAddins.UICommands
                 ParameterCell cell = cells[parameterName];
                 if (cell.IsSynced) return;
                 if (cell.IsNull) return;
-                Parameter parameter = cell.PushValueToParameter();
+                cell.PushValueToParameter();
                 
             }
             catch (Exception ex)
@@ -377,12 +394,10 @@ namespace CarsonsAddins.UICommands
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
         }
     }
-
-
     class ParameterCell : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-
+        public static Document doc;
         private bool isSynced = true;
         public bool IsSynced
         {
@@ -391,13 +406,23 @@ namespace CarsonsAddins.UICommands
             {
                 if (isSynced == value) return;
                 isSynced = value;
-                if (isSynced) BackgroundColor = Brushes.White;
-                else BackgroundColor = Brushes.Orange;
                 //OnNotifyPropertyChanged();
             }
         }
-        private Brush backgroundColor = Brushes.White;
-        public Brush BackgroundColor
+        private SolidColorBrush fontColor = new SolidColorBrush(Colors.Black);
+        public SolidColorBrush FontColor
+        {
+            get => fontColor;
+            set
+            {
+                if (value == null) return;
+                if (fontColor == value) return;
+                fontColor = value;
+                OnNotifyPropertyChanged();
+            }
+        }
+        private SolidColorBrush backgroundColor = new SolidColorBrush(Colors.White);
+        public SolidColorBrush BackgroundColor
         {
             get => backgroundColor;
             set
@@ -420,7 +445,6 @@ namespace CarsonsAddins.UICommands
                 if (parameterValue.Equals(value)) return;
                 if (IsNull) return;
                 parameterValue = value;
-                BackgroundColor = Brushes.Orange;
                 IsSynced = false;
                 PushValueToParameter();
                 OnNotifyPropertyChanged();
@@ -432,16 +456,17 @@ namespace CarsonsAddins.UICommands
         {
             this.parameter = parameter;
             IsNull = parameter == null;
+           // parameterValue = GetParameterValue(parameter);
             ParameterValue = GetParameterValue(parameter);
             IsSynced = true;
-            if (IsNull) BackgroundColor = Brushes.Gray;
+            if (IsNull) BackgroundColor = new SolidColorBrush(Colors.LightGray);
+            if (!IsNull && parameter.IsReadOnly) FontColor = new SolidColorBrush(Colors.Gray);
         }
 
         private string GetParameterValue(Parameter parameter)
         {
             if (parameter == null) return null;
-            IsSynced = true;
-            if (parameter.IsReadOnly) return null;
+            if (StorageType.String.Equals(parameter.StorageType)) return parameter.AsString();
             return parameter.AsValueString();
             /*switch (parameter.StorageType)
             {
@@ -459,49 +484,32 @@ namespace CarsonsAddins.UICommands
             ParameterValue = GetParameterValue(parameter);
             IsSynced = true;
         }
-        public Parameter PushValueToParameter()
+        //public void PushValueToParameterEvent()
+        //{
+        //    UpdateParameterHandler.Instance.handler.FunctionQueue += PushValueToParameter;
+        //}
+        public void PushValueToParameter()
         {
-            if (IsNull) return null;
-            IsSynced = true;
-
+            if (IsNull) return;
+            if (parameter.IsReadOnly) return;
+            
+            //Transaction transaction = new Transaction(doc);
+            //transaction.Start("Update " + parameter.Definition.Name + " Cell");
             try
             {
                 if (parameter.StorageType != StorageType.String) parameter.SetValueString(ParameterValue);
                 else parameter.Set(ParameterValue);
-                /*
-                switch (parameter.StorageType)
-                {
-                    case StorageType.String:
-                        {
-                            parameter.Set(parameterValue);
-                            return parameter;
-                        }
-                    case StorageType.Integer:
-                        {
-                            int.TryParse(parameterValue, out int value);
-                            parameter.Set(value);
-                            return parameter;
-                        }
-                    case StorageType.Double:
-                        {
-                            double.TryParse(parameterValue, out double value);
-                            parameter.Set(value);
-                            return parameter;
-                        }
-                    case StorageType.ElementId:
-                        {
-                            ElementId.TryParse(parameterValue, out ElementId value);
-                            parameter.Set(value);
-                            return parameter;
-                        }
-                    default: return parameter;
-                }*/
+                IsSynced = true;
+                //transaction.Commit();
+                //return;
             }
             catch (Exception ex)
             {
+                //transaction.RollBack();
                 TaskDialog.Show("ParameterCell Error", ex.Message);
+                //return;
             }
-            return parameter;
+            
         }
         protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
         {

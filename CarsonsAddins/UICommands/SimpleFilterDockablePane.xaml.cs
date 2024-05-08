@@ -62,7 +62,7 @@ namespace CarsonsAddins
             if (uidoc == null) return;
             categorySelectionItems.Clear();
             selectedCount = 0;
-            Dictionary<BuiltInCategory, CategorySelectionItem> categoriesDictionary = new Dictionary<BuiltInCategory, CategorySelectionItem>();
+            Dictionary<ElementId, CategorySelectionItem> categoriesDictionary = new Dictionary<ElementId, CategorySelectionItem>();
 
             List<ElementId> elementIds = uidoc.Selection.GetElementIds() as List<ElementId>;
             if (elementIds.Count == 0)
@@ -70,19 +70,19 @@ namespace CarsonsAddins
                 return;
 
             }
-
+            Document doc = uidoc.Document;
             foreach (ElementId id in elementIds)
             {
                 try
                 {
                     if (id == null) continue;
                     if (ElementId.InvalidElementId.Equals(id)) continue;
-                    Element elem = uidoc.Document.GetElement(id);
+                    Element elem = doc.GetElement(id);
                     if (elem == null) continue;
-                    BuiltInCategory category = elem.Category.BuiltInCategory;
+                    Category category = elem.Category;
 
-                    if (!categoriesDictionary.ContainsKey(category)) categoriesDictionary.Add(category, new CategorySelectionItem(category.ToString()));
-                    categoriesDictionary[category].Add(id);
+                    if (!categoriesDictionary.ContainsKey(category.Id)) categoriesDictionary.Add(category.Id, new CategorySelectionItem(category.Name));
+                    categoriesDictionary[category.Id].Add(id);
                 }
                 catch
                 {

@@ -51,7 +51,7 @@ namespace CarsonsAddins.Utils
                 {
                     if (connector.Owner == null) return new EndPrepInfo(connector.Origin, BellOrSpigot.NONE, "PE", false, false);
                     Element fitting = connector.Owner;
-                    Parameter parameter = fitting.LookupParameter("Adjacent End Prep");
+                    Parameter parameter = fitting.LookupParameter("End Prep");
                     if (parameter == null) return new EndPrepInfo(connector.Origin, BellOrSpigot.NONE, "PE", false, false);
                     endPrepCombinedString = parameter.AsValueString();
                 }

@@ -55,7 +55,7 @@ namespace CarsonsAddins.SelectionFilters
             if (linearOnly && !ConnectionUtils.HasParallelConnectors(elem)) return invert;
             if (allowPipes && ElementCheckUtils.IsPipe(elem)) { return !invert; }
             if (allowAccessories && ElementCheckUtils.IsPipeAccessory(elem)) return !invert;
-            if (elem.Category.BuiltInCategory.Equals(BuiltInCategory.OST_PipeFitting))
+            if (BuiltInCategory.OST_PipeFitting.Equals((BuiltInCategory)(elem.Category.Id.IntegerValue)))
             {
                 if (!(elem is FamilyInstance)) return invert;
                 FamilyInstance familyInstance = elem as FamilyInstance;
@@ -74,7 +74,7 @@ namespace CarsonsAddins.SelectionFilters
             if (linearOnly && ConnectionUtils.GetParallelConnector(connector) == null) return invert;
             if (allowPipes && ElementCheckUtils.IsPipe(elem)) { return !invert; }
             if (allowAccessories && ElementCheckUtils.IsPipeAccessory(elem)) return !invert;
-            if (elem.Category.BuiltInCategory.Equals(BuiltInCategory.OST_PipeFitting))
+            if (BuiltInCategory.OST_PipeFitting.Equals((BuiltInCategory)(elem.Category.Id.IntegerValue)))
             {
                 if (!(elem is FamilyInstance)) return invert;
                 FamilyInstance familyInstance = elem as FamilyInstance;

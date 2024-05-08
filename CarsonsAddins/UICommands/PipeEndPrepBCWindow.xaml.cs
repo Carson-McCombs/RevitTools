@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using CarsonsAddins.Properties;
+using CarsonsAddins.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,9 @@ namespace CarsonsAddins
         public const string FolderName = "Automation";
         public const bool IsWIP = false;
         public event PropertyChangedEventHandler PropertyChanged;
-
+        private GenericFunctionEventHandler handler = new GenericFunctionEventHandler();
+        private IntPtr windowHandle;
+        private ExternalEvent updateSelectionEvent;
         private PipeEndPrepBCUpdater updater;
         private bool isRunning = false;
 
@@ -101,6 +104,8 @@ namespace CarsonsAddins
         public PipeEndPrepBCWindow()
         {
             InitializeComponent();
+            updateSelectionEvent = ExternalEvent.Create(handler);
+            handler.FunctionQueue += UpdateSelection;
         }
 
         public PushButtonData RegisterButton(Assembly assembly)
@@ -155,7 +160,16 @@ namespace CarsonsAddins
         }
         private void UpdateSelection_Click(object sender, RoutedEventArgs e)
         {
+            
+            updateSelectionEvent.Raise();
+            windowHandle = MediaUtils.GetForegroundWindow();
             Hide();
+            MediaUtils.SetForegroundWindow(uidoc.Application.MainWindowHandle);
+        }
+
+        private void UpdateSelection()
+        {
+            
             Document doc = uidoc.Document;
             Transaction transaction = new Transaction(doc);
             transaction.Start("Update PEP");
@@ -164,10 +178,9 @@ namespace CarsonsAddins
             Pipe[] pipes = elements.Where(element => element != null && element is Pipe).Cast<Pipe>().ToArray();
             UpdatePipeEndPreps(doc, pipes);
             transaction.Commit();
-
-            Show();
+            if (windowHandle != null) MediaUtils.SetForegroundWindow(windowHandle);
+            ShowDialog();
         }
-
 
         private bool SetDefinitions(Document doc)
         {

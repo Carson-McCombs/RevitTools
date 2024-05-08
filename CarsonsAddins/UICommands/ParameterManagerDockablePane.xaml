@@ -65,8 +65,11 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <CollectionViewSource x:Key="ElementRowCollectionViewSource" IsLiveGroupingRequested="True" IsLiveSortingRequested="True"/>
 
+        
+        
+        <CollectionViewSource x:Key="ElementRowCollectionViewSource" IsLiveGroupingRequested="True" IsLiveSortingRequested="True"/>
+    
     </Page.Resources>
 
     <Grid Background="WhiteSmoke">
@@ -96,7 +99,7 @@
                             <Style TargetType="DataGridColumnHeader">
                                 <Setter Property="ContextMenu" Value="{StaticResource DataGridColumnHeaderContextMenu}"/>
                             </Style>
-
+                            
                         </DataGrid.Resources>
                         <DataGrid.GroupStyle>
                             <GroupStyle ContainerStyle="{StaticResource DataGridGroupHeaderStyle}">
@@ -108,7 +111,7 @@
                             </GroupStyle>
                         </DataGrid.GroupStyle>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn x:Name="IsSelected" Width="32" IsReadOnly="False" CanUserResize="False" CanUserReorder="False">
+                            <DataGridTemplateColumn x:Name="IsSelected" Width="32" IsReadOnly="False" CanUserResize="False" CanUserReorder="False" >
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate DataType="DataGridCell">
                                         <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>

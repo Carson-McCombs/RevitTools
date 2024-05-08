@@ -56,11 +56,11 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI, Version=23.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\AddIn\RevitAPI.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
     </Reference>
     <Reference Include="RevitAPIUI, Version=23.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\AddIn\RevitAPIUI.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\RevitAPIUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -119,6 +119,7 @@
     </Compile>
     <Compile Include="Utils\ConnectionUtils.cs" />
     <Compile Include="Utils\DatabaseUtils.cs" />
+    <Compile Include="Utils\GenericFunctionEventHandler.cs" />
     <Compile Include="Utils\DimensioningUtils.cs" />
     <Compile Include="Utils\ElementCheckUtils.cs" />
     <Compile Include="Utils\GeometryUtils.cs" />

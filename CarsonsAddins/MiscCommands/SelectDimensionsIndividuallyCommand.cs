@@ -46,7 +46,8 @@ namespace CarsonsAddins
                 {
                     if (!(doc.GetElement(id) is Dimension dimension)) continue;
                     if (!DimensionShape.Linear.Equals(dimension.DimensionShape)) continue;
-                    if (dimension.HasOneSegment())
+                    
+                    if (dimension.NumberOfSegments == 1)
                     {
                         dimensionSegmentsByOrigin.Add(dimension.Origin, (dimension, null));
                         continue;

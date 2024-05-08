@@ -40,6 +40,8 @@ namespace CarsonsAddins
         {
             table.Clear();
             this.uidoc = uidoc;
+            table.Clear();
+            ParameterCell.doc = uidoc.Document;
         }
         public PushButtonData RegisterButton(Assembly assembly)
         {

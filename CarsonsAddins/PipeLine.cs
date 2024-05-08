@@ -291,7 +291,7 @@ namespace CarsonsAddins
         {
             if (element == null) return null;
             if (ElementCheckUtils.IsPipe(element)) return styles.secondaryPipeDimensionType;
-            if (BuiltInCategory.OST_PipeFitting.Equals(element.Category.BuiltInCategory)) return styles.secondaryFittingDimensionType;
+            if (BuiltInCategory.OST_PipeFitting.Equals((BuiltInCategory)element.Category.Id.IntegerValue)) return styles.secondaryFittingDimensionType;
             if (ElementCheckUtils.IsPipeAccessory(element)) return styles.secondaryAccessoryDimensionType;
             return null;
         }
@@ -372,7 +372,7 @@ namespace CarsonsAddins
                 Element element = elements[i];
                 try
                 {
-                    bool isMechanicalEquipment = BuiltInCategory.OST_MechanicalEquipment.Equals(element.Category.BuiltInCategory);
+                    bool isMechanicalEquipment = BuiltInCategory.OST_MechanicalEquipment.Equals((BuiltInCategory)element.Category.Id.IntegerValue);
                     bool isEdge = i == 0 || i == elements.Length - 1;
                     Element connected = i < elements.Length - 1 ? elements[i + 1] : elements[i - 1];
                     //As Pipe elements have static geometry, a dedicated function is used to retrieve their references and create the dimension.

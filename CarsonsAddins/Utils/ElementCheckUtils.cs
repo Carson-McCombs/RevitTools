@@ -37,7 +37,8 @@ namespace CarsonsAddins.Utils
         {
             if (element == null) return false;
             if (!(element is FamilyInstance)) return false;
-            if (!BuiltInCategory.OST_PipeFitting.Equals(element.Category.BuiltInCategory)) return false;
+            //if (!BuiltInCategory.OST_PipeFitting.Equals(element.Category.Id)) return false;
+            if (!BuiltInCategory.OST_PipeFitting.Equals((BuiltInCategory)(element.Category.Id.IntegerValue))) return false;
             return FlangePartTypes.Contains(GetPartType(element as FamilyInstance));
         }
 
@@ -62,7 +63,8 @@ namespace CarsonsAddins.Utils
         {
             if (element == null) return false;
             if (element.Category == null) return false;
-            return (BuiltInCategory.OST_PipeAccessory.Equals(element.Category.BuiltInCategory));
+            //return (BuiltInCategory.OST_PipeAccessory.Equals(element.Category.Id));
+            return BuiltInCategory.OST_PipeAccessory.Equals((BuiltInCategory)(element.Category.Id.IntegerValue));
         }
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace CarsonsAddins.Utils
         {
             if (element == null) return false;
             if (element.Category == null) return false;
-            return (BuiltInCategory.OST_PipeCurves.Equals(element.Category.BuiltInCategory));
+            return BuiltInCategory.OST_PipeCurves.Equals((BuiltInCategory)(element.Category.Id.IntegerValue));
         }
 
         /// <summary>
