@@ -11,5 +11,8 @@
     <Setting Name="ComponentState_Preferences" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="DimensionStyles_Preferences" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

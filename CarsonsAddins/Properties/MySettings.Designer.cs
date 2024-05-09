@@ -58,5 +58,17 @@ namespace CarsonsAddins.Properties {
                 this["ComponentState_Preferences"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string DimensionStyles_Preferences {
+            get {
+                return ((string)(this["DimensionStyles_Preferences"]));
+            }
+            set {
+                this["DimensionStyles_Preferences"] = value;
+            }
+        }
     }
 }

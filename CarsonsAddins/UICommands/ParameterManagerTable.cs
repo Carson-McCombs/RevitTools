@@ -148,16 +148,12 @@ namespace CarsonsAddins.UICommands
         {
             if (parameterName is null) return;
             Definition definition = null;
-            bool isReadOnly = false;
-            StorageType st = StorageType.None;
-            int definitionFoundIndex = -1;
             //Iterates through each Element in the Table until an Element containing a Parameter sharing the name is found.
             for (int i = 0; i < rows.Count; i++)
             {
                 Parameter parameter = rows[i].element.LookupParameter(parameterName);
                 if (parameter == null) continue;
-                definitionFoundIndex = i;
-                st = parameter.StorageType;
+                StorageType st = parameter.StorageType;
                 definition = parameter.Definition;
                 parameterReadOnly.Add((st == StorageType.ElementId) || (parameter.IsReadOnly));
                 parameterReturnTypes.Add(st);

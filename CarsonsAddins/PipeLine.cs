@@ -273,13 +273,7 @@ namespace CarsonsAddins
         /// <summary>
         /// A list of static Dimension Types corresponding to each element category within the Pipeline and one for the Primary Dimension.
         /// </summary>
-        private struct DimensionStyles
-        {
-            public DimensionType primaryDimensionType;
-            public DimensionType secondaryPipeDimensionType;
-            public DimensionType secondaryAccessoryDimensionType;
-            public DimensionType secondaryFittingDimensionType;
-        }
+        
         
         /// <summary>
         /// Retrives the Dimension Type based on the element category.

@@ -91,6 +91,9 @@
     <Compile Include="MiscCommands\GenericComponentCommands.cs" />
     <Compile Include="MyApplicationSettings.cs" />
     <Compile Include="MiscCommands\SelectDimensionsIndividuallyCommand.cs" />
+    <Compile Include="UICommands\DimensionSettingsWindow.xaml.cs">
+      <DependentUpon>DimensionSettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UICommands\ParameterManagerTable.cs" />
     <Compile Include="UICommands\PipeEndPrepBCWindow.xaml.cs">
       <DependentUpon>PipeEndPrepBCWindow.xaml</DependentUpon>
@@ -168,6 +171,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UICommands\DimensionSettingsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UICommands\DimensionTextWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -228,23 +235,20 @@
     <Resource Include="Resources\Refresh_Icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\automation_icon_16.png" />
-    <EmbeddedResource Include="Resources\automation_icon_32.png" />
-    <EmbeddedResource Include="Resources\settings_icon_16.png" />
-    <EmbeddedResource Include="Resources\settings_icon_32.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\dimension_icon_32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\total_pipe_length_16.png" />
-    <EmbeddedResource Include="Resources\total_pipe_length_32.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\select_pipeline_icon_32.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\parameter_manager_icon_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\automation_icon_32.png" />
+    <EmbeddedResource Include="Resources\settings_icon_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\total_pipe_length_icon_32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
 </Project>

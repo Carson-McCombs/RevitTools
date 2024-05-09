@@ -62,7 +62,7 @@ namespace CarsonsAddins
             PulldownButtonData automationPullDownButtonData = new PulldownButtonData("AutomationPullDownButton", "Automation")
             {
                 ToolTip = "All tools with their own dedicated window or dockable pane.",
-                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.automation_icon_16.png"),
+                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.automation_icon_32.png"),
                 LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.automation_icon_32.png")
             };
             PulldownButton automationPullDownButton = panel.AddItem(automationPullDownButtonData) as PulldownButton;
@@ -80,8 +80,7 @@ namespace CarsonsAddins
             PulldownButtonData miscComponentsPulldownButtonData = new PulldownButtonData("MiscComponentsPullDownButton", "Misc")
             {
                 ToolTip = "All tools without their own dedicated window or dockable pane.",
-                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.blockA_16.png"),
-                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.blockA_32.png")
+               
             };
             PulldownButton miscComponentsPulldownButton = panel.AddItem(miscComponentsPulldownButtonData) as PulldownButton;
             pulldownButtonDictionary.Add("Misc", miscComponentsPulldownButton);
