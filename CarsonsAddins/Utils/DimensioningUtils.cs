@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Plumbing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -279,6 +280,194 @@ namespace CarsonsAddins.Utils
             }
             origin /= connectors.Length;
             return origin;
+        }
+
+
+
+        public class DimensionStyles
+        {
+            public bool foundAllDimensionTypes => primaryDimensionType != null && secondaryPipeDimensionType != null && secondaryAccessoryDimensionType != null && secondaryFittingDimensionType != null && secondaryOtherDimensionType != null;
+            public DimensionType primaryDimensionType;
+            public DimensionType secondaryPipeDimensionType;
+            public DimensionType secondaryAccessoryDimensionType;
+            public DimensionType secondaryFittingDimensionType;
+            public DimensionType secondaryOtherDimensionType;
+            public List<GraphicsStyle> centerlineStyles = new List<GraphicsStyle>();
+            public DimensionType GetSecondaryDimensionType(BuiltInCategory builtInCategory)
+            {
+                switch (builtInCategory)
+                {
+                    case BuiltInCategory.OST_PipeCurves: return secondaryPipeDimensionType;
+                    case BuiltInCategory.OST_PipeAccessory: return secondaryAccessoryDimensionType;
+                    case BuiltInCategory.OST_PipeFitting: return secondaryFittingDimensionType;
+                    default: return secondaryOtherDimensionType;
+                }
+            }
+            public DimensionStyleNames GetDimensionStyleNames()
+            {
+                return new DimensionStyleNames
+                {
+                    primaryDimensionTypeName = primaryDimensionType?.Name ?? string.Empty,
+                    secondaryPipeDimensionTypeName = secondaryPipeDimensionType?.Name ?? string.Empty,
+                    secondaryAccessoryDimensionTypeName = secondaryAccessoryDimensionType?.Name ?? string.Empty,
+                    secondaryFittingDimensionTypeName = secondaryFittingDimensionType?.Name ?? string.Empty,
+                    secondaryOtherDimensionTypeName = secondaryOtherDimensionType?.Name ?? string.Empty,
+                    centerlineStyleNames = centerlineStyles?.Select(style => style.Name).ToArray()
+                };
+            }
+
+        }
+
+        public struct DimensionStyleNames
+        {
+            public string primaryDimensionTypeName;
+            public string secondaryPipeDimensionTypeName;
+            public string secondaryAccessoryDimensionTypeName;
+            public string secondaryFittingDimensionTypeName;
+            public string secondaryOtherDimensionTypeName;
+            public string[] centerlineStyleNames;
+        }
+        public static Reference GetFlangeEndReference(Plane plane, Element flange, Element connected)
+        {
+            if (flange == null || connected == null) return null;
+            Connector connector = ConnectionUtils.TryGetConnection(flange, connected);
+            if (connector == null) return null;
+            Connector adjacent = ConnectionUtils.GetAdjacentConnector(connector);
+            if (adjacent == null) return null;
+            return GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, adjacent);
+        }
+
+
+        /// <summary>
+        /// Retrieves a reference to the end point of a Piping Element. Meant to be used when dimensioning to a end of the Pipeline
+        /// </summary>
+        /// <param name="activeView">The active View.</param>
+        /// <param name="validStyleIds">The ElementIds corresponding to the valid centerline line styles.</param>
+        /// <param name="element">a Piping Element</param>
+        /// <returns>a Reference corresponding to the endpoint of the Piping Element.</returns>
+        public static Reference GetEndReference(View activeView, ElementId[] validStyleIds, Element element)
+        {
+            if (ElementCheckUtils.IsPipe(element)) return GetPipeEndReference(activeView, element as Pipe);
+            return GetCenterReference(validStyleIds, element);
+        }
+
+        /// <summary>
+        /// Creates a Dimension from each end of a pipe. *Note: DimensionLinearElement could be called instead, but as a pipe has static geometry, a dedicated function ( that should be faster than the generic function ) was used instead.
+        /// </summary>
+        /// <param name="doc">The active Document.</param>
+        /// <param name="dimensionType">The Dimension Type of the created dimension</param>
+        /// <param name="dimensionLine">The line that the created dimension will be located on.</param>
+        /// <param name="pipe">The pipe element within the Pipeline that is being dimensioned.</param>
+        /// <returns>a newly created Dimension going from each end of the pipe element</returns>
+        public static Dimension DimensionPipe(Document doc, DimensionType dimensionType, Line dimensionLine, Pipe pipe)
+        {
+            ReferenceArray referenceArray = new ReferenceArray();
+            Line line = GeometryUtils.GetGeometryLineOfPipe(doc.ActiveView, pipe);
+            referenceArray.Append(line.GetEndPointReference(0));
+            referenceArray.Append(line.GetEndPointReference(1));
+
+            return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
+        }
+
+
+        
+
+        /// <summary>
+        /// Retrieves the center point of the element based on whether or not it has a location point or a location curve.
+        /// </summary>
+        /// <param name="element">a piping element.</param>
+        /// <returns>The center point of the element.</returns>
+        public static XYZ GetOriginOfElement(Element element)
+        {
+            if (element == null) return null;
+            Location location = element.Location;
+            if (location is LocationPoint locationPoint) return locationPoint.Point;
+            if (location is LocationCurve locationCurve) return (locationCurve.Curve as Line).Origin;
+            return null;
+        }
+
+        
+
+        /// <summary>
+        /// Creates a line that is parallel with the projected element line and intersects the dimension point. This is where the primary dimension will be placed.
+        /// </summary>
+        /// <param name="plane">The plane of the active View.</param>
+        /// <param name="projectedElementLine">The line ranging from each end of the Pipeline and projected onto the active View plane.</param>
+        /// <param name="dimensionPoint">The point that the dimension line intersects and therefore determines the position of the dimension line.</param>
+        /// <returns>A line offset from the Pipeline where the primary dimension will be placed.</returns>
+        public static Line CreateDimensionLine(Plane plane, Line projectedElementLine, XYZ dimensionPoint)
+        {
+            Line dimensionLine = Line.CreateUnbound(Utils.GeometryUtils.ProjectPointOntoPlane(plane, dimensionPoint), projectedElementLine.Direction);
+            dimensionLine.MakeUnbound();
+            return dimensionLine;
+        }
+
+       
+        /// <summary>
+        /// Gets a pseudo-Reference to the center of the piping element. 
+        /// This is done by retrieving all of the element's geometry lines that have a valid line style and have an endpoint sharing a position with the center of the piping element.
+        /// </summary>
+        /// <param name="validStyleIds">An array of valid Line Style Ids for centerlines. </param>
+        /// <param name="element">a piping element.</param>
+        /// <returns>a Reference to the center of the piping element.</returns>
+        public static Reference GetCenterReference(ElementId[] validStyleIds, Element element)
+        {
+            Line[] instanceLines = GeometryUtils.GetInstanceGeometryObjectsWithStyleIds<Line>(GeometryUtils.GetGeometryOptions(), element, validStyleIds);
+            Line[] symbolLines = GeometryUtils.GetSymbolGeometryObjectsWithStyleIds<Line>(GeometryUtils.GetGeometryOptions(), element, validStyleIds);
+            if (instanceLines == null || symbolLines == null) return null;
+            if (instanceLines.Length == 0 || symbolLines.Length == 0) return null;
+            XYZ origin = GetOriginOfElement(element);
+            int id = -1;
+            int endIndex = -1;
+            foreach (Line line in instanceLines)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    if (line.GetEndPoint(i).IsAlmostEqualTo(origin))
+                    {
+                        id = line.Id;
+                        endIndex = i;
+                        break;
+                    }
+                }
+                if (id != -1) break;
+            }
+
+            return symbolLines.Where(line => line.Id.Equals(id)).FirstOrDefault().GetEndPointReference(endIndex);
+        }
+
+
+        /// <summary>
+        /// Retrieves the Reference for unused connector of the pipe.
+        /// </summary>
+        /// <param name="activeView">The active View.</param>
+        /// <param name="pipe">a Pipe element with one open connector.</param>
+        /// <returns>a Reference to the endpoint of the pipe.</returns>
+        public static Reference GetPipeEndReference(View activeView, Pipe pipe)
+        {
+            if (pipe == null) return null;
+            //Gets the position of the open connector of the pipe.
+            XYZ position = null;
+            foreach (Connector connector in pipe.ConnectorManager.UnusedConnectors)
+            {
+                position = connector.Origin;
+                break;
+            }
+            if (position == null) return null;
+            //Attempts to find an endpoint of the pipes geometry that shares the same position as the open connector.
+            Line line = Utils.GeometryUtils.GetGeometryLineOfPipe(activeView, pipe);
+            for (int i = 0; i < 2; i++)
+            {
+                if (line.GetEndPoint(i).IsAlmostEqualTo(position)) return line.GetEndPointReference(i);
+            }
+            return null;
+        }
+
+        public static Reference GetMechanicalEquipmentEndReference(Plane plane, FamilyInstance mechanicalEquipment, FamilyInstance connected)
+        {
+            Connector connector = ConnectionUtils.TryGetConnection(mechanicalEquipment, connected);
+            if (connector == null) return null;
+            return GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, connector);
         }
     }
     

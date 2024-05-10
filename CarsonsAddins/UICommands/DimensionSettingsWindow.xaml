@@ -5,8 +5,20 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CarsonsAddins"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance Type=local:DimensionSettingsWindow, IsDesignTimeCreatable=False}">
+    <Window.Resources>
+        
+        <CollectionViewSource x:Key="DimensionTypesViewSource" IsLiveGroupingRequested="True" IsLiveSortingRequested="True" Source="{Binding Path=dimensionTypes}"/>
+    </Window.Resources>
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <local:DimensionTypeSelectorControl x:Name="DimensionTypeSelector" Grid.Row="0" Grid.Column="0"/>
+        <local:GraphicsStyleListControl x:Name="GraphicsStyleList" Grid.Row="1" Grid.Column="0"/>
     </Grid>
 </Window>

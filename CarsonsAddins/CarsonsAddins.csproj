@@ -88,11 +88,18 @@
   <ItemGroup>
     <Compile Include="ApplicationIds.cs" />
     <Compile Include="ComponentState.cs" />
+    <Compile Include="DimensionPipeline.cs" />
     <Compile Include="MiscCommands\GenericComponentCommands.cs" />
     <Compile Include="MyApplicationSettings.cs" />
     <Compile Include="MiscCommands\SelectDimensionsIndividuallyCommand.cs" />
     <Compile Include="UICommands\DimensionSettingsWindow.xaml.cs">
       <DependentUpon>DimensionSettingsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UICommands\DimensionTypeSelectorControl.xaml.cs">
+      <DependentUpon>DimensionTypeSelectorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UICommands\GraphicsStyleListControl.xaml.cs">
+      <DependentUpon>GraphicsStyleListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UICommands\ParameterManagerTable.cs" />
     <Compile Include="UICommands\PipeEndPrepBCWindow.xaml.cs">
@@ -182,6 +189,14 @@
     <Page Include="MyApplicationSettingsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UICommands\DimensionTypeSelectorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UICommands\GraphicsStyleListControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UICommands\PipeEndPrepBCWindow.xaml">
       <SubType>Designer</SubType>

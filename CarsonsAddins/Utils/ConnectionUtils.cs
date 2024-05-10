@@ -303,6 +303,12 @@ namespace CarsonsAddins.Utils
             return connected;
         }
 
+        public static XYZ TryGetConnectionPosition(Element element, Element other)
+        {
+            Connector connector = TryGetConnection(element, other);
+            return connector?.Origin;
+        }
+
         /// <summary>
         /// Attempts to find an "adjacent" Connector Element. In other words, it finds another Connector Element that shares the same ConnectorManager and Owner.
         /// </summary>

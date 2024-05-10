@@ -56,7 +56,7 @@
             <StackPanel Grid.Row="3" Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Height="30">
                     <Label Content="Segment Dimension Leader Visibility:"/>
-                    <ComboBox HorizontalAlignment="Right" Width="112" Margin="16,4" FontFamily="Arial" SelectionChanged="LeaderVisibility_Selected">
+                    <ComboBox HorizontalAlignment="Right" Width="112" Margin="16,4" FontFamily="Arial" SelectionChanged="LeaderVisibility_Selected" IsEnabled="False">
                         <ComboBoxItem Content="By Element" IsSelected="True"/>
                         <ComboBoxItem Content="Always On" FontFamily="Arial"/>
                         <ComboBoxItem Content="Always Off"/>

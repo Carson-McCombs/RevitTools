@@ -116,28 +116,37 @@ namespace CarsonsAddins.GenericCommands
         /// <summary>
         /// Static instance of the generic type. One instance exists seperately for each type.
         /// </summary>
+        private static UIApplication uiapp;
         private static T instance;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             try
             {
+                uiapp = commandData.Application;
                 if (instance == null)
                 {
                     instance = new T();
-                    instance.Init(commandData.Application.ActiveUIDocument);
+                    instance.Init(uiapp.ActiveUIDocument);
                     instance.Closing += Window_Closing;
+                    uiapp.Application.DocumentOpened += Application_DocumentOpened;
                 }
 
                 if (instance.Visibility != System.Windows.Visibility.Visible) instance.ShowDialog();
                 return Result.Succeeded;
 
             }
-            catch
+            catch (Exception ex)
             {
-                message = "Error showing window ( " + nameof(T) + " )";
+                message = "Error showing window ( " + instance.GetType().Name + " ) : \n" + ex.Message;
                 return Result.Failed;
             }
 
+        }
+
+        private void Application_DocumentOpened(object sender, DocumentOpenedEventArgs e)
+        {
+            if (instance == null || uiapp == null) return;
+            instance.Init(uiapp.ActiveUIDocument);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
