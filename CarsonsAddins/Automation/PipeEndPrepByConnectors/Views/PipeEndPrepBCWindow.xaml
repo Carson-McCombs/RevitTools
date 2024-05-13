@@ -21,7 +21,7 @@
         <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
             <CheckBox Content="AIS ( Domestic )" Margin="4" IsChecked="{Binding Path=IsDomestic, Mode=TwoWay}"/>
             <CheckBox Content="Check if Tapped" Margin="4" IsChecked="{Binding Path=CheckIfTapped, Mode=TwoWay}"/>
-            <CheckBox Content="Check Pipe Class" Margin="4" IsChecked="{Binding Path=CheckPipeClass, Mode=TwoWay}"/>
+            <CheckBox Content="Check Pipe Class" Margin="4" IsChecked="{Binding Path=CheckPipeClass, Mode=TwoWay}" IsEnabled="False"/>
             <CheckBox Content="Check Pipe Penetrations" Margin="4" IsChecked="{Binding Path=CheckPipePenetrations, Mode=TwoWay}"/>
         </StackPanel>
 
