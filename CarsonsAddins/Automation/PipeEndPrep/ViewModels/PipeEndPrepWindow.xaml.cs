@@ -40,6 +40,7 @@ namespace CarsonsAddins
         {
             return new PushButtonData("Pipe End Prep", "Pipe End Prep", assembly.Location, typeof(GenericCommands.ShowDockablePane<PipeEndPrepWindow>).FullName)
             {
+                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
                 ToolTip = "Opens Pipe End Prep Settings Window"
             };
         }

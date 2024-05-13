@@ -21,6 +21,17 @@ namespace CarsonsAddins
     {
         public const string FolderName = "Misc";
         public const bool IsWIP = false;
+
+        public PushButtonData RegisterButton(Assembly assembly)
+        {
+            PushButtonData pushButtonData = new PushButtonData("SelectAllElementsOfSystemCommand", "Selects all Elements in Piping System", assembly.Location, "CarsonsAddins.SelectAllElementsOfSystemCommand")
+            {
+                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
+                ToolTip = "Selects all Elements in Piping System."
+            };
+            return pushButtonData;
+        }
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -59,13 +70,6 @@ namespace CarsonsAddins
         }
 
 
-        public PushButtonData RegisterButton(Assembly assembly)
-        {
-            PushButtonData pushButtonData = new PushButtonData("SelectAllElementsOfSystemCommand", "Selects all Elements in Piping System", assembly.Location, "CarsonsAddins.SelectAllElementsOfSystemCommand")
-            {
-                ToolTip = "Selects all Elements in Piping System."
-            };
-            return pushButtonData;
-        }
+        
     }
 }

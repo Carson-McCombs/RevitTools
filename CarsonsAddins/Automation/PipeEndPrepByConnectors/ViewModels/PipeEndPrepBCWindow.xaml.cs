@@ -112,6 +112,7 @@ namespace CarsonsAddins
         {
             return new PushButtonData("Pipe End Prep BC", "Pipe End Prep BC", assembly.Location, typeof(GenericCommands.ShowWindow<PipeEndPrepBCWindow>).FullName)
             {
+                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
                 ToolTip = "Opens Pipe End Prep By Connectors DockablePane"
             };
         }

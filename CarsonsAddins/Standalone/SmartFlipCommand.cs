@@ -30,6 +30,7 @@ namespace CarsonsAddins
         {
             PushButtonData pushButtonData = new PushButtonData("SmartFlipFittingCommand", "Smart Flip Pipe Fitting", assembly.Location, "CarsonsAddins.SmartFlipCommand")
             {
+                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
                 Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.flip_icon_32.png"),
                 LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.flip_icon_32.png"),
                 ToolTip = "Disconnects Selected Fitting Before Flipping it and Reconnecting it"

@@ -47,6 +47,7 @@ namespace CarsonsAddins
         {
             PushButtonData pushButtonData = new PushButtonData("OpenPreferencesWindow", "Open Preferences Window", assembly.Location, "CarsonsAddins.ShowPreferenceWindow")
             {
+                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
                 ToolTip = "Opens Dockable Preference Window"
             };
             return pushButtonData;
