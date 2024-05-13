@@ -15,7 +15,7 @@ namespace CarsonsAddins.Setup.CommandAvailability
         /// </summary>
         public bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
         {
-            return applicationData.ActiveUIDocument?.Document?.IsFamilyDocument ?? false;
+            return !applicationData.ActiveUIDocument?.Document?.IsFamilyDocument ?? false;
         }
     }
 }
