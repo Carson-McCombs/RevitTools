@@ -135,8 +135,11 @@ namespace CarsonsAddins
         /// <returns>a secondary dimension line.</returns>
         private static Line CreateSecondaryDimensionLine(View activeView, DimensionType secondaryDimensionType, Line projectedElementLine, Line primaryDimensionLine)
         {
-            double textSize = secondaryDimensionType.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble();
-            double textOffset = secondaryDimensionType.get_Parameter(BuiltInParameter.TEXT_DIST_TO_LINE).AsDouble();
+            const double nullTextSize = (1.0/96.0); // 1/8"
+            const double nullTextOffset = (1.0 / 128.0); // 3/32"
+            
+            double textSize = secondaryDimensionType?.get_Parameter(BuiltInParameter.TEXT_SIZE).AsDouble() ?? nullTextSize;
+            double textOffset = secondaryDimensionType?.get_Parameter(BuiltInParameter.TEXT_DIST_TO_LINE).AsDouble() ?? nullTextOffset;
 
             double offset = (textSize + 3 * textOffset) * activeView.Scale;
             
@@ -159,7 +162,8 @@ namespace CarsonsAddins
             View activeView = doc.ActiveView;
             DimensionStyles dimensionStyles = DimensionSettingsWindow.DimensionStylesSettings ?? new DimensionStyles();
             ElementId[] validStyleIds = dimensionStyles.centerlineStyles.Select(style => style.Id).ToArray();
-
+            ElementId defaultDimensionTypeId = doc.GetDefaultElementTypeId(ElementTypeGroup.LinearDimensionType);
+            DimensionType defaultDimensionType = (defaultDimensionTypeId != ElementId.InvalidElementId) ? doc.GetElement(defaultDimensionTypeId) as DimensionType : default(DimensionType);
             //Creates the element line which goes from the center of the element on each end of Pipeline.
 
             XYZ pointA = ConnectionUtils.TryGetConnectionPosition(elements[0], elements[1]) ?? GetOriginOfElement(elements[0]);
@@ -182,7 +186,7 @@ namespace CarsonsAddins
 
             //Calculates the secondary dimension line by creating a line parallel to the primary dimension line but offset a distance based on the dimension type settings
             //( right now it only checks the pipe dimension type settings, but it should choose the type with the largest text and text offset )
-            Line secondaryDimensionLine = CreateSecondaryDimensionLine(doc.ActiveView, dimensionStyles.secondaryPipeDimensionType, projectedElementLine, primaryDimensionLine);
+            Line secondaryDimensionLine = CreateSecondaryDimensionLine(doc.ActiveView, dimensionStyles.secondaryPipeDimensionType ?? defaultDimensionType, projectedElementLine, primaryDimensionLine);
 
             //Creates a reference array for the primary dimension based on its end point references.
             ReferenceArray primaryReferenceArray = new ReferenceArray();
@@ -198,11 +202,12 @@ namespace CarsonsAddins
                     bool isMechanicalEquipment = BuiltInCategory.OST_MechanicalEquipment.Equals((BuiltInCategory)element.Category.Id.IntegerValue);
                     bool isEdge = i == 0 || i == elements.Length - 1;
                     Element connected = i < elements.Length - 1 ? elements[i + 1] : elements[i - 1];
+                    DimensionType dimensionType = dimensionStyles.GetSecondaryDimensionType((BuiltInCategory)element.Category.Id.IntegerValue) ?? defaultDimensionType;
                     //As Pipe elements have static geometry, a dedicated function is used to retrieve their references and create the dimension.
                     //Even though the DimensionLinearElement function could be used instead, it would be slower and less efficient.
                     if (ElementCheckUtils.IsPipe(element))                     {
                         if (isEdge) primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, element));
-                        if (secondaryDimension) DimensionPipe(doc, dimensionStyles.secondaryPipeDimensionType, secondaryDimensionLine, element as Pipe);
+                        if (secondaryDimension) DimensionPipe(doc, dimensionType, secondaryDimensionLine, element as Pipe);
                         continue;
                     }
                     else if (ElementCheckUtils.IsPipeFlange(element)) 
@@ -213,7 +218,7 @@ namespace CarsonsAddins
                     else
                     {
                         bool isLinear = ConnectionUtils.IsLinearElement(element);
-                        DimensionType dimensionType = dimensionStyles.GetSecondaryDimensionType((BuiltInCategory)element.Category.Id.IntegerValue);
+                        
                         if (isLinear) //Dimensions element based on whether or not it is linear.
                         {
                             if (isEdge) primaryReferenceArray.Append(GetEndReference(activeView, validStyleIds, element));
@@ -237,7 +242,7 @@ namespace CarsonsAddins
                 
             }
             //Creates the primary dimension
-            doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionStyles.primaryDimensionType);
+            doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionStyles.primaryDimensionType ?? defaultDimensionType);
         }
 
         /// <summary>
@@ -308,11 +313,11 @@ namespace CarsonsAddins
                 if (adjacentReference == null) return null;
                 referenceArray.Append(adjacentReference);
             }
-            
 
-            
-            
-            
+
+
+
+
             //Assembly the References into a ReferenceArray and then create and return the Dimension based on those references.
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
