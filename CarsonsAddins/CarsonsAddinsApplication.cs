@@ -87,7 +87,6 @@ namespace CarsonsAddins
             PulldownButton miscComponentsPulldownButton = panel.AddItem(miscComponentsPulldownButtonData) as PulldownButton;
             pulldownButtonDictionary.Add("Misc", miscComponentsPulldownButton);
             RegisterComponentPushButtons(assembly, panel, pulldownButtonDictionary);
-            app.ControlledApplication.DocumentChanged += UpdateTabVisibility_OnDocumentChanged;
             app.ControlledApplication.ApplicationInitialized += RegisterDockablePanes;
             return Result.Succeeded;
         }
