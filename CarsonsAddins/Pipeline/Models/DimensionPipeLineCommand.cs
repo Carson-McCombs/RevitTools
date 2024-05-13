@@ -28,6 +28,7 @@ namespace CarsonsAddins
         {
             PushButtonData pushButtonData = new PushButtonData("DimensionPipeLineCommand", "Dimensions Pipe Line", assembly.Location, "CarsonsAddins.DimensionPipeLineCommand")
             {
+                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
                 ToolTip = "Gets the dimensions of all elements in pipe line."
             };
             return pushButtonData;
