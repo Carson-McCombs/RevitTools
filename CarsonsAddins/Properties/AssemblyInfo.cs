@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("CarsonAddins")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("CarsonMcCombs")]
 [assembly: AssemblyProduct("CarsonAddins")]
 [assembly: AssemblyCopyright("Copyright 2023")]
 [assembly: AssemblyTrademark("")]

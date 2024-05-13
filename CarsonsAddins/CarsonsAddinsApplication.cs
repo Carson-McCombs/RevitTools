@@ -31,6 +31,8 @@ using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.DB.Plumbing;
 using CarsonsAddins.Properties;
 using Newtonsoft.Json;
+using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace CarsonsAddins
 {
@@ -85,12 +87,12 @@ namespace CarsonsAddins
             PulldownButton miscComponentsPulldownButton = panel.AddItem(miscComponentsPulldownButtonData) as PulldownButton;
             pulldownButtonDictionary.Add("Misc", miscComponentsPulldownButton);
             RegisterComponentPushButtons(assembly, panel, pulldownButtonDictionary);
-
+            app.ControlledApplication.DocumentChanged += UpdateTabVisibility_OnDocumentChanged;
             app.ControlledApplication.ApplicationInitialized += RegisterDockablePanes;
             return Result.Succeeded;
         }
-        
 
+        
         public Result OnShutdown(UIControlledApplication app)
         {
             return Result.Succeeded;
@@ -145,21 +147,10 @@ namespace CarsonsAddins
 
 
     
-    public class Availability_NoActiveUIDocument : IExternalCommandAvailability
-    {
-        public bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
-        {
-            if (applicationData.ActiveUIDocument == null)
-            {
-                return true;
-            }
-
-            return false;
-        }
-    }
+    
 
 
-
+    
 }
 
 
