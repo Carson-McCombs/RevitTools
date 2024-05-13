@@ -26,7 +26,7 @@ namespace CarsonsAddins
         {
             PushButtonData pushButtonData = new PushButtonData("SelectAllElementsOfSystemCommand", "Selects all Elements in Piping System", assembly.Location, "CarsonsAddins.SelectAllElementsOfSystemCommand")
             {
-                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
+                AvailabilityClassName = typeof(Setup.Availablity.Availability_ProjectDocumentAndActiveView).FullName,
                 ToolTip = "Selects all Elements in Piping System."
             };
             return pushButtonData;

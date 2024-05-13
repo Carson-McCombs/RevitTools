@@ -25,7 +25,7 @@ namespace CarsonsAddins
         {
             PushButtonData pushbuttonData = new PushButtonData("SelectPipeLineCommand", "Select Pipe Line", assembly.Location, "CarsonsAddins.SelectPipeLineCommand")
             {
-                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
+                AvailabilityClassName = typeof(Setup.Availablity.Availability_ProjectDocumentAndActiveView).FullName,
                 Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.select_pipeline_icon_32.png"),
                 LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.select_pipeline_icon_32.png"),
                 ToolTip = "Selects all pipes connected to selected pipe."

@@ -125,7 +125,8 @@
     <Compile Include="Settings\Models\MyApplicationSettings.cs" />
     <Compile Include="Settings\ViewModels\MyApplicationSettingsWindow.xaml.cs" />
     <Compile Include="Setup\ApplicationIds.cs" />
-    <Compile Include="Setup\Availability_ProjectDocumentOnly.cs" />
+    <Compile Include="Setup\Availablity\Availability_ProjectDocumentOnly.cs" />
+    <Compile Include="Setup\Availablity\Availablilty_ProjectDocumentAndActiveView.cs" />
     <Compile Include="Setup\ComponentState.cs" />
     <Compile Include="Setup\GenericComponentCommands.cs" />
     <Compile Include="Setup\SelectDimensionsIndividuallyCommand.cs" />

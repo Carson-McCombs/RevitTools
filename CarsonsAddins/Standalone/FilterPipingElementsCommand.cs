@@ -23,7 +23,7 @@ namespace CarsonsAddins
         {
             PushButtonData pushButtonData = new PushButtonData("FilterPipingElementsCommand", "Filters Piping Elements", assembly.Location, "CarsonsAddins.FilterPipingElementsCommand")
             {
-                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
+                AvailabilityClassName = typeof(Setup.Availablity.Availability_ProjectDocumentAndActiveView).FullName,
                 ToolTip = "Filters Selection."
             };
             return pushButtonData;

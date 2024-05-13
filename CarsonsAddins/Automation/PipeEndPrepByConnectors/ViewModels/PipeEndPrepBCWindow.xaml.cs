@@ -27,14 +27,14 @@ namespace CarsonsAddins
         public const string FolderName = "Automation";
         public const bool IsWIP = false;
         public event PropertyChangedEventHandler PropertyChanged;
-        private GenericFunctionEventHandler handler = new GenericFunctionEventHandler();
+        private readonly GenericFunctionEventHandler handler = new GenericFunctionEventHandler();
         private IntPtr windowHandle;
-        private ExternalEvent updateSelectionEvent;
+        private readonly ExternalEvent updateSelectionEvent;
         private PipeEndPrepBCUpdater updater;
         private bool isRunning = false;
 
-        private Brush redBrush = new SolidColorBrush(Colors.Red);
-        private Brush greenBrush = new SolidColorBrush(Colors.Green);
+        private readonly Brush redBrush = new SolidColorBrush(Colors.Red);
+        private readonly Brush greenBrush = new SolidColorBrush(Colors.Green);
 
 
         private bool isDomestic = false;
@@ -112,7 +112,7 @@ namespace CarsonsAddins
         {
             return new PushButtonData("Pipe End Prep BC", "Pipe End Prep BC", assembly.Location, typeof(GenericCommands.ShowWindow<PipeEndPrepBCWindow>).FullName)
             {
-                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
+                AvailabilityClassName = typeof(Setup.Availablity.Availability_ProjectDocumentsOnly).FullName,
                 ToolTip = "Opens Pipe End Prep By Connectors DockablePane"
             };
         }

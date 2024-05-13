@@ -29,7 +29,7 @@ namespace CarsonsAddins
         {
             PushButtonData pushButtonData = new PushButtonData("GetTotalPipeLengthCommand", "Get Total Pipe Length", assembly.Location, "CarsonsAddins.GetTotalPipeLengthCommand")
             {
-                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
+                AvailabilityClassName = typeof(Setup.Availablity.Availability_ProjectDocumentAndActiveView).FullName,
                 Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.total_pipe_length_icon_32.png"),
                 LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.total_pipe_length_icon_32.png"),
                 ToolTip = "Gets the total length of all selected pipe."

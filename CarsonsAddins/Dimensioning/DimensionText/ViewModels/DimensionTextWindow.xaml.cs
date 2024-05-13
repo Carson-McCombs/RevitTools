@@ -164,7 +164,7 @@ namespace CarsonsAddins
         {
             PushButtonData pushButtonData = new PushButtonData("DimensionsTextWindow", "Dimensions Text Window", assembly.Location, typeof(GenericCommands.ShowWindow<DimensionTextWindow>).FullName)
             {
-                AvailabilityClassName = typeof(Setup.CommandAvailability.Availability_ProjectDocumentsOnly).FullName,
+                AvailabilityClassName = typeof(Setup.Availablity.Availability_ProjectDocumentAndActiveView).FullName,
                 ToolTip = "Dimension Text Window"
             };
             return pushButtonData;
