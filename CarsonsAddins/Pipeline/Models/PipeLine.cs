@@ -32,6 +32,7 @@ namespace CarsonsAddins
     {
         readonly private SelectionFilters.SelectionFilter_PipingElements filter = null;
         readonly private Element[] elements;
+        readonly private Element selectedElement;
         public PipeLine(View view, Pipe pipe)
         {
             List<Element> elementList = new List<Element>();
@@ -39,6 +40,7 @@ namespace CarsonsAddins
             Connector[] connectors = ConnectionUtils.GetConnectors(pipe);
             AddNextElement_Left(view, connectors[0], ref elementList);
             elementList.Add(pipe);
+            selectedElement = pipe;
             AddNextElement_Right(view, connectors[1], ref elementList);
             elements = elementList.ToArray();
         }
@@ -166,9 +168,15 @@ namespace CarsonsAddins
             DimensionType defaultDimensionType = (defaultDimensionTypeId != ElementId.InvalidElementId) ? doc.GetElement(defaultDimensionTypeId) as DimensionType : default(DimensionType);
             //Creates the element line which goes from the center of the element on each end of Pipeline.
 
-            XYZ pointA = ConnectionUtils.TryGetConnectionPosition(elements[0], elements[1]) ?? GetOriginOfElement(elements[0]);
+            //XYZ pointA = ConnectionUtils.TryGetConnectionPosition(elements[0], elements[1]) ?? GetOriginOfElement(elements[0]);
 
-            XYZ pointB = ConnectionUtils.TryGetConnectionPosition(elements[elements.Length - 2], elements[elements.Length - 1]) ?? GetOriginOfElement(elements[elements.Length - 1]);
+            //XYZ pointB = ConnectionUtils.TryGetConnectionPosition(elements[elements.Length - 2], elements[elements.Length - 1]) ?? GetOriginOfElement(elements[elements.Length - 1]);
+
+            Connector[] connectors = ConnectionUtils.GetConnectors(selectedElement);
+            XYZ pointA = connectors[0].Origin;
+            XYZ pointB = connectors[1].Origin;
+
+
             Line elementLine = Line.CreateBound(pointA, pointB);
 
             //Projects the endpoints and the element line onto the plane of the active activeView.

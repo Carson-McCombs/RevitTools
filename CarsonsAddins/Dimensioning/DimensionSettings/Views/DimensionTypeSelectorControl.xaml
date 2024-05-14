@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CarsonsAddins"
              mc:Ignorable="d" 
-             Width="auto" Height="auto" d:DataContext="{d:DesignInstance Type=local:DimensionTypeSelectorControl, IsDesignTimeCreatable=False}">
+             Width="auto" Height="auto">
     <UserControl.Resources>
         <Style TargetType="TextBlock">
             <Setter Property="FontFamily" Value="Arial"/>
@@ -24,6 +24,8 @@
                 </Style>
                 <Style TargetType="ComboBox">
                     <Setter Property="Margin" Value="4"/>
+                    <Setter Property="ItemsSource" Value="{Binding DimensionTypes}"/>
+                    <Setter Property="DisplayMemberPath" Value="Name"/>
                 </Style>
             </Grid.Resources>
             <Grid.ColumnDefinitions>
@@ -39,16 +41,16 @@
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <TextBlock Text="Primary Dimension Type" Grid.Column="0" Grid.Row="0"/>
-            <ComboBox Name="PrimaryDimensionType_ComboBox" Grid.Column="1" Grid.Row="0" ItemsSource="{Binding DimensionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding PrimaryDimensionType, Mode=TwoWay}"/>
+            <ComboBox Name="PrimaryDimensionType_ComboBox" Grid.Column="1" Grid.Row="0" SelectedItem="{Binding PrimaryDimensionType, Mode=TwoWay}"/>
             <TextBlock Text="Secondary Dimension Types:" Grid.Column="0" Grid.Row="1" Margin="0, 16, 0, 8" />
             <TextBlock Text="Pipes" Grid.Column="0" Grid.Row="2"/>
-            <ComboBox Name="SecondaryDimensionTypePipes_ComboBox" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding DimensionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SecondaryPipeDimensionType, Mode=TwoWay}"/>
+            <ComboBox Name="SecondaryDimensionTypePipes_ComboBox" Grid.Column="1" Grid.Row="2" SelectedItem="{Binding SecondaryPipeDimensionType, Mode=TwoWay}"/>
             <TextBlock Text="Fittings" Grid.Column="0" Grid.Row="3"/>
-            <ComboBox Name="SecondaryDimensionTypeFittings_ComboBox" Grid.Column="1" Grid.Row="3" ItemsSource="{Binding DimensionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SecondaryFittingDimensionType, Mode=TwoWay}"/>
+            <ComboBox Name="SecondaryDimensionTypeFittings_ComboBox" Grid.Column="1" Grid.Row="3" SelectedItem="{Binding SecondaryFittingDimensionType, Mode=TwoWay}"/>
             <TextBlock Text="Accessories" Grid.Column="0" Grid.Row="4"/>
-            <ComboBox Name="SecondaryDimensionTypeAccessories_ComboBox" Grid.Column="1" Grid.Row="4" ItemsSource="{Binding DimensionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SecondaryAccessoryDimensionType, Mode=TwoWay}"/>
+            <ComboBox Name="SecondaryDimensionTypeAccessories_ComboBox" Grid.Column="1" Grid.Row="4" SelectedItem="{Binding SecondaryAccessoryDimensionType, Mode=TwoWay}"/>
             <TextBlock Text="Others" Grid.Column="0" Grid.Row="5"/>
-            <ComboBox Name="SecondaryDimensionTypeOthers_ComboBox" Grid.Column="1" Grid.Row="5" ItemsSource="{Binding DimensionTypes}" DisplayMemberPath="Name" SelectedItem="{Binding SecondaryOtherDimensionType, Mode=TwoWay}"/>
+            <ComboBox Name="SecondaryDimensionTypeOthers_ComboBox" Grid.Column="1" Grid.Row="5" SelectedItem="{Binding SecondaryOtherDimensionType, Mode=TwoWay}"/>
         </Grid>
     </Border>
     
