@@ -106,7 +106,7 @@ namespace CarsonsAddins
         private void SaveToDB() 
         {
             if (DimensionStylesSettings == null) return;
-            DimensionStyleNames dimensionStyleNames = DimensionStylesSettings.GetDimensionStyleNames();
+            DimensionStyleNames dimensionStyleNames = DimensionStylesSettings.GetDimensionStyleNames(GraphicsStyleList.SelectedGraphicStyleNames.ToArray());
             try
             {
                 MySettings.Default.DimensionStyles_Preferences = JsonConvert.SerializeObject(dimensionStyleNames);
@@ -130,8 +130,62 @@ namespace CarsonsAddins
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
         }
     }
-    
-    
-    
+
+
+    public class DimensionStyles
+    {
+        public bool foundAllDimensionTypes => primaryDimensionType != null && secondaryPipeDimensionType != null && secondaryAccessoryDimensionType != null && secondaryFittingDimensionType != null && secondaryOtherDimensionType != null;
+        public DimensionType primaryDimensionType;
+        public DimensionType secondaryPipeDimensionType;
+        public DimensionType secondaryAccessoryDimensionType;
+        public DimensionType secondaryFittingDimensionType;
+        public DimensionType secondaryOtherDimensionType;
+        public List<GraphicsStyle> centerlineStyles = new List<GraphicsStyle>();
+        public DimensionType GetSecondaryDimensionType(BuiltInCategory builtInCategory)
+        {
+            switch (builtInCategory)
+            {
+                case BuiltInCategory.OST_PipeCurves: return secondaryPipeDimensionType;
+                case BuiltInCategory.OST_PipeAccessory: return secondaryAccessoryDimensionType;
+                case BuiltInCategory.OST_PipeFitting: return secondaryFittingDimensionType;
+                default: return secondaryOtherDimensionType;
+            }
+        }
+        public DimensionStyleNames GetDimensionStyleNames()
+        {
+            return new DimensionStyleNames
+            {
+                primaryDimensionTypeName = primaryDimensionType?.Name ?? string.Empty,
+                secondaryPipeDimensionTypeName = secondaryPipeDimensionType?.Name ?? string.Empty,
+                secondaryAccessoryDimensionTypeName = secondaryAccessoryDimensionType?.Name ?? string.Empty,
+                secondaryFittingDimensionTypeName = secondaryFittingDimensionType?.Name ?? string.Empty,
+                secondaryOtherDimensionTypeName = secondaryOtherDimensionType?.Name ?? string.Empty,
+                centerlineStyleNames = centerlineStyles?.Select(style => style.Name).Distinct().ToArray()
+            };
+        }
+        public DimensionStyleNames GetDimensionStyleNames(string[] graphicStyleNames)
+        {
+            return new DimensionStyleNames
+            {
+                primaryDimensionTypeName = primaryDimensionType?.Name ?? string.Empty,
+                secondaryPipeDimensionTypeName = secondaryPipeDimensionType?.Name ?? string.Empty,
+                secondaryAccessoryDimensionTypeName = secondaryAccessoryDimensionType?.Name ?? string.Empty,
+                secondaryFittingDimensionTypeName = secondaryFittingDimensionType?.Name ?? string.Empty,
+                secondaryOtherDimensionTypeName = secondaryOtherDimensionType?.Name ?? string.Empty,
+                centerlineStyleNames = graphicStyleNames
+            };
+        }
+
+    }
+
+    public struct DimensionStyleNames
+    {
+        public string primaryDimensionTypeName;
+        public string secondaryPipeDimensionTypeName;
+        public string secondaryAccessoryDimensionTypeName;
+        public string secondaryFittingDimensionTypeName;
+        public string secondaryOtherDimensionTypeName;
+        public string[] centerlineStyleNames;
+    }
 
 }

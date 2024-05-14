@@ -284,49 +284,7 @@ namespace CarsonsAddins.Utils
 
 
 
-        public class DimensionStyles
-        {
-            public bool foundAllDimensionTypes => primaryDimensionType != null && secondaryPipeDimensionType != null && secondaryAccessoryDimensionType != null && secondaryFittingDimensionType != null && secondaryOtherDimensionType != null;
-            public DimensionType primaryDimensionType;
-            public DimensionType secondaryPipeDimensionType;
-            public DimensionType secondaryAccessoryDimensionType;
-            public DimensionType secondaryFittingDimensionType;
-            public DimensionType secondaryOtherDimensionType;
-            public List<GraphicsStyle> centerlineStyles = new List<GraphicsStyle>();
-            public DimensionType GetSecondaryDimensionType(BuiltInCategory builtInCategory)
-            {
-                switch (builtInCategory)
-                {
-                    case BuiltInCategory.OST_PipeCurves: return secondaryPipeDimensionType;
-                    case BuiltInCategory.OST_PipeAccessory: return secondaryAccessoryDimensionType;
-                    case BuiltInCategory.OST_PipeFitting: return secondaryFittingDimensionType;
-                    default: return secondaryOtherDimensionType;
-                }
-            }
-            public DimensionStyleNames GetDimensionStyleNames()
-            {
-                return new DimensionStyleNames
-                {
-                    primaryDimensionTypeName = primaryDimensionType?.Name ?? string.Empty,
-                    secondaryPipeDimensionTypeName = secondaryPipeDimensionType?.Name ?? string.Empty,
-                    secondaryAccessoryDimensionTypeName = secondaryAccessoryDimensionType?.Name ?? string.Empty,
-                    secondaryFittingDimensionTypeName = secondaryFittingDimensionType?.Name ?? string.Empty,
-                    secondaryOtherDimensionTypeName = secondaryOtherDimensionType?.Name ?? string.Empty,
-                    centerlineStyleNames = centerlineStyles?.Select(style => style.Name).ToArray()
-                };
-            }
-
-        }
-
-        public struct DimensionStyleNames
-        {
-            public string primaryDimensionTypeName;
-            public string secondaryPipeDimensionTypeName;
-            public string secondaryAccessoryDimensionTypeName;
-            public string secondaryFittingDimensionTypeName;
-            public string secondaryOtherDimensionTypeName;
-            public string[] centerlineStyleNames;
-        }
+       
         public static Reference GetFlangeEndReference(Plane plane, Element flange, Element connected)
         {
             if (flange == null || connected == null) return null;
