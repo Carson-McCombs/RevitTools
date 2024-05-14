@@ -29,63 +29,53 @@ namespace CarsonsAddins
 
         private DimensionStyles dimensionStyles;
 
-        private DimensionType primaryDimensionType;
         public DimensionType PrimaryDimensionType
         {
-            get => primaryDimensionType;
+            get => dimensionStyles.primaryDimensionType;
             set
             {
-                if (value == null || value == primaryDimensionType) return;
-                primaryDimensionType = value;
-                dimensionStyles.primaryDimensionType = primaryDimensionType;
+                if (value == null || value == dimensionStyles.primaryDimensionType) return;
+                dimensionStyles.primaryDimensionType = value;
                 OnNotifyPropertyChanged();
             }
         }
-        private DimensionType secondaryPipeDimensionType;
         public DimensionType SecondaryPipeDimensionType
         {
-            get => secondaryPipeDimensionType;
+            get => dimensionStyles.secondaryPipeDimensionType;
             set
             {
-                if (value == null || value == secondaryPipeDimensionType) return;
-                secondaryPipeDimensionType = value;
-                dimensionStyles.secondaryPipeDimensionType = secondaryPipeDimensionType;
+                if (value == null || value == dimensionStyles.secondaryPipeDimensionType) return;
+                dimensionStyles.secondaryPipeDimensionType = value;
                 OnNotifyPropertyChanged();
             }
         }
-        private DimensionType secondaryFittingDimensionType;
         public DimensionType SecondaryFittingDimensionType
         {
-            get => secondaryFittingDimensionType;
+            get => dimensionStyles.secondaryFittingDimensionType;
             set
             {
-                if (value == null || value == secondaryFittingDimensionType) return;
-                secondaryFittingDimensionType = value;
-                dimensionStyles.secondaryFittingDimensionType = secondaryFittingDimensionType;
+                if (value == null || value == dimensionStyles.secondaryFittingDimensionType) return;
+                dimensionStyles.secondaryFittingDimensionType = value;
                 OnNotifyPropertyChanged();
             }
         }
-        private DimensionType secondaryAccessoryDimensionType;
         public DimensionType SecondaryAccessoryDimensionType
         {
-            get => secondaryAccessoryDimensionType;
+            get => dimensionStyles.secondaryAccessoryDimensionType;
             set
             {
-                if (value == null || value == secondaryAccessoryDimensionType) return;
-                secondaryAccessoryDimensionType = value;
-                dimensionStyles.secondaryAccessoryDimensionType = secondaryAccessoryDimensionType;
+                if (value == null || value == dimensionStyles.secondaryAccessoryDimensionType) return;
+                dimensionStyles.secondaryAccessoryDimensionType = value;
                 OnNotifyPropertyChanged();
             }
         }
-        private DimensionType secondaryOtherDimensionType;
         public DimensionType SecondaryOtherDimensionType
         {
-            get => secondaryOtherDimensionType;
+            get => dimensionStyles.secondaryOtherDimensionType;
             set
             {
-                if (value == null || value == secondaryOtherDimensionType) return;
-                secondaryOtherDimensionType = value;
-                dimensionStyles.secondaryOtherDimensionType = secondaryOtherDimensionType;
+                if (value == null || value == dimensionStyles.secondaryOtherDimensionType) return;
+                dimensionStyles.secondaryOtherDimensionType = value;
                 OnNotifyPropertyChanged();
             }
         }
@@ -103,7 +93,17 @@ namespace CarsonsAddins
         {
             DimensionTypes = new ObservableCollection<DimensionType>(dimensionTypes);
             dimensionStyles = currentPreferences;
+            LoadFromDimensionStyles();
+        }
 
+        private void LoadFromDimensionStyles()
+        {
+            if (dimensionStyles == null) return;
+            OnNotifyPropertyChanged(nameof(PrimaryDimensionType));
+            OnNotifyPropertyChanged(nameof(SecondaryPipeDimensionType));
+            OnNotifyPropertyChanged(nameof(SecondaryFittingDimensionType));
+            OnNotifyPropertyChanged(nameof(SecondaryAccessoryDimensionType));
+            OnNotifyPropertyChanged(nameof(SecondaryOtherDimensionType));
         }
 
         protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
