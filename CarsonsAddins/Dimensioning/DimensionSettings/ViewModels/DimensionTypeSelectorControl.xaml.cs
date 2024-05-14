@@ -93,10 +93,10 @@ namespace CarsonsAddins
         {
             DimensionTypes = new ObservableCollection<DimensionType>(dimensionTypes);
             dimensionStyles = currentPreferences;
-            LoadFromDimensionStyles();
+            NotifyIntialized();
         }
 
-        private void LoadFromDimensionStyles()
+        private void NotifyIntialized()
         {
             if (dimensionStyles == null) return;
             OnNotifyPropertyChanged(nameof(PrimaryDimensionType));
