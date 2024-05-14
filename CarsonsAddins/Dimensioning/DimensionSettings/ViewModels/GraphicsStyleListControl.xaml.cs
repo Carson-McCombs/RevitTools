@@ -45,6 +45,8 @@ namespace CarsonsAddins
             {
                 if (value == null || selectedGraphicStyleNames == value) return;
                 selectedGraphicStyleNames = value;
+                OnNotifyPropertyChanged();
+
             }
         }
         private ObservableCollection<string> notSelectedGraphicStyleNames = new ObservableCollection<string>();
@@ -55,6 +57,7 @@ namespace CarsonsAddins
             {
                 if (value == null || notSelectedGraphicStyleNames == value) return;
                 notSelectedGraphicStyleNames = value;
+                OnNotifyPropertyChanged();
             }
         }
         private string comboboxSelectedGraphicStyleName;
@@ -76,14 +79,19 @@ namespace CarsonsAddins
         }
         public void Init(GraphicsStyle[] allGraphicStyles, ref List<GraphicsStyle> selectedGraphicStyles)
         {
+            this.selectedGraphicStyles = selectedGraphicStyles;
             
+            Populate(allGraphicStyles);
+        }
+
+        private void Populate(GraphicsStyle[] allGraphicStyles)
+        {
             List<string> nameList = allGraphicStyles.Select(gs => gs.Name).ToList();
             nameList.Sort();
             AllGraphicStyleNames = nameList.ToArray();
-            this.selectedGraphicStyles = selectedGraphicStyles;
             graphicStylesNameDictionary = allGraphicStyles.GroupBy(gs => gs.Name).ToDictionary(group => group.Key, group => group.ToArray());
-            SelectedGraphicStyleNames.Clear();
-            NotSelectedGraphicStyleNames = new ObservableCollection<string>(graphicStylesNameDictionary.Keys.OrderBy(s => s));          
+            SelectedGraphicStyleNames = new ObservableCollection<string>(selectedGraphicStyles.Select(gs => gs.Name).Distinct());
+            NotSelectedGraphicStyleNames = new ObservableCollection<string>(graphicStylesNameDictionary.Keys.Where(name => !SelectedGraphicStyleNames.Contains(name)).OrderBy(s => s));
         }
         private void AddStyle_Click(object sender, RoutedEventArgs e)
         {
