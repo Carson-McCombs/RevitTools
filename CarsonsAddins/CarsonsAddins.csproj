@@ -93,8 +93,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Automation\ViewModels\PipeEndPrepBCWindow.xaml.cs" />
-    <Compile Include="Automation\ViewModels\PipeEndPrepWindow.xaml.cs" />
+    <Compile Include="Automation\PipeEndPrep\ViewModels\PipeEndPrepBCWindow.xaml.cs" />
+    <Compile Include="Automation\PipeEndPrep\ViewModels\PipeEndPrepWindow.xaml.cs" />
     <Compile Include="Deprecated\PipingLC\ViewModels\PipingLCDockablePane.xaml.cs" />
     <Compile Include="Deprecated\PipingLC\ViewModels\PipingSystemSelectorControl.xaml.cs" />
     <Compile Include="Deprecated\SimpleFilter\Models\SetDimensionTextEventHandler.cs" />
@@ -172,11 +172,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Automation\Views\PipeEndPrepBCWindow.xaml">
+    <Page Include="Automation\PipeEndPrep\Views\PipeEndPrepBCWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Automation\Views\PipeEndPrepWindow.xaml">
+    <Page Include="Automation\PipeEndPrep\Views\PipeEndPrepWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -226,7 +226,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Automation\Models\" />
+    <Folder Include="Automation\PipeEndPrep\Models\" />
     <Folder Include="Deprecated\PipingLC\Models\" />
     <Folder Include="Dimensioning\DimensionSettings\Models\" />
     <Folder Include="Dimensioning\DimensionText\Models\" />
