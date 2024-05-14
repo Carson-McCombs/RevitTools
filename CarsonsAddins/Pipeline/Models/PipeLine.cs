@@ -176,8 +176,11 @@ namespace CarsonsAddins
             XYZ projectedPointB = GeometryUtils.ProjectPointOntoPlane(plane, pointB);
             Line projectedElementLine = Line.CreateBound(projectedPointA, projectedPointB);
             
+            double differenceFromOriginal = elementLine.Length - projectedElementLine.Length;
             //if the element line is not parallel with the active activeView, don't create the secondaryDimension.
-            if (!elementLine.Direction.IsAlmostEqualTo(projectedElementLine.Direction, 0.001)) secondaryDimension = false;
+            //Originally the comparison was made with the Line.Direction, but there were often inconsistencies due to the precision being spread across 3 variables and the normalization factor.
+            //Note: the tolerance allowed is not double.Epsilon because the precision is limited by Revit's coordinate system.
+            if (differenceFromOriginal > 0.001 || differenceFromOriginal < -0.001) secondaryDimension = false;
 
             //Retrieves and stores the desired dimension types per element category. This could also be an Dict<BuiltInCategory, DimensionType) + one dimension type for the primary dimension line.
 
