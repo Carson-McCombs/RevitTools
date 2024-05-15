@@ -102,6 +102,7 @@
     <Compile Include="Dimensioning\DimensionSettings\ViewModels\DimensionSettingsWindow.xaml.cs" />
     <Compile Include="Dimensioning\DimensionSettings\ViewModels\DimensionTypeSelectorControl.xaml.cs" />
     <Compile Include="Dimensioning\DimensionSettings\ViewModels\GraphicsStyleListControl.xaml.cs" />
+    <Compile Include="Dimensioning\DimensionSettings\ViewModels\PreviewControlWrapper.xaml.cs" />
     <Compile Include="Dimensioning\DimensionText\ViewModels\DimensionTextWindow.xaml.cs" />
     <Compile Include="Pipeline\Models\DimensionPipeLineCommand.cs" />
     <Compile Include="Pipeline\Models\PipeLine.cs" />
@@ -191,6 +192,10 @@
     <Page Include="Deprecated\SimpleFilter\Views\SimpleFilterDockablePane.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dimensioning\DimensionSettings\Views\PreviewControlWrapper.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dimensioning\DimensionSettings\Views\DimensionSettingsWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

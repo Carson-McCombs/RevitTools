@@ -23,7 +23,7 @@
                     <Setter Property="Margin" Value="4"/>
                 </Style>
                 <Style TargetType="ComboBox">
-                    <Setter Property="Margin" Value="4"/>
+                    <Setter Property="Margin" Value="2"/>
                     <Setter Property="ItemsSource" Value="{Binding DimensionTypes}"/>
                     <Setter Property="DisplayMemberPath" Value="Name"/>
                 </Style>

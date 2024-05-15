@@ -1,20 +1,23 @@
 ﻿<Window x:Class="CarsonsAddins.DimensionSettingsWindow"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:CarsonsAddins"
-             mc:Ignorable="d" 
-             d:Height="auto" d:Width="auto" d:DataContext="{d:DesignInstance Type=local:DimensionSettingsWindow, IsDesignTimeCreatable=False}">
-    <Grid Margin="8">
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:local="clr-namespace:CarsonsAddins"
+        mc:Ignorable="d" 
+        xmlns:revit="clr-namespace:Autodesk.Revit.UI;assembly=RevitAPIUI"
+        Height="786" Width="1024" ResizeMode="NoResize">
+    <Grid x:Name="DimensionGrid" Margin="8">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="512"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <local:DimensionTypeSelectorControl x:Name="DimensionTypeSelector" Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Width="324" Height="256" Margin="16"/>
-        <local:GraphicsStyleListControl x:Name="GraphicsStyleList" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" Width="316" Height="256" Margin="16"/>
+        <local:DimensionTypeSelectorControl x:Name="DimensionTypeSelector" Grid.Row="0" Grid.Column="0" Margin="16"/>
+        <local:GraphicsStyleListControl x:Name="GraphicsStyleList" Grid.Row="1" Grid.Column="0" Margin="16"/>
+        <local:PreviewControlWrapper x:Name="DimensionPreviewControl" Grid.Row="0" Grid.RowSpan="2"  Grid.Column="1" Margin="16"/>
     </Grid>
 </Window>

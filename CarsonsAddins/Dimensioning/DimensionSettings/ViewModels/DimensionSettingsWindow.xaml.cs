@@ -54,6 +54,7 @@ namespace CarsonsAddins
             LoadFromDB();
             DimensionTypeSelector.Init(dimensionTypes, ref DimensionStylesSettings);
             GraphicsStyleList.Init(graphicStyles, ref DimensionStylesSettings.centerlineStyles);
+            DimensionPreviewControl.AddPreviewControl(uidoc.Document, uidoc.Document.ActiveView.Id);
         }
         public PushButtonData RegisterButton(Assembly assembly)
         {
