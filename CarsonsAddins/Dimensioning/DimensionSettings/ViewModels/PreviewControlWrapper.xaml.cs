@@ -7,13 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+
 
 namespace CarsonsAddins
 {
@@ -49,7 +43,24 @@ namespace CarsonsAddins
             transaction.Start("Create Dimension View");
             try
             {
-                //ViewPlan.Create(doc, ViewFamily.FloorPlan, doc.lev)
+                Level level = Level.Create(doc, 0.0);
+                ElementId floorPlanId = doc.GetDefaultElementTypeId(ElementTypeGroup.ViewTypeFloorPlan);
+                if (level == null || floorPlanId == ElementId.InvalidElementId) 
+                {
+                    transaction.RollBack();
+                    return;
+                }
+                ViewPlan viewPlan = ViewPlan.Create(doc, floorPlanId, level.Id);
+
+                previewControl = new PreviewControl(doc, viewPlan.Id)
+                {
+                    IsEnabled = false
+                };
+
+                PreviewControlGrid.Children.Add(previewControl);
+
+
+
                 transaction.Commit();
             } 
             catch(Exception ex)
@@ -63,6 +74,7 @@ namespace CarsonsAddins
             if (doc == null || viewId == ElementId.InvalidElementId) return;
             previewControl = new PreviewControl(doc, viewId);
             PreviewControlGrid.Children.Add(previewControl);
+            previewControl.IsHitTestVisible = false;
 
         }
     }

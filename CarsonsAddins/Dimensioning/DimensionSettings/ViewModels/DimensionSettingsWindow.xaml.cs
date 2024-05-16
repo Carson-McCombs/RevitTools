@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using CarsonsAddins.Properties;
+using CarsonsAddins.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -54,7 +55,7 @@ namespace CarsonsAddins
             LoadFromDB();
             DimensionTypeSelector.Init(dimensionTypes, ref DimensionStylesSettings);
             GraphicsStyleList.Init(graphicStyles, ref DimensionStylesSettings.centerlineStyles);
-            DimensionPreviewControl.AddPreviewControl(uidoc.Document, uidoc.Document.ActiveView.Id);
+            //DimensionPreviewControl.AddPreviewControlWithCustomView(uidoc.Document);
         }
         public PushButtonData RegisterButton(Assembly assembly)
         {
@@ -147,8 +148,8 @@ namespace CarsonsAddins
             switch (builtInCategory)
             {
                 case BuiltInCategory.OST_PipeCurves: return secondaryPipeDimensionType;
-                case BuiltInCategory.OST_PipeAccessory: return secondaryAccessoryDimensionType;
                 case BuiltInCategory.OST_PipeFitting: return secondaryFittingDimensionType;
+                case BuiltInCategory.OST_PipeAccessory: return secondaryAccessoryDimensionType;
                 default: return secondaryOtherDimensionType;
             }
         }
