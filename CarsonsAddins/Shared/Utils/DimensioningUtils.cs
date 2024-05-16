@@ -288,7 +288,7 @@ namespace CarsonsAddins.Utils
         public static Reference GetFlangeEndReference(Plane plane, Element flange, Element connected)
         {
             if (flange == null || connected == null) return null;
-            Connector connector = ConnectionUtils.TryGetConnection(flange, connected);
+            Connector connector = ConnectionUtils.TryGetOneSidedConnection(flange, connected);
             if (connector == null) return null;
             Connector adjacent = ConnectionUtils.GetAdjacentConnector(connector);
             if (adjacent == null) return null;
@@ -423,7 +423,7 @@ namespace CarsonsAddins.Utils
 
         public static Reference GetMechanicalEquipmentEndReference(Plane plane, FamilyInstance mechanicalEquipment, FamilyInstance connected)
         {
-            Connector connector = ConnectionUtils.TryGetConnection(mechanicalEquipment, connected);
+            Connector connector = ConnectionUtils.TryGetOneSidedConnection(mechanicalEquipment, connected);
             if (connector == null) return null;
             return GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, connector);
         }

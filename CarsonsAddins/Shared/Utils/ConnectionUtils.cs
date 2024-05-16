@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography.X509Certificates;
+using System.Xml.Linq;
 
 namespace CarsonsAddins.Utils
 {
@@ -135,46 +136,47 @@ namespace CarsonsAddins.Utils
         /// <param name="elementA">The primary element whose connectors is being checked to see if they connect to elementB.</param>
         /// <param name="elementB">The secondary element which is being connected to.</param>
         /// <returns>Returns the connector from elementA that connects to elementB. Returns null if there is no connection.</returns>
-        public static Connector TryGetConnection(FamilyInstance elementA, FamilyInstance elementB)
+        public static Connector TryGetOneSidedConnection(Element elementA, Element elementB) => TryGetConnection(elementA, elementB).Item1;
+        public static (Connector,Connector) TryGetConnection(Element elementA, Element elementB)
         {
-            Connector[] connectorsA = GetConnectors(elementA.MEPModel.ConnectorManager);
-            Connector[] connectorsB = GetConnectors(elementB.MEPModel.ConnectorManager);
+            Connector[] connectorsA = GetConnectors(elementA);
+            Connector[] connectorsB = GetConnectors(elementB);
             foreach (Connector conA in connectorsA)
             {
                 foreach (Connector conB in connectorsB)
                 {
-                    if (conA.IsConnectedTo(conB)) return conA;
+                    if (conA.IsConnectedTo(conB)) return (conA, conB);
 
                 }
 
             }
-            return null;
+            return (null,null);
 
         }
-
-        public static Connector TryGetConnection(Element elementA, Element elementB)
+        public static bool IsConnectedTo(Element element, Connector other)
         {
-            Connector[] connectorsA = ( elementA is FamilyInstance familyInstanceA) ? GetConnectors(familyInstanceA) : GetConnectors(elementA as Pipe);
-            Connector[] connectorsB = (elementB is FamilyInstance familyInstanceB) ? GetConnectors(familyInstanceB) : GetConnectors(elementB as Pipe);
-            foreach (Connector conA in connectorsA)
-            {
-                foreach (Connector conB in connectorsB)
-                {
-                    if (conA.IsConnectedTo(conB)) return conA;
-
-                }
-            }
-            return null;
+            Connector[] connectors = GetConnectors(element);
+            return connectors.Any(connector => connector.IsConnectedTo(other));
         }
+        public static Connector[] GetOrderedConnectors(Element element, Element previous, Element next)
+        {
+            if (element == null || (previous == null) && (next == null)) return null;
+            Connector[] connectors = GetConnectors(element);
+            if (connectors.Length == 1) return connectors;
+            Connector connectsToPrevious = connectors.Where(connector => IsConnectedTo(previous, connector)).SingleOrDefault();
+            Connector connectsToNext = connectors.Where(connector => IsConnectedTo(next, connector)).SingleOrDefault();
+            return new Connector[2]{ connectsToPrevious, connectsToNext };
+        }
+
         /// <summary>
-        /// Calls the TryGetConnection function to retrieve the connector from elementA that connects to elementB. Then getting the direction from the center of elementA to the connector.
+        /// Calls the TryGetOneSidedConnection function to retrieve the connector from elementA that connects to elementB. Then getting the direction from the center of elementA to the connector.
         /// </summary>
         /// <param name="elementA">The primary element which the direction is centered on.</param>
         /// <param name="elementB">The secondary element which is connected to the first.</param>
         /// <returns>The direction from elementA's center to the connection. Returns null if there is not a connection between the two elements.</returns>
         public static XYZ GetDirectionOfConnection(FamilyInstance elementA, FamilyInstance elementB)
         {
-            Connector connector = TryGetConnection(elementA, elementB);
+            Connector connector = TryGetOneSidedConnection(elementA, elementB);
             if (connector == null) return null;
             XYZ origin = (elementA.Location as LocationPoint).Point;
             return (Line.CreateBound(origin, connector.Origin).Direction);
@@ -305,7 +307,7 @@ namespace CarsonsAddins.Utils
 
         public static XYZ TryGetConnectionPosition(Element element, Element other)
         {
-            Connector connector = TryGetConnection(element, other);
+            Connector connector = TryGetOneSidedConnection(element, other);
             return connector?.Origin;
         }
 

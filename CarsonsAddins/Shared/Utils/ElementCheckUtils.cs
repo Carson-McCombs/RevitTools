@@ -12,6 +12,7 @@ namespace CarsonsAddins.Utils
     /// </summary>
     public static class ElementCheckUtils
     {
+
         /// <summary>
         /// Gets the Part Type of the MEP Fitting
         /// </summary>
@@ -37,7 +38,6 @@ namespace CarsonsAddins.Utils
         {
             if (element == null) return false;
             if (!(element is FamilyInstance)) return false;
-            //if (!BuiltInCategory.OST_PipeFitting.Equals(element.Category.Id)) return false;
             if (!BuiltInCategory.OST_PipeFitting.Equals((BuiltInCategory)(element.Category.Id.IntegerValue))) return false;
             return FlangePartTypes.Contains(GetPartType(element as FamilyInstance));
         }
@@ -54,6 +54,13 @@ namespace CarsonsAddins.Utils
             return JunctionPartTypes.Contains(GetPartType(familyInstance));
         }
 
+        public static bool IsPipeFitting(Element element)
+        {
+            if (element == null) return false;
+            if (element.Category == null) return false;
+            return BuiltInCategory.OST_PipeFitting.Equals((BuiltInCategory)(element.Category.Id.IntegerValue));
+        }
+
         /// <summary>
         /// Checks if the Element provided is a Pipe Accessory with the corresponding Category.
         /// </summary>
@@ -63,8 +70,14 @@ namespace CarsonsAddins.Utils
         {
             if (element == null) return false;
             if (element.Category == null) return false;
-            //return (BuiltInCategory.OST_PipeAccessory.Equals(element.Category.Id));
             return BuiltInCategory.OST_PipeAccessory.Equals((BuiltInCategory)(element.Category.Id.IntegerValue));
+        }
+
+        public static bool IsMechanicalEquipment(Element element)
+        {
+            if (element == null) return false;
+            if (element.Category == null) return false;
+            return BuiltInCategory.OST_MechanicalEquipment.Equals((BuiltInCategory)(element.Category.Id.IntegerValue));
         }
 
         /// <summary>
@@ -77,6 +90,14 @@ namespace CarsonsAddins.Utils
             if (element == null) return false;
             if (element.Category == null) return false;
             return BuiltInCategory.OST_PipeCurves.Equals((BuiltInCategory)(element.Category.Id.IntegerValue));
+        }
+
+        public static bool IsPipeElbow(Element element)
+        {
+            if (element == null) return false;
+            if (!(element is FamilyInstance familyInstance)) return false;
+            if (!BuiltInCategory.OST_PipeFitting.Equals((BuiltInCategory)(element.Category.Id.IntegerValue))) return false;
+            return PartType.Elbow.Equals(GetPartType(familyInstance));
         }
 
         /// <summary>

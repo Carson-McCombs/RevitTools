@@ -59,27 +59,12 @@ namespace CarsonsAddins
                 }
                 PipeLine pipeLine = new PipeLine(doc.ActiveView, pipe);
                 Element[] elements = pipeLine.GetElements();
-                Plane plane = null;
-                if (doc.ActiveView.SketchPlane == null)
-                {
-                    plane = Plane.CreateByNormalAndOrigin(doc.ActiveView.ViewDirection, doc.ActiveView.Origin);
-
-                    SubTransaction sketchplaneTransaction = new SubTransaction(doc);
-                    sketchplaneTransaction.Start();
-                    SketchPlane sketchplane = SketchPlane.Create(doc, plane);
-                    doc.ActiveView.SketchPlane = sketchplane;
-                    doc.ActiveView.HideElements(new List<ElementId>() { sketchplane.Id });
-                    sketchplaneTransaction.Commit();
-                }
-                else
-                {
-                    plane = doc.ActiveView.SketchPlane.GetPlane();
-                }
+                
 
                 ObjectSnapTypes objectSnapTypes = ObjectSnapTypes.Endpoints | ObjectSnapTypes.Nearest | ObjectSnapTypes.Perpendicular | ObjectSnapTypes.Points;
                 XYZ dimensionPoint = uidoc.Selection.PickPoint(objectSnapTypes, "Please select where you would like the dimensions to be placed.");
                 if (dimensionPoint == null) return Result.Cancelled;
-                DimensionPipeline.CreateDimensions(doc, plane, elements, pipe, dimensionPoint, true);
+                DimensionPipeline.CreateDimensions(doc, elements, pipe, dimensionPoint);
                 transaction.Commit();
 
                 return Result.Succeeded;

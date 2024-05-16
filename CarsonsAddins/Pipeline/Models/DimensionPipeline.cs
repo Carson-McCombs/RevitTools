@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using static CarsonsAddins.Utils.DimensioningUtils;
 using Autodesk.Revit.UI;
+using System.Runtime.ExceptionServices;
+using System.Windows.Controls;
 
 namespace CarsonsAddins.Pipeline.Models
 {
@@ -52,8 +54,106 @@ namespace CarsonsAddins.Pipeline.Models
 
             return Line.CreateUnbound(Lerp(result.XYZPoint, projectedElementLine.Origin, percent), primaryDimensionLine.Direction);
         }
+        private static Plane GetPlane(Document doc)
+        {
+            if (doc.ActiveView.SketchPlane == null)
+            {
+                Plane plane = Plane.CreateByNormalAndOrigin(doc.ActiveView.ViewDirection, doc.ActiveView.Origin);
 
-        /// <summary>
+                SubTransaction sketchplaneTransaction = new SubTransaction(doc);
+                sketchplaneTransaction.Start();
+                SketchPlane sketchplane = SketchPlane.Create(doc, plane);
+                doc.ActiveView.SketchPlane = sketchplane;
+                doc.ActiveView.HideElements(new List<ElementId>() { sketchplane.Id });
+                sketchplaneTransaction.Commit();
+                return plane;
+            }
+            return doc.ActiveView.SketchPlane.GetPlane();
+        }
+        public static void CreateDimensions(Document doc, Element[] elements, Element selectedElement, XYZ dimensionPoint) //can only be called after GetPipeLine is called
+        {
+            if (elements == null) return;
+            View activeView = doc.ActiveView;
+            Plane plane = GetPlane(doc);
+
+            DimensionStyles dimensionStyles = DimensionSettingsWindow.DimensionStylesSettings ?? new DimensionStyles();
+            ElementId[] validStyleIds = dimensionStyles.centerlineStyles.Select(style => style.Id).ToArray();
+            ElementId defaultDimensionTypeId = doc.GetDefaultElementTypeId(ElementTypeGroup.LinearDimensionType);
+            DimensionType defaultDimensionType = (defaultDimensionTypeId != ElementId.InvalidElementId) ? doc.GetElement(defaultDimensionTypeId) as DimensionType : default;
+
+            Connector[] connectors = ConnectionUtils.GetConnectors(selectedElement);
+            XYZ pointA = connectors[0].Origin;
+            XYZ pointB = connectors[1].Origin;
+
+
+            Line elementLine = Line.CreateBound(pointA, pointB);
+
+            //Projects the endpoints and the element line onto the plane of the active activeView.
+            XYZ projectedPointA = GeometryUtils.ProjectPointOntoPlane(plane, pointA);
+            XYZ projectedPointB = GeometryUtils.ProjectPointOntoPlane(plane, pointB);
+            Line projectedElementLine = Line.CreateBound(projectedPointA, projectedPointB);
+
+            double differenceFromOriginal = elementLine.Length - projectedElementLine.Length;
+            //if the element line is not parallel with the active activeView, don't create the secondaryDimension.
+            //Originally the comparison was made with the Line.Direction, but there were often inconsistencies due to the precision being spread across 3 variables and the normalization factor.
+            //Note: the tolerance allowed is not double.Epsilon because the precision is limited by Revit's coordinate system.
+            bool secondaryDimension = (differenceFromOriginal < 0.001 && differenceFromOriginal > -0.001);
+
+            //Retrieves and stores the desired dimension types per element category. This could also be an Dict<BuiltInCategory, DimensionType) + one dimension type for the primary dimension line.
+
+            //Calculates the primary dimension line by creating a line that is parallel with the projected element line and intersects the dimension point.
+            Line primaryDimensionLine = CreateDimensionLine(plane, projectedElementLine, dimensionPoint);
+
+            //Calculates the secondary dimension line by creating a line parallel to the primary dimension line but offset a distance based on the dimension type settings
+            //( right now it only checks the pipe dimension type settings, but it should choose the type with the largest text and text offset )
+            Line secondaryDimensionLine = CreateSecondaryDimensionLine(doc.ActiveView, dimensionStyles.secondaryPipeDimensionType ?? defaultDimensionType, projectedElementLine, primaryDimensionLine);
+
+            //Creates a reference array for the primary dimension based on its end point references.
+            ReferenceArray primaryReferenceArray = new ReferenceArray();
+            //ReferenceArray secondaryReferenceArray = new ReferenceArray();
+            PipingElementReferenceOrderedList referenceSets = new PipingElementReferenceOrderedList(validStyleIds, doc.ActiveView, elements);
+            referenceSets.SubtractFlanges();
+            ReferenceArray secondaryReferenceArray = new ReferenceArray();
+            bool matchesPrimary = true;
+            for (int i = 0; i < referenceSets.nodes.Length; i++)
+            {
+                if (referenceSets.nodes[i].isNonConnector) continue;
+                PipingElementReferenceOrderedList.ReferenceNode node = referenceSets.nodes[i];
+                                
+                
+                AddReferences(ref primaryReferenceArray, ref secondaryReferenceArray, node, secondaryDimension);
+                if (node.firstReference != null || node.lastReference != null) matchesPrimary = false;
+                bool splitDimension = (i == referenceSets.nodes.Length - 1) || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Ignore || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Partial && (node.isEdge || node.adjacentNonLinear)));
+                if (splitDimension) 
+                {
+                    BuiltInCategory builtInCategory = (node.referenceCount == secondaryReferenceArray.Size) ? node.builtInCategory : BuiltInCategory.OST_PipeCurves;
+                    if (!matchesPrimary) doc.Create.NewDimension(activeView, secondaryDimensionLine, secondaryReferenceArray, dimensionStyles.GetSecondaryDimensionType(builtInCategory) ?? defaultDimensionType);
+                    secondaryReferenceArray.Clear();
+                    matchesPrimary = true;
+                }
+
+            }
+            doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionStyles.primaryDimensionType ?? defaultDimensionType);
+        }
+        private static void AddReferences(ref ReferenceArray primaryReferenceArray, ref ReferenceArray secondaryReferenceArray, PipingElementReferenceOrderedList.ReferenceNode node, bool secondaryDimension)
+        {
+            if (node.isStart && node.lastReference != null) primaryReferenceArray.Append(node.firstReference);
+            if (node.centerReference != null) primaryReferenceArray.Append(node.centerReference);
+            if (node.isEnd && node.firstReference != null) primaryReferenceArray.Append(node.lastReference);
+
+            if (secondaryDimension)
+            {
+                if (node.firstReference != null) secondaryReferenceArray.Append(node.firstReference);
+                if (node.centerReference != null) secondaryReferenceArray.Append(node.centerReference);
+                if (node.lastReference != null) secondaryReferenceArray.Append(node.lastReference);
+            }
+        }
+    }
+    
+}
+
+/* OLD CODE
+ * /// <summary>
         /// Creates a primary and ( optionally ) a secondary dimension, with the primary dimension ranging from the center points of each of the elements on the end of the Pipeline. And the secondary dimension containing each of the individual dimensions for each element in the Pipeline. Will not allow the secondary dimension to be created if the Pipeline is not parallel with the plane of the active View.
         /// </summary>
         /// <param name="doc">The active Document.</param>
@@ -186,6 +286,7 @@ namespace CarsonsAddins.Pipeline.Models
         }
 
 
+        
 
 
 
@@ -204,7 +305,7 @@ namespace CarsonsAddins.Pipeline.Models
         {
             ReferenceArray referenceArray = new ReferenceArray();
             //Get the element's connector that is still within the Pipeline
-            Connector connector = ConnectionUtils.TryGetConnection(element, connected);
+            Connector connector = ConnectionUtils.TryGetOneSidedConnection(element, connected);
 
             //Retrieve a reference to the connector. As connectors themselves don't have a reference,
             //find either a PlanarFace or a Line that has an endpoint that shares that connector's position,
@@ -235,5 +336,4 @@ namespace CarsonsAddins.Pipeline.Models
             //Assembly the References into a ReferenceArray and then create and return the Dimension based on those references.
             return doc.Create.NewDimension(doc.ActiveView, dimensionLine, referenceArray, dimensionType);
         }
-    }
-}
+ */

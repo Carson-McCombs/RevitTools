@@ -505,6 +505,15 @@ namespace CarsonsAddins.Utils
             Reference refB = line.GetEndPointReference(1);
             return new Reference[2] { refA, refB };
         }
-        
+        public static XYZ GetOrigin(Location location)
+        {
+            if (location == null) return null;
+            if (location is LocationPoint point) return point.Point;
+            if (location is LocationCurve curve)
+            {
+                if (curve.Curve is Line line) return line.Origin;
+            }
+            return null;
+        }
     }
 }
