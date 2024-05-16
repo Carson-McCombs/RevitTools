@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using CarsonsAddins.Pipeline.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
@@ -33,7 +34,7 @@ namespace CarsonsAddins
             };
             return pushButtonData;
         }
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elementSet)
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
@@ -53,11 +54,11 @@ namespace CarsonsAddins
                 {
                     transaction.RollBack();
                     message = "Pipe is null";
-                    elements.Insert(pipeElement);
+                    elementSet.Insert(pipeElement);
                     return Result.Cancelled;
                 }
                 PipeLine pipeLine = new PipeLine(doc.ActiveView, pipe);
-                pipeLine.GetElements();
+                Element[] elements = pipeLine.GetElements();
                 Plane plane = null;
                 if (doc.ActiveView.SketchPlane == null)
                 {
@@ -75,11 +76,10 @@ namespace CarsonsAddins
                     plane = doc.ActiveView.SketchPlane.GetPlane();
                 }
 
-                ObjectSnapTypes objectSnapTypes = ObjectSnapTypes.Endpoints | ObjectSnapTypes.Nearest | ObjectSnapTypes.Intersections | ObjectSnapTypes.Perpendicular | ObjectSnapTypes.Points;
+                ObjectSnapTypes objectSnapTypes = ObjectSnapTypes.Endpoints | ObjectSnapTypes.Nearest | ObjectSnapTypes.Perpendicular | ObjectSnapTypes.Points;
                 XYZ dimensionPoint = uidoc.Selection.PickPoint(objectSnapTypes, "Please select where you would like the dimensions to be placed.");
                 if (dimensionPoint == null) return Result.Cancelled;
-                pipeLine.CreateDimensions(doc, plane, dimensionPoint, true);
-
+                DimensionPipeline.CreateDimensions(doc, plane, elements, pipe, dimensionPoint, true);
                 transaction.Commit();
 
                 return Result.Succeeded;
