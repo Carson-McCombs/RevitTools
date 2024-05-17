@@ -29,6 +29,25 @@ namespace CarsonsAddins.Utils
                 View = activeView
             };
         }
+
+        public static Plane GetOrCreatePlane(Document doc)
+        {
+
+            if (doc.ActiveView.SketchPlane == null)
+            {
+                Plane plane = Plane.CreateByNormalAndOrigin(doc.ActiveView.ViewDirection, doc.ActiveView.Origin);
+
+                SubTransaction sketchplaneTransaction = new SubTransaction(doc);
+                sketchplaneTransaction.Start();
+                SketchPlane sketchplane = SketchPlane.Create(doc, plane);
+                doc.ActiveView.SketchPlane = sketchplane;
+                doc.ActiveView.HideElements(new List<ElementId>() { sketchplane.Id });
+                sketchplaneTransaction.Commit();
+                return plane;
+            }
+            return doc.ActiveView.SketchPlane.GetPlane();
+        }
+
         public static T[] GetGeometryObjectsFromSolid<T>(Solid solid) where T : GeometryObject
         {
             if (solid == null) return new T[0];

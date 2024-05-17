@@ -4,6 +4,7 @@ using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using CarsonsAddins.Pipeline.Models;
+using CarsonsAddins.Utils;
 using System;
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
@@ -60,7 +61,8 @@ namespace CarsonsAddins
                 PipeLine pipeLine = new PipeLine(doc.ActiveView, pipe);
                 Element[] elements = pipeLine.GetElements();
                 
-
+                //Needs a workplane to select a point
+                GeometryUtils.GetOrCreatePlane(doc);
                 ObjectSnapTypes objectSnapTypes = ObjectSnapTypes.Endpoints | ObjectSnapTypes.Nearest | ObjectSnapTypes.Perpendicular | ObjectSnapTypes.Points;
                 XYZ dimensionPoint = uidoc.Selection.PickPoint(objectSnapTypes, "Please select where you would like the dimensions to be placed.");
                 if (dimensionPoint == null) return Result.Cancelled;

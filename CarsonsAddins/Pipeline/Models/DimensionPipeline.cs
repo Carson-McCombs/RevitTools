@@ -54,27 +54,11 @@ namespace CarsonsAddins.Pipeline.Models
 
             return Line.CreateUnbound(Lerp(result.XYZPoint, projectedElementLine.Origin, percent), primaryDimensionLine.Direction);
         }
-        private static Plane GetPlane(Document doc)
-        {
-            if (doc.ActiveView.SketchPlane == null)
-            {
-                Plane plane = Plane.CreateByNormalAndOrigin(doc.ActiveView.ViewDirection, doc.ActiveView.Origin);
-
-                SubTransaction sketchplaneTransaction = new SubTransaction(doc);
-                sketchplaneTransaction.Start();
-                SketchPlane sketchplane = SketchPlane.Create(doc, plane);
-                doc.ActiveView.SketchPlane = sketchplane;
-                doc.ActiveView.HideElements(new List<ElementId>() { sketchplane.Id });
-                sketchplaneTransaction.Commit();
-                return plane;
-            }
-            return doc.ActiveView.SketchPlane.GetPlane();
-        }
         public static void CreateDimensions(Document doc, Element[] elements, Element selectedElement, XYZ dimensionPoint) //can only be called after GetPipeLine is called
         {
             if (elements == null) return;
             View activeView = doc.ActiveView;
-            Plane plane = GetPlane(doc);
+            Plane plane = GeometryUtils.GetOrCreatePlane(doc);
 
             DimensionStyles dimensionStyles = DimensionSettingsWindow.DimensionStylesSettings ?? new DimensionStyles();
             ElementId[] validStyleIds = dimensionStyles.centerlineStyles.Select(style => style.Id).ToArray();
