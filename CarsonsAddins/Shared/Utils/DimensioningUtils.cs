@@ -390,8 +390,8 @@ namespace CarsonsAddins.Utils
                 }
                 if (id != -1) break;
             }
-
-            return symbolLines.Where(line => line.Id.Equals(id)).FirstOrDefault().GetEndPointReference(endIndex);
+            if (id == -1 || endIndex == -1) return null;
+            return symbolLines.Where(line => line.Id.Equals(id)).FirstOrDefault()?.GetEndPointReference(endIndex);
         }
 
 
