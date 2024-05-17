@@ -27,7 +27,6 @@ namespace CarsonsAddins.Pipeline.Models
             Plane plane = activeView.SketchPlane.GetPlane();
             nodes[0] = new ReferenceNode
             {
-                //pipingCategory = ElementCheckUtils.GetPipingCategory(orderedElements[0]),
                 builtInCategory = (BuiltInCategory)orderedElements[0].Category.Id.IntegerValue,
                 mode = GetMode(orderedElements[0]),
                 origin = GeometryUtils.GetOrigin(orderedElements[0].Location),
@@ -40,31 +39,38 @@ namespace CarsonsAddins.Pipeline.Models
             nodes[0].adjacentNonLinear = nodes[0].isLinear;
             for (int i = 1; i < orderedElements.Length; i++)
             {
-                Element element = orderedElements[i];
-
-                (Connector, Connector) connection = ConnectionUtils.TryGetConnection(orderedElements[i-1], element);
-                nodes[i - 1].lastReference = GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, connection.Item1)
-                    ?? GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(activeView), plane, connection.Item1);
-                bool isLinear = ConnectionUtils.IsLinearElement(element);
-                bool isEnd = i == orderedElements.Length - 1;
-                bool isFlange = ElementCheckUtils.IsPipeFlange(element);
-                Reference firstReference =  isFlange ? null : GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, connection.Item2)
-                    ?? GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(activeView), plane, connection.Item2);
-                Reference centerReference = isFlange ? null : (isEnd) ? DimensioningUtils.GetEndReference(activeView, validStyleIds, element) : (!isLinear) ? DimensioningUtils.GetCenterReference(validStyleIds, element) : null;
-                nodes[i] = new ReferenceNode
-                {
-                    //pipingCategory = ElementCheckUtils.GetPipingCategory(orderedElements[i]),
-                    builtInCategory = (BuiltInCategory)element.Category.Id.IntegerValue,
-                    mode = GetMode(element),
-                    origin = GeometryUtils.GetOrigin(element.Location),
-                    isStart = false,
-                    isEnd = isEnd,
-                    isLinear = isLinear,
-                    adjacentNonLinear = false,
-                    centerReference = centerReference,
-                    firstReference = firstReference
-                };
+                CreateReferenceNode(validStyleIds, activeView, plane, i);
             }
+            SetAdjacentNonLinear();
+        }
+        private void CreateReferenceNode(ElementId[] validStyleIds, View activeView, Plane plane, int index)
+        {
+            Element element = orderedElements[index];
+
+            (Connector, Connector) connection = ConnectionUtils.TryGetConnection(orderedElements[index - 1], element);
+            Reference currentFirstReference = GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, connection.Item2)
+                ?? GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(activeView), plane, connection.Item2);
+            
+            nodes[index - 1].lastReference = GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, connection.Item1)
+                ?? GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(activeView), plane, connection.Item1) ?? currentFirstReference;
+            bool isLinear = ConnectionUtils.IsLinearElement(element);
+            bool isEnd = index == orderedElements.Length - 1;
+            bool isFlange = ElementCheckUtils.IsPipeFlange(element);
+            nodes[index] = new ReferenceNode
+            {
+                builtInCategory = (BuiltInCategory)element.Category.Id.IntegerValue,
+                mode = GetMode(element),
+                origin = GeometryUtils.GetOrigin(element.Location),
+                isStart = false,
+                isEnd = isEnd,
+                isLinear = isLinear,
+                adjacentNonLinear = false,
+                centerReference = isFlange ? null : (isEnd) ? DimensioningUtils.GetEndReference(activeView, validStyleIds, element) : (!isLinear) ? DimensioningUtils.GetCenterReference(validStyleIds, element) : null,
+                firstReference = currentFirstReference ?? nodes[index - 1].lastReference,
+        };
+        }
+        private void SetAdjacentNonLinear()
+        {
             for (int i = 0; i < nodes.Length; i++)
             {
                 if (nodes[i].isLinear) continue;
@@ -73,7 +79,8 @@ namespace CarsonsAddins.Pipeline.Models
                 if (i < nodes.Length - 1) nodes[i + 1].adjacentNonLinear = true;
             }
         }
-        
+
+
         public void SubtractFlanges()
         {
             for (int i = 0; i < nodes.Length; i++)
