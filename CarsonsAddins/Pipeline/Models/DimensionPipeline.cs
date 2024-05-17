@@ -108,7 +108,7 @@ namespace CarsonsAddins.Pipeline.Models
                 AddReferences(ref primaryReferenceArray, ref secondaryReferenceArray, node, secondaryDimension);
                 if (node.firstReference != null || node.lastReference != null) matchesPrimary = false;
                 bool splitDimension = (i == referenceSets.nodes.Length - 1) || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Ignore || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Partial && (node.isEdge || node.adjacentNonLinear)));
-                if (splitDimension) 
+                if (splitDimension && secondaryReferenceArray.Size > 1) 
                 {
                     BuiltInCategory builtInCategory = (node.referenceCount == secondaryReferenceArray.Size) ? node.builtInCategory : BuiltInCategory.OST_PipeCurves;
                     if (!matchesPrimary) doc.Create.NewDimension(activeView, secondaryDimensionLine, secondaryReferenceArray, dimensionStyles.GetSecondaryDimensionType(builtInCategory) ?? defaultDimensionType);
@@ -121,9 +121,9 @@ namespace CarsonsAddins.Pipeline.Models
         }
         private static void AddReferences(ref ReferenceArray primaryReferenceArray, ref ReferenceArray secondaryReferenceArray, PipingElementReferenceOrderedList.ReferenceNode node, bool secondaryDimension)
         {
-            if (node.isStart && node.lastReference != null) primaryReferenceArray.Append(node.firstReference);
+            if (node.isStart && node.centerReference == null && node.lastReference != null) primaryReferenceArray.Append(node.lastReference);
             if (node.centerReference != null) primaryReferenceArray.Append(node.centerReference);
-            if (node.isEnd && node.firstReference != null) primaryReferenceArray.Append(node.lastReference);
+            if (node.isEnd && node.centerReference == null && node.firstReference != null) primaryReferenceArray.Append(node.firstReference);
 
             if (secondaryDimension)
             {
@@ -131,6 +131,7 @@ namespace CarsonsAddins.Pipeline.Models
                 if (node.centerReference != null) secondaryReferenceArray.Append(node.centerReference);
                 if (node.lastReference != null) secondaryReferenceArray.Append(node.lastReference);
             }
+
         }
     }
     
