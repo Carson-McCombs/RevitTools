@@ -76,7 +76,7 @@ namespace CarsonsAddins
 
         public string GetAdditionalInformation()
         {
-            return "Triggers an event on element deletion.";
+            return "Tracks when Elements within the Parameter Manager have changed within Revit.";
         }
 
         public ChangePriority GetChangePriority()
@@ -91,7 +91,7 @@ namespace CarsonsAddins
 
         public string GetUpdaterName()
         {
-            return "Stale Element Reference Updater";
+            return "Parameter Manager Updater";
         }
     }
 
