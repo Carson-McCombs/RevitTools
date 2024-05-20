@@ -16,6 +16,7 @@ using System.Drawing;
 using Binding = System.Windows.Data.Binding;
 using CarsonsAddins.Utils;
 using System.Windows.Media;
+using CarsonsAddins.Shared.EventHandlers;
 
 namespace CarsonsAddins.UICommands
 {
@@ -35,12 +36,22 @@ namespace CarsonsAddins.UICommands
         private readonly DataGrid dataGrid;
         private readonly CollectionViewSource collectionViewSource;
         private string currentGroupName = "";
+        private ExternalEvent updateParametersEvent;
         public ParameterTable(DataGrid dataGrid, CollectionViewSource collectionViewSource)
         {
             this.dataGrid = dataGrid;
             this.collectionViewSource = collectionViewSource;
             //dataGrid.ItemsSource = rows;
             collectionViewSource.Source = rows;
+            ParameterCell.UpdateParameterEventHandler = new SingleCallFunctionEventHandler();
+            updateParametersEvent = ExternalEvent.Create(ParameterCell.UpdateParameterEventHandler);
+            dataGrid.CurrentCellChanged += UpdateChangedCells;
+            dataGrid.MouseLeave += UpdateChangedCells;
+        }
+
+        private void UpdateChangedCells(object sender, EventArgs e)
+        {
+            updateParametersEvent.Raise();
         }
 
         /// <summary>
@@ -392,8 +403,8 @@ namespace CarsonsAddins.UICommands
     }
     class ParameterCell : INotifyPropertyChanged
     {
+        public static SingleCallFunctionEventHandler UpdateParameterEventHandler;
         public event PropertyChangedEventHandler PropertyChanged;
-        public static Document doc;
         private bool isSynced = true;
         public bool IsSynced
         {
@@ -482,20 +493,18 @@ namespace CarsonsAddins.UICommands
         }
         //public void PushValueToParameterEvent()
         //{
-        //    UpdateParameterHandler.Instance.handler.FunctionQueue += PushValueToParameter;
+        //    UpdateParameterHandler.Instance.handler.Functions += PushValueToParameter;
         //}
         public void PushValueToParameter()
         {
             if (IsNull) return;
             if (parameter.IsReadOnly) return;
-            
+            if (ParameterValue == GetParameterValue(parameter)) return;
             //Transaction transaction = new Transaction(doc);
             //transaction.Start("Update " + parameter.Definition.Name + " Cell");
             try
             {
-                if (parameter.StorageType != StorageType.String) parameter.SetValueString(ParameterValue);
-                else parameter.Set(ParameterValue);
-                IsSynced = true;
+                UpdateParameterEventHandler.Functions += PushValueFromHandler;
                 //transaction.Commit();
                 //return;
             }
@@ -506,6 +515,23 @@ namespace CarsonsAddins.UICommands
                 //return;
             }
             
+        }
+        public void PushValueFromHandler(Document doc)
+        {
+            Transaction transaction = new Transaction(doc);
+            transaction.Start("Update Parameter");
+            try
+            {
+                if (parameter.StorageType != StorageType.String) parameter.SetValueString(ParameterValue);
+                else parameter.Set(ParameterValue);
+                IsSynced = true;
+                transaction.Commit();
+            }
+            catch (Exception ex)
+            {
+                transaction.RollBack();
+                TaskDialog.Show("Error Updating Element", ex.Message);
+            }
         }
         protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
         {

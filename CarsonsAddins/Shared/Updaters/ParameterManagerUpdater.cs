@@ -18,7 +18,6 @@ namespace CarsonsAddins
     {
         private readonly UpdaterId updaterId;
         private List<ElementId> elementIds;
-        private List<ElementId> parameterIds;
         private ParameterManagerDockablePane parameterManager = null;
         public ParameterManagerUpdater(AddInId addinId, ref List<ElementId> elementIds)
         {

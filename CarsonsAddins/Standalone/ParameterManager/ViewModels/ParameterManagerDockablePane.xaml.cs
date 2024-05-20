@@ -34,6 +34,7 @@ namespace CarsonsAddins
             CollectionViewSource collectionViewSource = FindResource("ElementRowCollectionViewSource") as CollectionViewSource;
             table = new ParameterTable(SelectionDataGrid, collectionViewSource);
             
+            
         }
 
         public void Init(UIDocument uidoc)
@@ -41,6 +42,8 @@ namespace CarsonsAddins
             table.Clear();
             this.uidoc = uidoc;
         }
+
+
         public PushButtonData RegisterButton(Assembly assembly)
         {
             PushButtonData pushButtonData = new PushButtonData("Parameter Manager", "Parameter Manager", assembly.Location, typeof(GenericCommands.ShowDockablePane<ParameterManagerDockablePane>).FullName)

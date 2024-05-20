@@ -27,7 +27,7 @@ namespace CarsonsAddins
         public const string FolderName = "Automation";
         public const bool IsWIP = false;
         public event PropertyChangedEventHandler PropertyChanged;
-        private readonly GenericFunctionEventHandler handler = new GenericFunctionEventHandler();
+        private readonly RepeatedFunctionCallEventHandler handler = new RepeatedFunctionCallEventHandler();
         private IntPtr windowHandle;
         private readonly ExternalEvent updateSelectionEvent;
         private PipeEndPrepBCUpdater updater;
@@ -105,7 +105,7 @@ namespace CarsonsAddins
         {
             InitializeComponent();
             updateSelectionEvent = ExternalEvent.Create(handler);
-            handler.FunctionQueue += UpdateSelection;
+            handler.Functions += UpdateSelection;
         }
 
         public PushButtonData RegisterButton(Assembly assembly)
@@ -168,10 +168,8 @@ namespace CarsonsAddins
             MediaUtils.SetForegroundWindow(uidoc.Application.MainWindowHandle);
         }
 
-        private void UpdateSelection()
+        private void UpdateSelection(Document doc)
         {
-            
-            Document doc = uidoc.Document;
             Transaction transaction = new Transaction(doc);
             transaction.Start("Update PEP");
             List<Reference> references = uidoc.Selection.PickObjects(Autodesk.Revit.UI.Selection.ObjectType.Element, new SelectionFilters.SelectionFilter_Pipe()).ToList();
