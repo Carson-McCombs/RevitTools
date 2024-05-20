@@ -27,7 +27,7 @@ namespace CarsonsAddins
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private DimensionStyles dimensionStyles;
+        private DimensionStyles dimensionStyles = new DimensionStyles();
 
         public DimensionType PrimaryDimensionType
         {
