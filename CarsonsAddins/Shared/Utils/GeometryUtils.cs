@@ -3,8 +3,7 @@ using Autodesk.Revit.DB.Plumbing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using static CarsonsAddins.Utils.GeometryUtils;
 
 namespace CarsonsAddins.Utils
 {
@@ -129,20 +128,82 @@ namespace CarsonsAddins.Utils
             }
             return (null, null);
         }
-
-        public static Reference GetPseudoReferenceOfConnector(Options geometryOptions, Plane plane, Connector connector)
+        public static Reference GetPseudoReferenceOfConnector(ElementId[] validElementIds, Options geometryOptions, Plane plane, Connector connector)
+        {
+            return GetExposedPseudoReferenceOfConnectorByFaces(geometryOptions, plane, connector) ??
+                GetExposedPseudoReferenceOfConnectorByLines(validElementIds, geometryOptions, plane, connector) ??
+                GetPseudoReferenceOfConnectorByFace(geometryOptions, plane, connector) ?? 
+                GetPseudoReferenceOfConnector(validElementIds, geometryOptions, plane, connector);
+        }
+        public static Reference GetPseudoReferenceOfConnectorByFace(Options geometryOptions, Plane plane, Connector connector)
         {
             if (connector == null) return null;
             XYZ projectedOrigin = ProjectPointOntoPlane(plane, connector.Origin);
             if (projectedOrigin == null) return null;
             PlanarFace[] instancePlanarFaces = GetGeometryObjectFromInstanceGeometry<PlanarFace>(geometryOptions, connector.Owner);
             Lookup<int, PlanarFace> symbolPlanarFacesLookup = GetGeometryObjectFromSymbolGeometry<PlanarFace>(geometryOptions, connector.Owner).ToLookup(planarFace => planarFace.Id) as Lookup<int, PlanarFace>;
-            PlanarFace instanceConnectorFace = instancePlanarFaces.Where(planarFace => ProjectPointOntoPlane(plane, planarFace.Origin).IsAlmostEqualTo(projectedOrigin, 0.000001)).FirstOrDefault();
+            PlanarFace instanceConnectorFace = instancePlanarFaces.Where(planarFace => projectedOrigin.IsAlmostEqualTo(ProjectPointOntoPlane(plane, planarFace.Origin), 0.000001)).FirstOrDefault();
             if (instanceConnectorFace == default(PlanarFace)) return null;
             PlanarFace symbolFace = symbolPlanarFacesLookup[instanceConnectorFace.Id].FirstOrDefault();
             Reference referenceConnectorFace = symbolFace.Reference;
             return referenceConnectorFace;
         }
+        public static Reference GetPseudoReferenceOfConnectorByLines(ElementId[] validElementIds, Options geometryOptions, Plane plane, Connector connector)
+        {
+            if (connector == null || validElementIds == null || validElementIds.Length == 0) return null;
+            XYZ projectedOrigin = ProjectPointOntoPlane(plane, connector.Origin);
+            if (projectedOrigin == null) return null;
+            Line[] instanceLines = GetGeometryObjectFromInstanceGeometry<Line>(geometryOptions, connector.Owner).Where(line => validElementIds.Contains(line.GraphicsStyleId)).ToArray();
+            Lookup<int, Reference[]> referenceLookup = GetGeometryObjectFromSymbolGeometry<Line>(geometryOptions, connector.Owner).ToLookup(line => line.Id, line => GetEndPointReferences(line)) as Lookup<int, Reference[]>;
+            foreach (Line line in instanceLines)
+            {
+                for (int i = 0 ; i < 2; i++)
+                {
+                    XYZ endPoint = line.GetEndPoint(i);
+                    XYZ projectedEndPoint = ProjectPointOntoPlane(plane, endPoint);
+                    if (projectedOrigin.IsAlmostEqualTo(projectedEndPoint) && referenceLookup.Contains(line.Id)) return referenceLookup[line.Id].FirstOrDefault()?[i];
+                }
+                
+            }
+            return null;
+        }
+
+        public static Reference GetExposedPseudoReferenceOfConnectorByFaces(Options geometryOptions, Plane plane, Connector connector)
+        {
+            if (connector == null) return null;
+            XYZ projectedOrigin = ProjectPointOntoPlane(plane, connector.Origin);
+            if (projectedOrigin == null) return null;
+            PlanarFace[] faces = GetExposedGeometryObjects<PlanarFace>(geometryOptions, connector.Owner);
+            foreach (PlanarFace face in faces)
+            {
+                XYZ projectedFaceOrigin = ProjectPointOntoPlane(plane, face.Origin);
+                if (projectedOrigin.IsAlmostEqualTo(projectedFaceOrigin)) return face.Reference;
+
+            }
+            return null;
+        }
+
+        public static Reference GetExposedPseudoReferenceOfConnectorByLines(ElementId[] validElementIds, Options geometryOptions, Plane plane, Connector connector)
+        {
+            if (connector == null || validElementIds == null || validElementIds.Length == 0) return null;
+            XYZ projectedOrigin = ProjectPointOntoPlane(plane, connector.Origin);
+            if (projectedOrigin == null) return null;
+            Line[] lines = GetExposedGeometryObjects<Line>(geometryOptions, connector.Owner).Where(line => validElementIds.Contains(line.GraphicsStyleId)).ToArray();
+            foreach (Line line in lines)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    XYZ endPoint = line.GetEndPoint(i);
+                    XYZ projectedEndPoint = ProjectPointOntoPlane(plane, endPoint);
+                    if (projectedOrigin.IsAlmostEqualTo(projectedEndPoint)) return line.GetEndPointReference(i);
+                }
+
+            }
+            return null;
+        }
+
+
+
         public static GeometryObject[] GetGeometryLinesOfBend(View activeView, Element element, ElementId validStyleId)
         {
             if (element == null) return null;
@@ -288,37 +349,33 @@ namespace CarsonsAddins.Utils
             }
             return geometryObjects.ToArray();
         }
-        public static XYZWithReference[] StripGeometryObjectsWithReferences(Element element)
+        public static GeometryObject[] BreakdownGeometryElementIntoDimensionableGeometryObjects(ElementId[] validStyleIds, GeometryElement geometryInstance)
         {
-            GeometryElement geometryElement = element.get_Geometry(GetGeometryOptions());
-            if (geometryElement == null) return new XYZWithReference[0];
-            GeometryInstance geometryInstance = geometryElement.OfType<GeometryInstance>().FirstOrDefault();
-            if (geometryInstance == null) return new XYZWithReference[0];
-            List<XYZWithReference> geometryObjectWithReferences = new List<XYZWithReference>();
-            IdWithXYZ[] idsWithXYZs = IdWithXYZ.BreakdownGeometryObjects(BreakdownSolidsIntoDimensionableGeometryObjects(geometryInstance.GetInstanceGeometry()));
-            Lookup<int, IdWithReference> idsWithReferences = IdWithReference.BreakdownGeometryObjects(BreakdownSolidsIntoDimensionableGeometryObjects(geometryInstance.GetSymbolGeometry()))
-                .ToLookup(idWithReference => idWithReference.id) as Lookup<int, IdWithReference>;
+            if (geometryInstance == null) return new GeometryObject[0];
+            List<GeometryObject> geometryObjects = new List<GeometryObject>();
+            foreach (GeometryObject geometryObject in geometryInstance)
+            {
+                if (geometryObject == null) continue;
+                else if (geometryObject is Solid solid) geometryObjects.AddRange(solid.Faces.OfType<PlanarFace>().ToArray());
+                else if (geometryObject is Point) geometryObjects.Add(geometryObject);
+                else if (geometryObject is Curve && (validStyleIds.Contains(geometryObject.GraphicsStyleId) || validStyleIds == null)) geometryObjects.Add(geometryObject);
 
-            XYZWithReference[] xyzsWithReferences = idsWithXYZs.Select(xyzWithRef => new XYZWithReference(xyzWithRef.xyz, idsWithReferences[xyzWithRef.id]
-                .Where(idWithRef => xyzWithRef.secondaryId == idWithRef.secondaryId).FirstOrDefault().reference)).ToArray();
-            return xyzsWithReferences;
+            }
+            return geometryObjects.ToArray();
         }
-
-        public static GeometryObject[] BreakdownSolidsIntoDimensionableGeometryObjects(GeometryElement geometryElement)
+        public static GeometryObject[] StripExposedGeometryObjects(ElementId[] validStyleIds, GeometryElement geometryElement)
         {
             if (geometryElement == null) return new GeometryObject[0];
             List<GeometryObject> geometryObjects = new List<GeometryObject>();
             foreach (GeometryObject geometryObject in geometryElement)
             {
-                if (geometryObject == null) continue;
+                if (geometryObject == null || !geometryObject.IsElementGeometry || geometryObject is GeometryInstance) continue;
                 else if (geometryObject is Solid solid) geometryObjects.AddRange(solid.Faces.OfType<PlanarFace>().ToArray());
-                else if (geometryObject is Point) geometryObjects.Add(geometryObject);
-                else if (geometryObject is Line) geometryObjects.Add(geometryObject);
-
+                else if (geometryObject is Point point && point.Reference != null) geometryObjects.Add(geometryObject);
+                else if (geometryObject is Line && (validStyleIds.Contains(geometryObject.GraphicsStyleId) || validStyleIds == null)) geometryObjects.Add(geometryObject);
             }
             return geometryObjects.ToArray();
         }
-
         public struct XYZWithReference
         {
             public XYZ xyz;
@@ -328,12 +385,64 @@ namespace CarsonsAddins.Utils
                 this.xyz = xyz;
                 this.reference = reference;
             }
+            public override string ToString()
+            {
+                return xyz.ToString() + " -> " + reference.ToString();
+            }
+            public static XYZWithReference[] StripGeometryObjectsWithReferences(ElementId[] validStyleIds, Options geometryOptions, Element element)
+            {
 
+                GeometryElement geometryElement = element.get_Geometry(geometryOptions);
+                if (geometryElement == null) return new XYZWithReference[0];
+                List<XYZWithReference> geometryObjectWithReferences = new List<XYZWithReference>();
+                geometryObjectWithReferences.AddRange(StripExposedGeometryObjectsWithReferences(validStyleIds, geometryOptions, element));
+                GeometryInstance geometryInstance = geometryElement.OfType<GeometryInstance>().FirstOrDefault();
+                if (geometryInstance == null) return geometryObjectWithReferences.ToArray();
+
+                IdWithXYZ[] idsWithXYZs = IdWithXYZ.BreakdownGeometryObjects(BreakdownGeometryElementIntoDimensionableGeometryObjects(validStyleIds, geometryInstance.GetInstanceGeometry()));
+                Lookup<(int, int), IdWithReference> idsWithReferences = IdWithReference.BreakdownGeometryObjects(BreakdownGeometryElementIntoDimensionableGeometryObjects(validStyleIds, geometryInstance.GetSymbolGeometry()))
+                    .ToLookup(idWithReference => (idWithReference.id, idWithReference.secondaryId)) as Lookup<(int, int), IdWithReference>;
+
+                XYZWithReference[] xyzsWithReferences = idsWithXYZs.Select(xyzWithRef => new XYZWithReference(xyzWithRef.xyz, idsWithReferences[(xyzWithRef.id, xyzWithRef.secondaryId)]
+                    .Where(idWithRef => xyzWithRef.secondaryId == idWithRef.secondaryId).FirstOrDefault().reference)).ToArray();
+                return xyzsWithReferences;
+            }
+            
+            public static XYZWithReference[] StripExposedGeometryObjectsWithReferences(ElementId[] validStyleIds, Options geometryOptions, Element element)
+            {
+                if (element == null) return default;
+                GeometryObject[] geometryObjects = StripExposedGeometryObjects(validStyleIds, element.get_Geometry(geometryOptions));
+                List<XYZWithReference> xyzWithReferences = new List<XYZWithReference>();
+                foreach (GeometryObject geometryObject in geometryObjects)
+                {
+                    if (geometryObject == null) continue;
+                    else if (geometryObject is Solid solid) xyzWithReferences.AddRange(solid.Faces.OfType<PlanarFace>().SelectMany(face => StripExposedFacesWithReferences(face)).ToArray());
+                    else if (geometryObject is Point point) xyzWithReferences.Add(new XYZWithReference(point.Coord, point.Reference));
+                    else if (geometryObject is Curve curve && (validStyleIds.Contains(geometryObject.GraphicsStyleId) || validStyleIds == null))
+                    {
+                        xyzWithReferences.Add(new XYZWithReference(curve.GetEndPoint(0), curve.GetEndPointReference(0)));
+                        xyzWithReferences.Add(new XYZWithReference(curve.GetEndPoint(1), curve.GetEndPointReference(1)));
+                    }
+                }
+                return xyzWithReferences.ToArray();
+            }
+            
+            public static XYZWithReference[] StripExposedFacesWithReferences(PlanarFace face)
+            {
+                Edge[] edges = face.EdgeLoops.OfType<Edge>().ToArray();
+                List<XYZWithReference> xyzWithReferences = new List<XYZWithReference>();
+                foreach (Edge edge in edges)
+                {
+                    if (edge == null) continue;
+                    xyzWithReferences.AddRange(edge.Tessellate().Select(xyz => new XYZWithReference(xyz, face.Reference)));
+                }
+                return xyzWithReferences.ToArray();
+            }
         }
         public struct IdWithXYZ
         {
             public int id;
-            public int secondaryId; //only used for line endpoint indices
+            public int secondaryId; //only used for line endPoint indices
             public XYZ xyz;
             public IdWithXYZ(int id, int secondaryId, XYZ xyz)
             {
@@ -350,11 +459,10 @@ namespace CarsonsAddins.Utils
             public static IdWithXYZ[] BreakdownGeometryObject(GeometryObject geometryObject)
             {
                 if (geometryObject == null) return new IdWithXYZ[0];
-                if (!geometryObject.IsElementGeometry) return new IdWithXYZ[0];
                 if (geometryObject is Point point) return new IdWithXYZ[1] { new IdWithXYZ(point.Id, point.Coord) };
-                if (geometryObject is Line line) return new IdWithXYZ[2] {
-                    new IdWithXYZ(line.Id, 0, line.GetEndPoint(0)),
-                    new IdWithXYZ(line.Id, 1, line.GetEndPoint(1))
+                if (geometryObject is Curve curve) return new IdWithXYZ[2] {
+                    new IdWithXYZ(curve.Id, 0, curve.GetEndPoint(0)),
+                    new IdWithXYZ(curve.Id, 1, curve.GetEndPoint(1))
                 };
                 if (geometryObject is PlanarFace planarFace) return new IdWithXYZ[1] { new IdWithXYZ(planarFace.Id, planarFace.Origin) };
                 return new IdWithXYZ[0];
@@ -368,12 +476,17 @@ namespace CarsonsAddins.Utils
                 }
                 return idsWithXYZs.ToArray();
             }
+            public override string ToString()
+            {
+                if (secondaryId >= 0) return "( " + id + ", " + secondaryId + " ): " + xyz.ToString();
+                return "( " + id + " ): " + xyz.ToString();
+            }
         }
 
         public struct IdWithReference
         {
             public int id;
-            public int secondaryId; //only used for line endpoint indices
+            public int secondaryId; //only used for line endPoint indices
             public Reference reference;
             public IdWithReference(int id, int secondaryId, Reference reference)
             {
@@ -392,9 +505,9 @@ namespace CarsonsAddins.Utils
                 if (geometryObject == null) return new IdWithReference[0];
                 if (!geometryObject.IsElementGeometry) return new IdWithReference[0];
                 if (geometryObject is Point point) return new IdWithReference[1] { new IdWithReference(point.Id, point.Reference) };
-                if (geometryObject is Line line) return new IdWithReference[2] {
-                    new IdWithReference(line.Id, 0, line.GetEndPointReference(0)),
-                    new IdWithReference(line.Id, 1, line.GetEndPointReference(1))
+                if (geometryObject is Curve curve) return new IdWithReference[2] {
+                    new IdWithReference(curve.Id, 0, curve.GetEndPointReference(0)),
+                    new IdWithReference(curve.Id, 1, curve.GetEndPointReference(1))
                 };
                 if (geometryObject is PlanarFace planarFace) return new IdWithReference[1] { new IdWithReference(planarFace.Id, planarFace.Reference) };
                 return new IdWithReference[0];
@@ -409,6 +522,11 @@ namespace CarsonsAddins.Utils
                     IdsWithReferences.AddRange(BreakdownGeometryObject(geometryObject));
                 }
                 return IdsWithReferences.ToArray();
+            }
+            public override string ToString()
+            {
+                if (secondaryId >= 0) return "( " + id + ", " + secondaryId + " ): " + reference.ToString();
+                return "( " + id + " ): " + reference.ToString();
             }
         }
 

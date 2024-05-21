@@ -108,10 +108,10 @@ namespace CarsonsAddins.Pipeline.Models
                 AddReferences(ref primaryReferenceArray, ref secondaryReferenceArray, node, secondaryDimension);
                 if (node.firstReference != null || node.lastReference != null) matchesPrimary = false;
                 bool splitDimension = (i == referenceSets.nodes.Length - 1) || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Ignore || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Partial && (node.isEdge || node.adjacentNonLinear)));
-                if (splitDimension && secondaryReferenceArray.Size > 1) 
+                if (splitDimension) 
                 {
                     BuiltInCategory builtInCategory = (node.referenceCount == secondaryReferenceArray.Size) ? node.builtInCategory : BuiltInCategory.OST_PipeCurves;
-                    if (!matchesPrimary) doc.Create.NewDimension(activeView, secondaryDimensionLine, secondaryReferenceArray, dimensionStyles.GetSecondaryDimensionType(builtInCategory) ?? defaultDimensionType);
+                    if (!matchesPrimary && secondaryReferenceArray.Size > 1) doc.Create.NewDimension(activeView, secondaryDimensionLine, secondaryReferenceArray, dimensionStyles.GetSecondaryDimensionType(builtInCategory) ?? defaultDimensionType);
                     secondaryReferenceArray.Clear();
                     matchesPrimary = true;
                 }
@@ -120,18 +120,35 @@ namespace CarsonsAddins.Pipeline.Models
             doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionStyles.primaryDimensionType ?? defaultDimensionType);
         }
         private static void AddReferences(ref ReferenceArray primaryReferenceArray, ref ReferenceArray secondaryReferenceArray, PipingElementReferenceOrderedList.ReferenceNode node, bool secondaryDimension)
-        {
-            if (node.isStart && node.centerReference == null && node.lastReference != null) primaryReferenceArray.Append(node.lastReference);
-            if (node.centerReference != null) primaryReferenceArray.Append(node.centerReference);
-            if (node.isEnd && node.centerReference == null && node.firstReference != null) primaryReferenceArray.Append(node.firstReference);
+        { 
+            if (node.isEdge)
+            {
+                if (node.isLinear)
+                {
+                    if (node.isEnd) AddReferenceIfNotNull(ref primaryReferenceArray, node.lastReference);
+                    else if (node.isStart) AddReferenceIfNotNull(ref primaryReferenceArray, node.firstReference);
+                }
+                else if (node.centerReference == null)
+                {
+                    if (node.isStart) AddReferenceIfNotNull(ref primaryReferenceArray, node.lastReference);
+                    else if (node.isEnd) AddReferenceIfNotNull(ref primaryReferenceArray, node.firstReference);
+                }
+            }
+            AddReferenceIfNotNull(ref primaryReferenceArray, node.centerReference);
+
 
             if (secondaryDimension)
             {
-                if (node.firstReference != null) secondaryReferenceArray.Append(node.firstReference);
-                if (node.centerReference != null) secondaryReferenceArray.Append(node.centerReference);
-                if (node.lastReference != null) secondaryReferenceArray.Append(node.lastReference);
+                AddReferenceIfNotNull(ref secondaryReferenceArray, node.firstReference);
+                AddReferenceIfNotNull(ref secondaryReferenceArray, node.centerReference);
+                AddReferenceIfNotNull(ref secondaryReferenceArray, node.lastReference);
             }
 
+        }
+        private static void AddReferenceIfNotNull(ref ReferenceArray referenceArray, Reference reference)
+        {
+            if (referenceArray == null || reference == null) return;
+            referenceArray.Append(reference);
         }
     }
     

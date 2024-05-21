@@ -141,6 +141,7 @@
     <Compile Include="Setup\ComponentState.cs" />
     <Compile Include="Setup\GenericComponentCommands.cs" />
     <Compile Include="Setup\SelectDimensionsIndividuallyCommand.cs" />
+    <Compile Include="Shared\EventHandlers\SingleFunctionCallEventHandler.cs" />
     <Compile Include="Shared\SelectionFilters\SelectionFilter_LinearDimension.cs" />
     <Compile Include="Shared\SelectionFilters\SelectionFilter_Pipe.cs" />
     <Compile Include="Shared\SelectionFilters\SelectionFilter_PipeFittingPartType.cs" />
@@ -156,10 +157,11 @@
     <Compile Include="Shared\Utils\DatabaseUtils.cs" />
     <Compile Include="Shared\Utils\DimensioningUtils.cs" />
     <Compile Include="Shared\Utils\ElementCheckUtils.cs" />
-    <Compile Include="Shared\Utils\GenericFunctionEventHandler.cs" />
+    <Compile Include="Shared\EventHandlers\RepeatedFunctionCallEventHandler.cs" />
     <Compile Include="Shared\Utils\GeometryUtils.cs" />
     <Compile Include="Shared\Utils\MediaUtils.cs" />
     <Compile Include="Shared\Utils\UnitUtils.cs" />
+    <Compile Include="Standalone\DebugGeometryCommand.cs" />
     <Compile Include="Standalone\FilterPipingElementsCommand.cs" />
     <Compile Include="Standalone\GetTotalPipeLengthCommand.cs" />
     <Compile Include="Standalone\ParameterManager\Models\ParameterManagerTable.cs" />

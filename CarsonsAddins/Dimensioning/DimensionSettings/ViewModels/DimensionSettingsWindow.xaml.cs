@@ -49,7 +49,7 @@ namespace CarsonsAddins
         public void Init(UIDocument uidoc)
         {
             DimensionStylesSettings = new DimensionStyles();
-            BuiltInCategory[] pipingCategories = new BuiltInCategory[] {BuiltInCategory.OST_PipeCurves, BuiltInCategory.OST_PipeFitting, BuiltInCategory.OST_PipeAccessory, BuiltInCategory.OST_MechanicalEquipment, BuiltInCategory.OST_PipeCurvesCenterLine, BuiltInCategory.OST_PipeFittingCenterLine, BuiltInCategory.OST_CenterLines};
+            BuiltInCategory[] pipingCategories = new BuiltInCategory[] {BuiltInCategory.OST_PipeCurves, BuiltInCategory.OST_PipeFitting, BuiltInCategory.OST_PipeAccessory, BuiltInCategory.OST_MechanicalEquipment, BuiltInCategory.OST_PipeCurvesCenterLine, BuiltInCategory.OST_PipeFittingCenterLine, BuiltInCategory.OST_CenterLines, BuiltInCategory.OST_ReferenceLines};
             dimensionTypes = new FilteredElementCollector(uidoc.Document).WhereElementIsElementType().OfClass(typeof(DimensionType)).ToElements().Cast<DimensionType>().Where(dt => DimensionStyleType.Linear.Equals(dt.StyleType)).ToArray();
             graphicStyles = new FilteredElementCollector(uidoc.Document).OfClass(typeof(GraphicsStyle)).Cast<GraphicsStyle>().Where(gs => pipingCategories.Contains((BuiltInCategory)gs.GraphicsStyleCategory.Id.IntegerValue) || ((gs.GraphicsStyleCategory.Parent != null) && pipingCategories.Contains((BuiltInCategory)gs.GraphicsStyleCategory.Parent.Id.IntegerValue))).ToArray();
             LoadFromDB();
@@ -57,6 +57,7 @@ namespace CarsonsAddins
             GraphicsStyleList.Init(graphicStyles, ref DimensionStylesSettings.centerlineStyles);
             //DimensionPreviewControl.AddPreviewControlWithCustomView(uidoc.Document);
         }
+        
         public PushButtonData RegisterButton(Assembly assembly)
         {
             return new PushButtonData("Dimension Pipeline Settings", "Dimension Pipeline Settings", assembly.Location, typeof(GenericCommands.ShowWindow<DimensionSettingsWindow>).FullName)

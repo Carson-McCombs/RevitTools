@@ -59,8 +59,11 @@ namespace CarsonsAddins
         public void Execute(UpdaterData data)
         {
             if (parameterManager == null) return;
-            RemoveStaleReferences(data.GetDeletedElementIds().ToArray());
-            RefreshParameters(data.GetModifiedElementIds().ToArray());
+            ElementId[] deletedElementIds = data.GetModifiedElementIds().Where(elementId => elementIds.Contains(elementId)).ToArray();
+            ElementId[] modifiedElementIds = data.GetModifiedElementIds().Where(elementId => elementIds.Contains(elementId)).ToArray();
+
+            RemoveStaleReferences(deletedElementIds);
+            RefreshParameters(modifiedElementIds);
         }
 
         private void RemoveStaleReferences(ElementId[] deletedElementIds)

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
 namespace CarsonsAddins.Pipeline.Models
 {
     class PipingElementReferenceOrderedList
@@ -25,49 +24,121 @@ namespace CarsonsAddins.Pipeline.Models
         private void PopulateNodes(ElementId[] validStyleIds, View activeView)
         {
             Plane plane = activeView.SketchPlane.GetPlane();
-            nodes[0] = new ReferenceNode
+            for (int i = 0; i < orderedElements.Length; i++)
             {
-                builtInCategory = (BuiltInCategory)orderedElements[0].Category.Id.IntegerValue,
-                mode = GetMode(orderedElements[0]),
-                origin = GeometryUtils.GetOrigin(orderedElements[0].Location),
-                isStart = true, 
-                isEnd = false,
-                adjacentNonLinear = false,
-                isLinear = ConnectionUtils.IsLinearElement(orderedElements[0]),
-                centerReference = (!ElementCheckUtils.IsPipeFlange(orderedElements[0])) ? DimensioningUtils.GetEndReference(activeView, validStyleIds, orderedElements[0]) : null
-            };
-            nodes[0].adjacentNonLinear = nodes[0].isLinear;
-            for (int i = 1; i < orderedElements.Length; i++)
-            {
-                CreateReferenceNode(validStyleIds, activeView, plane, i);
+                CreateReferenceNode(i);
             }
+            if (nodes.Length > 1)
+            {
+                if (nodes[0].isLinear )
+                {
+                    Connector connector = ConnectionUtils.GetParallelConnector(ConnectionUtils.GetConnectors(orderedElements[0]).Where(con => ConnectionUtils.IsConnectedTo(orderedElements[1], con)).FirstOrDefault());
+                    //nodes[0].firstReference = GetPseudoConnectorReference(validStyleIds, activeView, plane, connector);
+                    nodes[0].firstConnector = connector;
+                }
+                if (nodes[nodes.Length - 1].isLinear)
+                {
+                    Connector connector = ConnectionUtils.GetParallelConnector(ConnectionUtils.GetConnectors(orderedElements[nodes.Length - 1]).Where(con => ConnectionUtils.IsConnectedTo(orderedElements[nodes.Length - 2], con)).FirstOrDefault());
+                    //nodes[nodes.Length - 1].lastReference = GetPseudoConnectorReference(validStyleIds, activeView, plane, connector);
+                    nodes[0].lastConnector = connector;
+
+                }
+            }
+            else if (nodes[0].isLinear)
+            {
+                Connector[] connectors = ConnectionUtils.GetConnectors(orderedElements[0]);
+                nodes[0].firstConnector = connectors[0];
+                nodes[0].lastConnector = connectors[1];
+            }
+            PopulateNodeReferences(validStyleIds, activeView);
+            FillAdjacentNodeReferences();
             SetAdjacentNonLinear();
         }
-        private void CreateReferenceNode(ElementId[] validStyleIds, View activeView, Plane plane, int index)
+        private void CreateReferenceNode(int index)
         {
             Element element = orderedElements[index];
+            //Reference currentFirstReference = null;
+            Connector firstConnector = null;
+            if (index > 0)
+            {
+                (Connector, Connector) connection = ConnectionUtils.TryGetConnection(orderedElements[index - 1], element);
+                firstConnector = connection.Item2;
+                nodes[index - 1].lastConnector = connection.Item1;
+                //currentFirstReference = GetPseudoConnectorReference(validStyleIds, activeView, plane, connection.Item2);
 
-            (Connector, Connector) connection = ConnectionUtils.TryGetConnection(orderedElements[index - 1], element);
-            Reference currentFirstReference = GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, connection.Item2)
-                ?? GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(activeView), plane, connection.Item2);
-            
-            nodes[index - 1].lastReference = GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, connection.Item1)
-                ?? GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(activeView), plane, connection.Item1) ?? currentFirstReference;
+                //nodes[index - 1].lastReference = GetPseudoConnectorReference(validStyleIds, activeView, plane, connection.Item1) ?? currentFirstReference;
+                //currentFirstReference = currentFirstReference ?? nodes[index - 1].lastReference;
+            }
             bool isLinear = ConnectionUtils.IsLinearElement(element);
+            bool isStart = index == 0;
             bool isEnd = index == orderedElements.Length - 1;
-            bool isFlange = ElementCheckUtils.IsPipeFlange(element);
+            //bool isFlange = ElementCheckUtils.IsPipeFlange(element);
             nodes[index] = new ReferenceNode
             {
                 builtInCategory = (BuiltInCategory)element.Category.Id.IntegerValue,
                 mode = GetMode(element),
                 origin = GeometryUtils.GetOrigin(element.Location),
-                isStart = false,
+                isStart = isStart,
                 isEnd = isEnd,
                 isLinear = isLinear,
                 adjacentNonLinear = false,
-                centerReference = isFlange ? null : (isEnd) ? DimensioningUtils.GetEndReference(activeView, validStyleIds, element) : (!isLinear) ? DimensioningUtils.GetCenterReference(validStyleIds, element) : null,
-                firstReference = currentFirstReference ?? nodes[index - 1].lastReference,
+                //centerReference = isFlange ? null :  (!isLinear) ? DimensioningUtils.GetProjectedCenterReference(GeometryUtils.GetGeometryOptions(), validStyleIds, plane, element) ?? DimensioningUtils.GetProjectedCenterReference(GeometryUtils.GetGeometryOptions(activeView), validStyleIds, plane, element) : null,
+                //firstReference = currentFirstReference,
+                firstConnector = firstConnector
         };
+        }
+        private Reference GetPseudoConnectorReference(ElementId[] validStyleIds, View activeView, Plane plane, Connector connector)
+        {
+            return GeometryUtils.GetPseudoReferenceOfConnector(validStyleIds, GeometryUtils.GetGeometryOptions(activeView), plane, connector) ??
+                GeometryUtils.GetPseudoReferenceOfConnector(validStyleIds, GeometryUtils.GetGeometryOptions(), plane, connector);
+        }
+
+        private Reference FindReference(GeometryUtils.XYZWithReference[] xyzReferences, Plane plane, XYZ xyz)
+        {
+            Reference reference = xyzReferences.Where(xyzReference => xyz.IsAlmostEqualTo(xyzReference.xyz)).FirstOrDefault().reference;
+            if (reference != null) return reference;
+            XYZ projectedXYZ = GeometryUtils.ProjectPointOntoPlane(plane, xyz);
+            Reference projectedReference = xyzReferences.Where(xyzReference => xyz.IsAlmostEqualTo(GeometryUtils.ProjectPointOntoPlane(plane, xyzReference.xyz))).FirstOrDefault().reference;
+            return projectedReference;
+        }
+
+        private void PopulateNodeReferences(ElementId[] validStyleIds, View activeView)
+        {
+            Plane plane = activeView.SketchPlane.GetPlane();
+            GeometryUtils.XYZWithReference[][] nodeReferencesWithView = Enumerable.Range(0,nodes.Length).Select(i => GeometryUtils.XYZWithReference.StripGeometryObjectsWithReferences(validStyleIds, GeometryUtils.GetGeometryOptions(activeView), orderedElements[i])).ToArray();
+            GeometryUtils.XYZWithReference[][] nodeReferencesWithoutView = Enumerable.Range(0, nodes.Length).Select(i => GeometryUtils.XYZWithReference.StripGeometryObjectsWithReferences(validStyleIds, GeometryUtils.GetGeometryOptions(), orderedElements[i])).ToArray();
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                if (nodes[i].firstConnector != null)
+                {
+                    XYZ firstConnectorOrigin = nodes[i].firstConnector.Origin;
+                    nodes[i].firstReference = FindReference(nodeReferencesWithView[i], plane, firstConnectorOrigin) ?? FindReference(nodeReferencesWithoutView[i], plane, firstConnectorOrigin);
+                }
+                if (!nodes[i].isLinear)
+                {
+                    XYZ origin = nodes[i].origin;
+                    nodes[i].firstReference = FindReference(nodeReferencesWithView[i], plane, origin) ?? FindReference(nodeReferencesWithoutView[i], plane, origin);
+                }
+                if (nodes[i].lastConnector != null)
+                {
+                    XYZ lastConnectorOrigin = nodes[i].lastConnector.Origin;
+                    nodes[i].lastReference = FindReference(nodeReferencesWithView[i], plane, lastConnectorOrigin) ?? FindReference(nodeReferencesWithoutView[i], plane, lastConnectorOrigin);
+                }
+
+            }
+        }
+        private void FillAdjacentNodeReferences()
+        {
+            for (int i = 0; i < nodes.Length - 1; i++)
+            {
+                if ((nodes[i].firstReference == null) != (nodes[i + 1].lastReference == null))
+                {
+                    Reference reference = nodes[i].firstReference ?? nodes[i].lastReference;
+                    nodes[i].firstReference = reference;
+                    nodes[i + 1].lastReference = reference;
+                }
+
+            }
         }
         private void SetAdjacentNonLinear()
         {
@@ -173,7 +244,8 @@ namespace CarsonsAddins.Pipeline.Models
             public Reference firstReference;
             public Reference centerReference;
             public Reference lastReference;
-            
+            public Connector firstConnector;
+            public Connector lastConnector;
         }
     }
 
