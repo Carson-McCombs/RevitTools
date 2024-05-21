@@ -96,7 +96,6 @@ namespace CarsonsAddins.Pipeline.Models
             ReferenceArray primaryReferenceArray = new ReferenceArray();
             //ReferenceArray secondaryReferenceArray = new ReferenceArray();
             PipingElementReferenceOrderedList referenceSets = new PipingElementReferenceOrderedList(validStyleIds, doc.ActiveView, elements);
-            referenceSets.SubtractFlanges();
             ReferenceArray secondaryReferenceArray = new ReferenceArray();
             bool matchesPrimary = true;
             for (int i = 0; i < referenceSets.nodes.Length; i++)
@@ -121,6 +120,7 @@ namespace CarsonsAddins.Pipeline.Models
         }
         private static void AddReferences(ref ReferenceArray primaryReferenceArray, ref ReferenceArray secondaryReferenceArray, PipingElementReferenceOrderedList.ReferenceNode node, bool secondaryDimension)
         { 
+            if (node.isNonConnector || node.mode != PipingElementReferenceOrderedList.FlangeDimensionMode.None) return;
             if (node.isEdge)
             {
                 if (node.isLinear)

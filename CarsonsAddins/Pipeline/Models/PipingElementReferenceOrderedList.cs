@@ -40,7 +40,7 @@ namespace CarsonsAddins.Pipeline.Models
                 {
                     Connector connector = ConnectionUtils.GetParallelConnector(ConnectionUtils.GetConnectors(orderedElements[nodes.Length - 1]).Where(con => ConnectionUtils.IsConnectedTo(orderedElements[nodes.Length - 2], con)).FirstOrDefault());
                     //nodes[nodes.Length - 1].lastReference = GetPseudoConnectorReference(validStyleIds, activeView, plane, connector);
-                    nodes[0].lastConnector = connector;
+                    nodes[nodes.Length - 1].lastConnector = connector;
 
                 }
             }
@@ -53,6 +53,7 @@ namespace CarsonsAddins.Pipeline.Models
             PopulateNodeReferences(validStyleIds, activeView);
             FillAdjacentNodeReferences();
             SetAdjacentNonLinear();
+            SubtractFlanges();
         }
         private void CreateReferenceNode(int index)
         {
@@ -117,7 +118,7 @@ namespace CarsonsAddins.Pipeline.Models
                 if (!nodes[i].isLinear)
                 {
                     XYZ origin = nodes[i].origin;
-                    nodes[i].firstReference = FindReference(nodeReferencesWithView[i], plane, origin) ?? FindReference(nodeReferencesWithoutView[i], plane, origin);
+                    nodes[i].centerReference = FindReference(nodeReferencesWithView[i], plane, origin) ?? FindReference(nodeReferencesWithoutView[i], plane, origin);
                 }
                 if (nodes[i].lastConnector != null)
                 {
@@ -133,9 +134,9 @@ namespace CarsonsAddins.Pipeline.Models
             {
                 if ((nodes[i].firstReference == null) != (nodes[i + 1].lastReference == null))
                 {
-                    Reference reference = nodes[i].firstReference ?? nodes[i].lastReference;
-                    nodes[i].firstReference = reference;
-                    nodes[i + 1].lastReference = reference;
+                    Reference reference = nodes[i].lastReference ?? nodes[i + 1].firstReference;
+                    nodes[i].lastReference = reference;
+                    nodes[i + 1].firstReference = reference;
                 }
 
             }
