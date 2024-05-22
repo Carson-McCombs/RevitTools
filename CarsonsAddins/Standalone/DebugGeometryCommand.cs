@@ -78,7 +78,7 @@ namespace CarsonsAddins
             GraphicsStyle[] graphicStyles = new FilteredElementCollector(doc).OfClass(typeof(GraphicsStyle)).Cast<GraphicsStyle>().Where(gs => pipingCategories.Contains((BuiltInCategory)gs.GraphicsStyleCategory.Id.IntegerValue) || ((gs.GraphicsStyleCategory.Parent != null) && pipingCategories.Contains((BuiltInCategory)gs.GraphicsStyleCategory.Parent.Id.IntegerValue))).ToArray();
             try
             {
-                DimensionStyleNames dimensionStyleNames = JsonConvert.DeserializeObject<DimensionStyleNames>(MySettings.Default.DimensionStyles_Preferences);
+                DimensionSettingsModel dimensionStyleNames = JsonConvert.DeserializeObject<DimensionSettingsModel>(MySettings.Default.DimensionStyles_Preferences);
                 if (dimensionStyleNames.centerlineStyleNames == null) return new ElementId[0];
                 foreach (GraphicsStyle graphicsStyle in graphicStyles)
                 {

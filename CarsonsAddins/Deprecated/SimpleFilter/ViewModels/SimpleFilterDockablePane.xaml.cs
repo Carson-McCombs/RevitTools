@@ -136,7 +136,7 @@ namespace CarsonsAddins
             SetAllCategoriesToSelectionState(false);
             foreach (CategorySelectionItem item in categorySelectionItems) b += item.ToString() + '\n';
 
-            TaskDialog.Show("Comparing Check None Action", "BEFORE: \n " + a + "\n\nAFTER: \n" + b);
+            TaskDialog.Show("Comparing Check Default Action", "BEFORE: \n " + a + "\n\nAFTER: \n" + b);
         }
 
         private void ApplySelectionButtonPress(object sender, RoutedEventArgs e)

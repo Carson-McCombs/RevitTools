@@ -109,8 +109,12 @@
     <Compile Include="Deprecated\SimpleFilter\ViewModels\SimpleFilterDockablePane.xaml.cs" />
     <Compile Include="Dimensioning\DimensionSettings\ViewModels\DimensionSettingsWindow.xaml.cs" />
     <Compile Include="Dimensioning\DimensionSettings\ViewModels\DimensionTypeSelectorControl.xaml.cs" />
+    <Compile Include="Dimensioning\DimensionSettings\ViewModels\FlangeModeSelectorViewModel.cs" />
     <Compile Include="Dimensioning\DimensionSettings\ViewModels\GraphicsStyleListControl.xaml.cs" />
     <Compile Include="Dimensioning\DimensionSettings\ViewModels\PreviewControlWrapper.xaml.cs" />
+    <Compile Include="Dimensioning\DimensionSettings\Views\FlangeModeSelectorControl.xaml.cs">
+      <DependentUpon>FlangeModeSelectorControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dimensioning\DimensionText\ViewModels\DimensionTextWindow.xaml.cs" />
     <Compile Include="Pipeline\Models\DimensionPipeline.cs" />
     <Compile Include="Pipeline\Models\DimensionPipeLineCommand.cs" />
@@ -204,6 +208,10 @@
     <Page Include="Deprecated\SimpleFilter\Views\SimpleFilterDockablePane.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Dimensioning\DimensionSettings\Views\FlangeModeSelectorControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Dimensioning\DimensionSettings\Views\PreviewControlWrapper.xaml">
       <SubType>Designer</SubType>

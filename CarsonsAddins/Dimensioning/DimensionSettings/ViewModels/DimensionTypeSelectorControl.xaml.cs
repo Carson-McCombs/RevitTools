@@ -27,7 +27,7 @@ namespace CarsonsAddins
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private DimensionStyles dimensionStyles = new DimensionStyles();
+        private DimensionStyles dimensionStyles;
 
         public DimensionType PrimaryDimensionType
         {
@@ -80,8 +80,18 @@ namespace CarsonsAddins
             }
         }
 
-        public ObservableCollection<DimensionType> dimensionTypes = new ObservableCollection<DimensionType>();
-        public ObservableCollection<DimensionType> DimensionTypes { get => dimensionTypes; set => dimensionTypes = value; }
+        public DimensionType[] dimensionTypes = new DimensionType[0];
+        public DimensionType[] DimensionTypes 
+        { 
+            get => dimensionTypes; 
+            set 
+            {
+                if (value == null || dimensionTypes == value) return;
+                dimensionTypes = value; 
+                OnNotifyPropertyChanged();
+            }
+
+        }
 
         public DimensionTypeSelectorControl()
         {
@@ -91,7 +101,7 @@ namespace CarsonsAddins
 
         public void Init(DimensionType[] dimensionTypes, ref DimensionStyles currentPreferences)
         {
-            DimensionTypes = new ObservableCollection<DimensionType>(dimensionTypes);
+            DimensionTypes = dimensionTypes;
             dimensionStyles = currentPreferences;
             NotifyIntialized();
         }

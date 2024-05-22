@@ -105,7 +105,7 @@ namespace CarsonsAddins.Pipeline.Models
                                 
                 
                 matchesPrimary = AddReferences(ref primaryReferenceArray, ref secondaryReferenceArray, node, secondaryDimension);
-                bool splitDimension = node.isEnd || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Exact || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Partial && (node.isEdge || node.adjacentNonLinear)));
+                bool splitDimension = node.isEnd || (node.mode == FlangeDimensionMode.Exact || (node.mode == FlangeDimensionMode.Partial && (node.isEdge || node.adjacentNonLinear)));
                 if (splitDimension) 
                 {
                     

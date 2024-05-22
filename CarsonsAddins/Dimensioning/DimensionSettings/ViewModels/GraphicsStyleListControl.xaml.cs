@@ -70,6 +70,7 @@ namespace CarsonsAddins
                 OnNotifyPropertyChanged();
             }
         }
+        
         private Dictionary<string, GraphicsStyle[]> graphicStylesNameDictionary = new Dictionary<string, GraphicsStyle[]>();
         private List<GraphicsStyle> selectedGraphicStyles = new List<GraphicsStyle>();
         public GraphicsStyleListControl()

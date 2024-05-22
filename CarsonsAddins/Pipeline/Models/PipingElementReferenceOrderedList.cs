@@ -3,14 +3,17 @@ using CarsonsAddins.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static CarsonsAddins.Utils.DimensioningUtils;
+
 namespace CarsonsAddins.Pipeline.Models
 {
     class PipingElementReferenceOrderedList
     {
-        public enum FlangeDimensionMode { None, Exact, Partial, Negate }
+        
         public Element[] orderedElements;
         public ReferenceNode[] nodes;
 
@@ -75,11 +78,12 @@ namespace CarsonsAddins.Pipeline.Models
             bool isStart = index == 0;
             bool isEnd = index == orderedElements.Length - 1;
             bool isNonConnector = element.Name == "Non-Connector";
+            FlangeDimensionMode mode = DimensionSettingsWindow.DimensionStylesSettings.GetMode(element);
             //bool isFlange = ElementCheckUtils.IsPipeFlange(element);
             nodes[index] = new ReferenceNode
             {
                 builtInCategory = (BuiltInCategory)element.Category.Id.IntegerValue,
-                mode = GetMode(element),
+                mode = mode,
                 origin = GeometryUtils.GetOrigin(element.Location),
                 isStart = isStart,
                 isEnd = isEnd,
@@ -186,7 +190,7 @@ namespace CarsonsAddins.Pipeline.Models
                 if (nodes[i].isNonConnector) continue;
                 switch(nodes[i].mode)
                 {
-                    case (FlangeDimensionMode.None): 
+                    case (FlangeDimensionMode.Default): 
                         break;
                     case (FlangeDimensionMode.Exact):
                         IgnoreFlange(i); 
@@ -200,15 +204,6 @@ namespace CarsonsAddins.Pipeline.Models
 
                 } 
             }
-        }
-        private FlangeDimensionMode GetMode(Element element)
-        {
-            if (!ElementCheckUtils.IsPipeFlange(element)) return FlangeDimensionMode.None;
-            
-            string familyName = (element as FamilyInstance).Symbol.FamilyName;
-            if (familyName.Contains("FLG")) return FlangeDimensionMode.Exact;
-            else if (familyName.Contains("MJ") || familyName.Contains("PO")) return FlangeDimensionMode.Negate;
-            return FlangeDimensionMode.Partial;
         }
         private void IgnoreFlange(int index)
         {
@@ -265,7 +260,7 @@ namespace CarsonsAddins.Pipeline.Models
             //public ElementCheckUtils.PipingCategory pipingCategory;
             public BuiltInCategory builtInCategory;
             public FlangeDimensionMode mode;
-            public bool isFlange => mode != FlangeDimensionMode.None;
+            public bool isFlange => mode != FlangeDimensionMode.Default;
             public XYZ origin;
             public bool isStart;
             public bool isEnd;

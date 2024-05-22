@@ -10,6 +10,8 @@ namespace CarsonsAddins.Utils
 {
     public static class DimensioningUtils
     {
+
+        public enum FlangeDimensionMode { None, Default, Exact, Partial, Negate }
         public static Line GetDimensionSegmentLine(DimensionSegment segment, XYZ direction)
         {
             if (segment.Value == null) return null;

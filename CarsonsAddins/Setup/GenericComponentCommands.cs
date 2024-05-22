@@ -118,6 +118,19 @@ namespace CarsonsAddins.GenericCommands
         /// </summary>
         private static UIApplication uiapp;
         private static T instance;
+
+        public void InitWindow(UIApplication uiapp)
+        {
+            if (uiapp == null) return;
+            if (instance == null) 
+            {
+                instance = new T();
+                instance.Closing += Window_Closing;
+            }
+            instance.Init(uiapp.ActiveUIDocument);
+            instance.Closing += Window_Closing;
+            uiapp.Application.DocumentOpened += Application_DocumentOpened;
+        }
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             try

@@ -33,6 +33,7 @@ using CarsonsAddins.Properties;
 using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using CarsonsAddins.GenericCommands;
 
 namespace CarsonsAddins
 {
@@ -43,8 +44,6 @@ namespace CarsonsAddins
         public static string tmplog = string.Empty;
         private List<ComponentState> componentStates = new List<ComponentState>();
         private readonly List<ISettingsComponent> settingsComponents = new List<ISettingsComponent>();
-        public static CarsonsAddinsApplication instance {  get; private set; }
-        public CarsonsAddinsApplication() { instance = this; }
         public Result OnStartup(UIControlledApplication app)
         {
             ApplicationIds.Init();
@@ -88,6 +87,7 @@ namespace CarsonsAddins
             pulldownButtonDictionary.Add("Misc", miscComponentsPulldownButton);
             RegisterComponentPushButtons(assembly, panel, pulldownButtonDictionary);
             app.ControlledApplication.ApplicationInitialized += RegisterDockablePanes;
+            app.ControlledApplication.ApplicationInitialized += DummyLaunchDimensionSettingsWindow;
             return Result.Succeeded;
         }
 
@@ -124,10 +124,17 @@ namespace CarsonsAddins
                 }
             }
         }
-
         /// <summary>
         /// Registers all of the classes with a SettingsComponent that contain a DockablePane via reflection.
         /// </summary>
+        private void DummyLaunchDimensionSettingsWindow(object sender, ApplicationInitializedEventArgs e)
+        {
+            UIApplication uiapp = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
+            new ShowWindow<DimensionTextWindow>().InitWindow(uiapp);
+        }
+            /// <summary>
+            /// Registers all of the classes with a SettingsComponent that contain a DockablePane via reflection.
+            /// </summary>
         private void RegisterDockablePanes(object sender, ApplicationInitializedEventArgs e)
         {
             UIApplication uiapp = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
@@ -136,9 +143,9 @@ namespace CarsonsAddins
                 if (!(component is IDockablePaneProvider))  continue;
                 if (component is ISettingsUIComponent uiComponent) 
                 {
-                    Type registerCommandType = typeof( GenericCommands.RegisterDockablePane<>).MakeGenericType(uiComponent.GetType());
+                    Type registerCommandType = typeof( RegisterDockablePane<>).MakeGenericType(uiComponent.GetType());
                     var registerCommand = Activator.CreateInstance(registerCommandType);
-                    if (registerCommand is GenericCommands.IExecuteWithUIApplication command) command.Execute(uiapp);
+                    if (registerCommand is IExecuteWithUIApplication command) command.Execute(uiapp);
                 }
             }
         }
