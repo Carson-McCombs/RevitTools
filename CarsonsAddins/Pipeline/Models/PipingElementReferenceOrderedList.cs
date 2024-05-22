@@ -10,7 +10,7 @@ namespace CarsonsAddins.Pipeline.Models
 {
     class PipingElementReferenceOrderedList
     {
-        public enum FlangeDimensionMode { None, Ignore, Partial, Negate }
+        public enum FlangeDimensionMode { None, Exact, Partial, Negate }
         public Element[] orderedElements;
         public ReferenceNode[] nodes;
 
@@ -53,6 +53,7 @@ namespace CarsonsAddins.Pipeline.Models
             PopulateNodeReferences(validStyleIds, activeView);
             FillAdjacentNodeReferences();
             SetAdjacentNonLinear();
+            MoveEdges();
             SubtractFlanges();
         }
         private void CreateReferenceNode(int index)
@@ -73,6 +74,7 @@ namespace CarsonsAddins.Pipeline.Models
             bool isLinear = ConnectionUtils.IsLinearElement(element);
             bool isStart = index == 0;
             bool isEnd = index == orderedElements.Length - 1;
+            bool isNonConnector = element.Name == "Non-Connector";
             //bool isFlange = ElementCheckUtils.IsPipeFlange(element);
             nodes[index] = new ReferenceNode
             {
@@ -83,11 +85,35 @@ namespace CarsonsAddins.Pipeline.Models
                 isEnd = isEnd,
                 isLinear = isLinear,
                 adjacentNonLinear = false,
+                isNonConnector = isNonConnector,
+                ignore = isNonConnector,
                 //centerReference = isFlange ? null :  (!isLinear) ? DimensioningUtils.GetProjectedCenterReference(GeometryUtils.GetGeometryOptions(), validStyleIds, plane, element) ?? DimensioningUtils.GetProjectedCenterReference(GeometryUtils.GetGeometryOptions(activeView), validStyleIds, plane, element) : null,
                 //firstReference = currentFirstReference,
                 firstConnector = firstConnector
-        };
+            };
         }
+        private void MoveEdges()
+        {
+            if (nodes[0].isNonConnector || nodes[0].isFlange)
+            {
+                int nextIndex = GetAdjacentElementIndex(1, 1, false, false);
+                if (nextIndex > 0) 
+                {
+                    for (int i = 0; i < nextIndex; i++) nodes[i].ignore = true;
+                    nodes[nextIndex].isStart = true;
+                }
+            }
+            if (nodes[nodes.Length - 1].isNonConnector || nodes[nodes.Length - 1].isFlange)
+            {
+                int previousIndex = GetAdjacentElementIndex(nodes.Length - 2, -1, false, false);
+                if (previousIndex >= 0)
+                {
+                    for (int i = nodes.Length - 1; i > previousIndex; i--) nodes[i].ignore = true;
+                    nodes[previousIndex].isEnd = true;
+                }
+            }
+        }
+
         private Reference GetPseudoConnectorReference(ElementId[] validStyleIds, View activeView, Plane plane, Connector connector)
         {
             return GeometryUtils.GetPseudoReferenceOfConnector(validStyleIds, GeometryUtils.GetGeometryOptions(activeView), plane, connector) ??
@@ -162,7 +188,7 @@ namespace CarsonsAddins.Pipeline.Models
                 {
                     case (FlangeDimensionMode.None): 
                         break;
-                    case (FlangeDimensionMode.Ignore):
+                    case (FlangeDimensionMode.Exact):
                         IgnoreFlange(i); 
                         break;
                     case (FlangeDimensionMode.Partial):
@@ -180,19 +206,19 @@ namespace CarsonsAddins.Pipeline.Models
             if (!ElementCheckUtils.IsPipeFlange(element)) return FlangeDimensionMode.None;
             
             string familyName = (element as FamilyInstance).Symbol.FamilyName;
-            if (familyName.Contains("FLG")) return FlangeDimensionMode.Ignore;
-            if (familyName.Contains("MJ") || familyName.Contains("PO")) return FlangeDimensionMode.Negate;
+            if (familyName.Contains("FLG")) return FlangeDimensionMode.Exact;
+            else if (familyName.Contains("MJ") || familyName.Contains("PO")) return FlangeDimensionMode.Negate;
             return FlangeDimensionMode.Partial;
         }
         private void IgnoreFlange(int index)
         {
-            if (index < 0 && index >= nodes.Length) return;
+            if (index < 0 || index >= nodes.Length) return;
             nodes[index].firstReference = null;
             nodes[index].lastReference = null;
         }
         private void NegateFlange(int index)
         {
-            if (index < 0 && index >= nodes.Length) return;
+            if (index < 0 || index >= nodes.Length) return;
             nodes[index].firstReference = null;
             nodes[index].lastReference = null;
             RemoveLastReference(index - 1);
@@ -200,32 +226,37 @@ namespace CarsonsAddins.Pipeline.Models
         }
         private void PartialFlange(int index)
         {
-            if (index < 0 && index >= nodes.Length) return;
-            if (nodes[index].isStart || nodes[index].isEnd || NextToNonLinear(index)) IgnoreFlange(index);
+            if (index < 0 || index >= nodes.Length) return;
+            else if (nodes[index].isStart || nodes[index].isEnd || NextToNonLinear(index)) IgnoreFlange(index);
             else NegateFlange(index);
         }
-        private bool NextToNonLinear(int index) => IsPreviousNonLinear(index) || IsNextNonLinear(index);
-        private bool IsNextNonLinear(int index)
+        private int GetAdjacentElementIndex(int index, int direction, bool allowNonConnectors, bool allowFlanges)
         {
-            if (index < 0 || index >= nodes.Length - 1) return false;
-            if (nodes[index + 1].isNonConnector) return IsNextNonLinear(index + 1);
-            return !nodes[index + 1].isLinear;
+            if (direction == 0 || index < 0 || index >= nodes.Length) return -1;
+            bool passesFlangeFilter = (allowFlanges || (!allowFlanges && !nodes[index].isFlange));
+            bool passesNonConnectorFilter = (allowNonConnectors || (!allowNonConnectors && !nodes[index].isNonConnector));
+            if (passesFlangeFilter && passesNonConnectorFilter) return index;
+            return GetAdjacentElementIndex(index + direction, direction, allowNonConnectors, allowFlanges);
         }
-        private bool IsPreviousNonLinear(int index)
+        private bool NextToNonLinear(int index) 
         {
-            if (index < 1 || index > nodes.Length - 1) return false;
-            if (nodes[index - 1].isNonConnector) return IsNextNonLinear(index - 1);
-            return !nodes[index - 1].isLinear;
+            if (index < 0 || index >= nodes.Length) return false;
+            int previousIndex = GetAdjacentElementIndex(index - 1, -1, false, true);
+            int nextIndex = GetAdjacentElementIndex(index + 1, 1, false, true);
+            if (previousIndex >= 0 && !nodes[previousIndex].isLinear) return true;
+            if (nextIndex >= 0 && !nodes[nextIndex].isLinear) return true;
+            return false;
         }
+
         private void RemoveLastReference(int index)
         {
-            if (index < 0 && index >= nodes.Length) return;
+            if (index < 0 || index >= nodes.Length) return;
             if (nodes[index].isNonConnector) RemoveLastReference(index - 1);
             nodes[index].lastReference = null;
         }
         private void RemoveFirstReference(int index)
         {
-            if (index < 0 && index >= nodes.Length) return;
+            if (index < 0 || index >= nodes.Length) return;
             if (nodes[index].isNonConnector) RemoveFirstReference(index + 1);
             nodes[index].firstReference = null;
         }
@@ -234,6 +265,7 @@ namespace CarsonsAddins.Pipeline.Models
             //public ElementCheckUtils.PipingCategory pipingCategory;
             public BuiltInCategory builtInCategory;
             public FlangeDimensionMode mode;
+            public bool isFlange => mode != FlangeDimensionMode.None;
             public XYZ origin;
             public bool isStart;
             public bool isEnd;
@@ -242,6 +274,7 @@ namespace CarsonsAddins.Pipeline.Models
             public bool isLinear;
             public bool adjacentNonLinear;
             public bool isNonConnector;
+            public bool ignore;
             public Reference firstReference;
             public Reference centerReference;
             public Reference lastReference;

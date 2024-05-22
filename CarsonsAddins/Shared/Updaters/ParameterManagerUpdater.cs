@@ -58,22 +58,12 @@ namespace CarsonsAddins
         }
         public void Execute(UpdaterData data)
         {
-            if (parameterManager == null) return;
+            if (parameterManager == null || elementIds.Count == 0) return;
             ElementId[] deletedElementIds = data.GetModifiedElementIds().Where(elementId => elementIds.Contains(elementId)).ToArray();
             ElementId[] modifiedElementIds = data.GetModifiedElementIds().Where(elementId => elementIds.Contains(elementId)).ToArray();
 
-            RemoveStaleReferences(deletedElementIds);
-            RefreshParameters(modifiedElementIds);
-        }
-
-        private void RemoveStaleReferences(ElementId[] deletedElementIds)
-        {
-            ElementId[] filteredDeletedElementIds = deletedElementIds.Where(id => elementIds.Contains(id)).ToArray();
-            parameterManager.RemoveElements(filteredDeletedElementIds);
-        }
-        private void RefreshParameters(ElementId[] elementIds)
-        {
-            parameterManager.RefreshElements(elementIds);
+            if (deletedElementIds.Length > 0) parameterManager.RemoveElements(deletedElementIds);
+            if (modifiedElementIds.Length > 0) parameterManager.RefreshElements(modifiedElementIds);
         }
 
         public string GetAdditionalInformation()

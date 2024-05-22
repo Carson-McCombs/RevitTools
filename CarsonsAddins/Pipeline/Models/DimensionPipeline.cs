@@ -100,15 +100,15 @@ namespace CarsonsAddins.Pipeline.Models
             bool matchesPrimary = true;
             for (int i = 0; i < referenceSets.nodes.Length; i++)
             {
-                if (referenceSets.nodes[i].isNonConnector) continue;
                 PipingElementReferenceOrderedList.ReferenceNode node = referenceSets.nodes[i];
+                if (node.ignore) continue;
                                 
                 
-                AddReferences(ref primaryReferenceArray, ref secondaryReferenceArray, node, secondaryDimension);
-                if (node.firstReference != null || node.lastReference != null) matchesPrimary = false;
-                bool splitDimension = (i == referenceSets.nodes.Length - 1) || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Ignore || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Partial && (node.isEdge || node.adjacentNonLinear)));
+                matchesPrimary = AddReferences(ref primaryReferenceArray, ref secondaryReferenceArray, node, secondaryDimension);
+                bool splitDimension = node.isEnd || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Exact || (node.mode == PipingElementReferenceOrderedList.FlangeDimensionMode.Partial && (node.isEdge || node.adjacentNonLinear)));
                 if (splitDimension) 
                 {
+                    
                     BuiltInCategory builtInCategory = (node.referenceCount == secondaryReferenceArray.Size) ? node.builtInCategory : BuiltInCategory.OST_PipeCurves;
                     if (!matchesPrimary && secondaryReferenceArray.Size > 1) doc.Create.NewDimension(activeView, secondaryDimensionLine, secondaryReferenceArray, dimensionStyles.GetSecondaryDimensionType(builtInCategory) ?? defaultDimensionType);
                     secondaryReferenceArray.Clear();
@@ -118,37 +118,42 @@ namespace CarsonsAddins.Pipeline.Models
             }
             doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionStyles.primaryDimensionType ?? defaultDimensionType);
         }
-        private static void AddReferences(ref ReferenceArray primaryReferenceArray, ref ReferenceArray secondaryReferenceArray, PipingElementReferenceOrderedList.ReferenceNode node, bool secondaryDimension)
+        private static bool AddReferences(ref ReferenceArray primaryReferenceArray, ref ReferenceArray secondaryReferenceArray, PipingElementReferenceOrderedList.ReferenceNode node, bool secondaryDimension)
         { 
-            if (node.isNonConnector || node.mode != PipingElementReferenceOrderedList.FlangeDimensionMode.None) return;
+            if (node.isFlange) return false;
+            int addedFirst = 0;
+            int addedCenter = 0;
+            int addedLast = 0;
             if (node.isEdge)
             {
                 if (node.isLinear)
                 {
-                    if (node.isEnd) AddReferenceIfNotNull(ref primaryReferenceArray, node.lastReference);
-                    else if (node.isStart) AddReferenceIfNotNull(ref primaryReferenceArray, node.firstReference);
+                    if (node.isEnd) AddReferenceIfNotNull(ref primaryReferenceArray, node.lastReference, ref addedLast);
+                    else if (node.isStart) AddReferenceIfNotNull(ref primaryReferenceArray, node.firstReference, ref addedFirst);
                 }
                 else if (node.centerReference == null)
                 {
-                    if (node.isStart) AddReferenceIfNotNull(ref primaryReferenceArray, node.lastReference);
-                    else if (node.isEnd) AddReferenceIfNotNull(ref primaryReferenceArray, node.firstReference);
+                    if (node.isStart) AddReferenceIfNotNull(ref primaryReferenceArray, node.lastReference, ref addedLast);
+                    else if (node.isEnd) AddReferenceIfNotNull(ref primaryReferenceArray, node.firstReference, ref addedFirst);
                 }
             }
-            AddReferenceIfNotNull(ref primaryReferenceArray, node.centerReference);
+            AddReferenceIfNotNull(ref primaryReferenceArray, node.centerReference, ref addedCenter);
 
 
             if (secondaryDimension)
             {
-                AddReferenceIfNotNull(ref secondaryReferenceArray, node.firstReference);
-                AddReferenceIfNotNull(ref secondaryReferenceArray, node.centerReference);
-                AddReferenceIfNotNull(ref secondaryReferenceArray, node.lastReference);
+                AddReferenceIfNotNull(ref secondaryReferenceArray, node.firstReference, ref addedFirst);
+                AddReferenceIfNotNull(ref secondaryReferenceArray, node.centerReference, ref addedCenter);
+                AddReferenceIfNotNull(ref secondaryReferenceArray, node.lastReference, ref addedLast);
             }
+            return !(addedFirst == 1 || addedLast == 1);
 
         }
-        private static void AddReferenceIfNotNull(ref ReferenceArray referenceArray, Reference reference)
+        private static void AddReferenceIfNotNull(ref ReferenceArray referenceArray, Reference reference, ref int counter)
         {
             if (referenceArray == null || reference == null) return;
             referenceArray.Append(reference);
+            counter ++;
         }
     }
     
