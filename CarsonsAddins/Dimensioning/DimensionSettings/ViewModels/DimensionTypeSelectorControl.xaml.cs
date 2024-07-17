@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using CarsonsAddins.Dimensioning.DimensionSettings.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -31,7 +32,7 @@ namespace CarsonsAddins
 
         public DimensionType PrimaryDimensionType
         {
-            get => dimensionStyles.primaryDimensionType;
+            get => dimensionStyles?.primaryDimensionType;
             set
             {
                 if (value == null || value == dimensionStyles.primaryDimensionType) return;
@@ -41,7 +42,7 @@ namespace CarsonsAddins
         }
         public DimensionType SecondaryPipeDimensionType
         {
-            get => dimensionStyles.secondaryPipeDimensionType;
+            get => dimensionStyles?.secondaryPipeDimensionType;
             set
             {
                 if (value == null || value == dimensionStyles.secondaryPipeDimensionType) return;
@@ -51,7 +52,7 @@ namespace CarsonsAddins
         }
         public DimensionType SecondaryFittingDimensionType
         {
-            get => dimensionStyles.secondaryFittingDimensionType;
+            get => dimensionStyles?.secondaryFittingDimensionType;
             set
             {
                 if (value == null || value == dimensionStyles.secondaryFittingDimensionType) return;
@@ -61,7 +62,7 @@ namespace CarsonsAddins
         }
         public DimensionType SecondaryAccessoryDimensionType
         {
-            get => dimensionStyles.secondaryAccessoryDimensionType;
+            get => dimensionStyles?.secondaryAccessoryDimensionType;
             set
             {
                 if (value == null || value == dimensionStyles.secondaryAccessoryDimensionType) return;
@@ -71,7 +72,7 @@ namespace CarsonsAddins
         }
         public DimensionType SecondaryOtherDimensionType
         {
-            get => dimensionStyles.secondaryOtherDimensionType;
+            get => dimensionStyles?.secondaryOtherDimensionType;
             set
             {
                 if (value == null || value == dimensionStyles.secondaryOtherDimensionType) return;

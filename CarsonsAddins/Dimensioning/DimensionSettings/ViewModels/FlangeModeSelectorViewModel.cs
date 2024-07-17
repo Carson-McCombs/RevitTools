@@ -1,8 +1,8 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using CarsonsAddins.Dimensioning.DimensionSettings.Models;
 using CarsonsAddins.Properties;
 using CarsonsAddins.Utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -51,26 +51,5 @@ namespace CarsonsAddins
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
         }
     }
-    public class FlangeModeItem
-    {
-        public event PropertyChangedEventHandler PropertyChanged;
-        public int elementId = -1;
-        public string Name { get; set; } = "";
-        public Utils.DimensioningUtils.FlangeDimensionMode Mode { get; set; } = Utils.DimensioningUtils.FlangeDimensionMode.Default;
-
-
-        [JsonConstructor]
-        public FlangeModeItem(int elementId, string name, Utils.DimensioningUtils.FlangeDimensionMode mode)
-        {
-            this.elementId = elementId;
-            Name = name;
-            Mode = mode;
-        }
-        public FlangeModeItem(ElementId elementId, string name, Utils.DimensioningUtils.FlangeDimensionMode mode)
-        {
-            this.elementId = elementId.IntegerValue;
-            Name = name;
-            Mode = mode;
-        }
-    }
+    
 }

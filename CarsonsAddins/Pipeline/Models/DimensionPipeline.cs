@@ -10,6 +10,7 @@ using static CarsonsAddins.Utils.DimensioningUtils;
 using Autodesk.Revit.UI;
 using System.Runtime.ExceptionServices;
 using System.Windows.Controls;
+using CarsonsAddins.Dimensioning.DimensionSettings.Models;
 
 namespace CarsonsAddins.Pipeline.Models
 {
@@ -95,7 +96,7 @@ namespace CarsonsAddins.Pipeline.Models
             //Creates a reference array for the primary dimension based on its end point references.
             ReferenceArray primaryReferenceArray = new ReferenceArray();
             //ReferenceArray secondaryReferenceArray = new ReferenceArray();
-            PipingElementReferenceOrderedList referenceSets = new PipingElementReferenceOrderedList(validStyleIds, doc.ActiveView, elements);
+            PipingElementReferenceOrderedList referenceSets = new PipingElementReferenceOrderedList(validStyleIds, doc.ActiveView, dimensionStyles, elements);
             ReferenceArray secondaryReferenceArray = new ReferenceArray();
             bool matchesPrimary = true;
             for (int i = 0; i < referenceSets.nodes.Length; i++)
@@ -104,23 +105,31 @@ namespace CarsonsAddins.Pipeline.Models
                 if (node.ignore) continue;
                                 
                 
-                matchesPrimary = AddReferences(ref primaryReferenceArray, ref secondaryReferenceArray, node, secondaryDimension);
-                bool splitDimension = node.isEnd || (node.mode == FlangeDimensionMode.Exact || (node.mode == FlangeDimensionMode.Partial && (node.isEdge || node.adjacentNonLinear)));
-                if (splitDimension) 
+                matchesPrimary = AddReferences(ref primaryReferenceArray, ref secondaryReferenceArray, node, secondaryDimension, matchesPrimary);
+                bool splitDimension = node.isEnd || node.mode == FlangeDimensionMode.Exact || (node.mode == FlangeDimensionMode.Partial && (node.isEdge || node.adjacentNonLinear));
+                if (splitDimension)
                 {
-                    
+
                     BuiltInCategory builtInCategory = (node.referenceCount == secondaryReferenceArray.Size) ? node.builtInCategory : BuiltInCategory.OST_PipeCurves;
-                    if (!matchesPrimary && secondaryReferenceArray.Size > 1) doc.Create.NewDimension(activeView, secondaryDimensionLine, secondaryReferenceArray, dimensionStyles.GetSecondaryDimensionType(builtInCategory) ?? defaultDimensionType);
-                    secondaryReferenceArray.Clear();
-                    matchesPrimary = true;
+                    if (!matchesPrimary)
+                    {
+                        if (secondaryReferenceArray.Size > 1) doc.Create.NewDimension(activeView, secondaryDimensionLine, secondaryReferenceArray, dimensionStyles.GetSecondaryDimensionType(builtInCategory) ?? defaultDimensionType);
+                        secondaryReferenceArray.Clear();
+                        matchesPrimary = true;
+                    }
+                    else if (node.centerReference != null)
+                    {
+                        secondaryReferenceArray.Clear();
+                        matchesPrimary = true;
+                    }
                 }
 
             }
             doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionStyles.primaryDimensionType ?? defaultDimensionType);
         }
-        private static bool AddReferences(ref ReferenceArray primaryReferenceArray, ref ReferenceArray secondaryReferenceArray, PipingElementReferenceOrderedList.ReferenceNode node, bool secondaryDimension)
+        private static bool AddReferences(ref ReferenceArray primaryReferenceArray, ref ReferenceArray secondaryReferenceArray, PipingElementReferenceOrderedList.ReferenceNode node, bool secondaryDimension, bool matchesPrimary)
         { 
-            if (node.isFlange) return false;
+            //if (node.isFlange) return false;
             int addedFirst = 0;
             int addedCenter = 0;
             int addedLast = 0;
@@ -146,7 +155,7 @@ namespace CarsonsAddins.Pipeline.Models
                 AddReferenceIfNotNull(ref secondaryReferenceArray, node.centerReference, ref addedCenter);
                 AddReferenceIfNotNull(ref secondaryReferenceArray, node.lastReference, ref addedLast);
             }
-            return !(addedFirst == 1 || addedLast == 1);
+            return !(!matchesPrimary || node.mode == FlangeDimensionMode.Exact || addedFirst > 0 || addedLast > 0);
 
         }
         private static void AddReferenceIfNotNull(ref ReferenceArray referenceArray, Reference reference, ref int counter)

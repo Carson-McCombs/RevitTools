@@ -1,5 +1,4 @@
 ﻿using CarsonsAddins.Properties;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -88,7 +87,7 @@ namespace CarsonsAddins
                 {
                     if (instance == null) instance = new MyApplicationSettingsWindow();
                     instance.SettingsDataGrid.ItemsSource = MyApplicationSettings.Instance.settingsState;
-                    instance.Show();
+                    instance.ShowDialog();
 
                     return Result.Succeeded;
 

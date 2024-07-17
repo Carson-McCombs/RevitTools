@@ -1,15 +1,16 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using CarsonsAddins.Dimensioning.DimensionSettings.Models;
 using CarsonsAddins.Properties;
 using CarsonsAddins.Utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace CarsonsAddins
 {

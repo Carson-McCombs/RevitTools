@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using CarsonsAddins.Dimensioning.DimensionSettings.Models;
 using CarsonsAddins.Utils;
 using System;
 using System.Collections.Generic;
@@ -16,10 +17,11 @@ namespace CarsonsAddins.Pipeline.Models
         
         public Element[] orderedElements;
         public ReferenceNode[] nodes;
-
-        public PipingElementReferenceOrderedList(ElementId[] validStyleIds, View activeView, Element[] orderedElements)
+        private DimensionStyles dimensionStyles;
+        public PipingElementReferenceOrderedList(ElementId[] validStyleIds, View activeView, DimensionStyles dimensionStyles, Element[] orderedElements)
         {
             this.orderedElements = orderedElements;
+            this.dimensionStyles = dimensionStyles;
             nodes = new ReferenceNode[orderedElements.Length];
             PopulateNodes(validStyleIds, activeView);
         }
@@ -77,8 +79,8 @@ namespace CarsonsAddins.Pipeline.Models
             bool isLinear = ConnectionUtils.IsLinearElement(element);
             bool isStart = index == 0;
             bool isEnd = index == orderedElements.Length - 1;
-            bool isNonConnector = element.Name == "Non-Connector";
-            FlangeDimensionMode mode = DimensionSettingsWindow.DimensionStylesSettings.GetMode(element);
+            bool isNonConnector = IsNonConnector(element);
+            FlangeDimensionMode mode = dimensionStyles.GetMode(element);
             //bool isFlange = ElementCheckUtils.IsPipeFlange(element);
             nodes[index] = new ReferenceNode
             {
@@ -95,6 +97,13 @@ namespace CarsonsAddins.Pipeline.Models
                 //firstReference = currentFirstReference,
                 firstConnector = firstConnector
             };
+        }
+        private bool IsNonConnector(Element element)
+        {
+            if (element == null) return false;
+            if (!(element is FamilyInstance familyInstance)) return false;
+            return (familyInstance.Symbol.FamilyName == "Non-Connector");
+
         }
         private void MoveEdges()
         {
@@ -190,7 +199,7 @@ namespace CarsonsAddins.Pipeline.Models
                 if (nodes[i].isNonConnector) continue;
                 switch(nodes[i].mode)
                 {
-                    case (FlangeDimensionMode.Default): 
+                    case (FlangeDimensionMode.None): 
                         break;
                     case (FlangeDimensionMode.Exact):
                         IgnoreFlange(i); 

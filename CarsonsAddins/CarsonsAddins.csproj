@@ -51,6 +51,10 @@
     <AssemblyName>CarsonsAddins</AssemblyName>
   </PropertyGroup>
   <PropertyGroup>
+	  <Nullable>enable</Nullable>
+	  <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
@@ -60,22 +64,19 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AdWindows, Version=3.0.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\AdWindows.dll</HintPath>
+    <Reference Include="AdWindows">
+      <HintPath>E:\Revit\Product\Revit 2023\AdWindows.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>E:\Revit\Product\Revit 2023\AddIns\PnIDModeler\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="RevitAPI, Version=23.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
+    <Reference Include="RevitAPI">
+      <HintPath>E:\Revit\Product\Revit 2023\RevitAPI.dll</HintPath>
     </Reference>
-    <Reference Include="RevitAPIUI, Version=23.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\RevitAPIUI.dll</HintPath>
+    <Reference Include="RevitAPIUI">
+      <HintPath>E:\Revit\Product\Revit 2023\RevitAPIUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -87,11 +88,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
@@ -107,11 +104,13 @@
     <Compile Include="Deprecated\PipingLC\ViewModels\PipingSystemSelectorControl.xaml.cs" />
     <Compile Include="Deprecated\SimpleFilter\Models\SetDimensionTextEventHandler.cs" />
     <Compile Include="Deprecated\SimpleFilter\ViewModels\SimpleFilterDockablePane.xaml.cs" />
+    <Compile Include="Dimensioning\DimensionSettings\Models\DimensionSettingsModel.cs" />
+    <Compile Include="Dimensioning\DimensionSettings\Models\DimensionStyles.cs" />
+    <Compile Include="Dimensioning\DimensionSettings\Models\FlangedModeItem.cs" />
     <Compile Include="Dimensioning\DimensionSettings\ViewModels\DimensionSettingsWindow.xaml.cs" />
     <Compile Include="Dimensioning\DimensionSettings\ViewModels\DimensionTypeSelectorControl.xaml.cs" />
     <Compile Include="Dimensioning\DimensionSettings\ViewModels\FlangeModeSelectorViewModel.cs" />
     <Compile Include="Dimensioning\DimensionSettings\ViewModels\GraphicsStyleListControl.xaml.cs" />
-    <Compile Include="Dimensioning\DimensionSettings\ViewModels\PreviewControlWrapper.xaml.cs" />
     <Compile Include="Dimensioning\DimensionSettings\Views\FlangeModeSelectorControl.xaml.cs">
       <DependentUpon>FlangeModeSelectorControl.xaml</DependentUpon>
     </Compile>
@@ -182,7 +181,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
     <None Include="Properties\MySettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>MySettings.Designer.cs</LastGenOutput>
@@ -253,7 +251,6 @@
   <ItemGroup>
     <Folder Include="Automation\PipeEndPrep\Models\" />
     <Folder Include="Deprecated\PipingLC\Models\" />
-    <Folder Include="Dimensioning\DimensionSettings\Models\" />
     <Folder Include="Dimensioning\DimensionText\Models\" />
     <Folder Include="Pipeline\ViewModels\" />
     <Folder Include="Pipeline\Views\" />
@@ -266,6 +263,41 @@
     <EmbeddedResource Include="Resources\select_pipeline_icon_32.png" />
     <EmbeddedResource Include="Resources\settings_icon_32.png" />
     <EmbeddedResource Include="Resources\total_pipe_length_icon_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces">
+      <Version>8.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Buffers">
+      <Version>4.5.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Memory">
+      <Version>4.5.5</Version>
+    </PackageReference>
+    <PackageReference Include="System.Numerics.Vectors">
+      <Version>4.5.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime">
+      <Version>4.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
+      <Version>6.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Text.Encodings.Web">
+      <Version>8.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Text.Json">
+      <Version>8.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="System.Threading.Tasks.Extensions">
+      <Version>4.5.4</Version>
+    </PackageReference>
+    <PackageReference Include="System.ValueTuple">
+      <Version>4.5.0</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
 </Project>

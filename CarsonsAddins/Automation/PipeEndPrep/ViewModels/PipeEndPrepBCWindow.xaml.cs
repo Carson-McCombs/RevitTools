@@ -3,7 +3,6 @@ using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.UI;
 using CarsonsAddins.Properties;
 using CarsonsAddins.Utils;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

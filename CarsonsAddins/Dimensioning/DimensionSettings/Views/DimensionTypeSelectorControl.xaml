@@ -16,7 +16,7 @@
             <Setter Property="FontSize" Value="12"/>
         </Style>
     </UserControl.Resources>
-    <Border Background="White" BorderBrush="Gray" BorderThickness="2" CornerRadius="8" Width="auto" Height="auto">
+    <Border Background="White" BorderBrush="DarkGray" BorderThickness="2" CornerRadius="8" Width="auto" Height="auto">
         <Grid Margin="8">
             <Grid.Resources>
                 <Style TargetType="TextBlock">
@@ -39,18 +39,20 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Text="Primary Dimension Type" Grid.Column="0" Grid.Row="0"/>
-            <ComboBox Name="PrimaryDimensionType_ComboBox" Grid.Column="1" Grid.Row="0" SelectedItem="{Binding PrimaryDimensionType, Mode=TwoWay}"/>
-            <TextBlock Text="Secondary Dimension Types:" Grid.Column="0" Grid.Row="1" Margin="0, 16, 0, 8" />
-            <TextBlock Text="Pipes" Grid.Column="0" Grid.Row="2"/>
-            <ComboBox Name="SecondaryDimensionTypePipes_ComboBox" Grid.Column="1" Grid.Row="2" SelectedItem="{Binding SecondaryPipeDimensionType, Mode=TwoWay}"/>
-            <TextBlock Text="Fittings" Grid.Column="0" Grid.Row="3"/>
-            <ComboBox Name="SecondaryDimensionTypeFittings_ComboBox" Grid.Column="1" Grid.Row="3" SelectedItem="{Binding SecondaryFittingDimensionType, Mode=TwoWay}"/>
-            <TextBlock Text="Accessories" Grid.Column="0" Grid.Row="4"/>
-            <ComboBox Name="SecondaryDimensionTypeAccessories_ComboBox" Grid.Column="1" Grid.Row="4" SelectedItem="{Binding SecondaryAccessoryDimensionType, Mode=TwoWay}"/>
-            <TextBlock Text="Others" Grid.Column="0" Grid.Row="5"/>
-            <ComboBox Name="SecondaryDimensionTypeOthers_ComboBox" Grid.Column="1" Grid.Row="5" SelectedItem="{Binding SecondaryOtherDimensionType, Mode=TwoWay}"/>
+            <TextBlock Text="Dimension Types: " Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" FontSize="16"/>
+            <TextBlock Text="Primary Dimension Type" Grid.Column="0" Grid.Row="1"/>
+            <ComboBox Name="PrimaryDimensionType_ComboBox" Grid.Column="1" Grid.Row="1" SelectedItem="{Binding PrimaryDimensionType, Mode=TwoWay}"/>
+            <TextBlock Text="Secondary Dimension Types:" Grid.Column="0" Grid.Row="2" Margin="0, 16, 0, 8" />
+            <TextBlock Text="Pipes" Grid.Column="0" Grid.Row="3"/>
+            <ComboBox Name="SecondaryDimensionTypePipes_ComboBox" Grid.Column="1" Grid.Row="3" SelectedItem="{Binding SecondaryPipeDimensionType, Mode=TwoWay}"/>
+            <TextBlock Text="Fittings" Grid.Column="0" Grid.Row="4"/>
+            <ComboBox Name="SecondaryDimensionTypeFittings_ComboBox" Grid.Column="1" Grid.Row="4" SelectedItem="{Binding SecondaryFittingDimensionType, Mode=TwoWay}"/>
+            <TextBlock Text="Accessories" Grid.Column="0" Grid.Row="5"/>
+            <ComboBox Name="SecondaryDimensionTypeAccessories_ComboBox" Grid.Column="1" Grid.Row="5" SelectedItem="{Binding SecondaryAccessoryDimensionType, Mode=TwoWay}"/>
+            <TextBlock Text="Others" Grid.Column="0" Grid.Row="6"/>
+            <ComboBox Name="SecondaryDimensionTypeOthers_ComboBox" Grid.Column="1" Grid.Row="6" SelectedItem="{Binding SecondaryOtherDimensionType, Mode=TwoWay}"/>
         </Grid>
     </Border>
     

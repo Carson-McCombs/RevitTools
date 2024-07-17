@@ -11,7 +11,12 @@
     </UserControl.Resources>
     <Border Background="White" BorderBrush="DarkGray" BorderThickness="2" CornerRadius="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="12">
         <Grid Background="White" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <DataGrid Background="White" Name="DataGridControl" ItemsSource="{Binding Source={StaticResource FlangeItemsCollection}, UpdateSourceTrigger=PropertyChanged}" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="True" HeadersVisibility="None" GridLinesVisibility="Horizontal">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" FontSize="16" Text="Flange Mode Selector: "/>
+            <DataGrid Background="White" Name="DataGridControl" ItemsSource="{Binding Source={StaticResource FlangeItemsCollection}, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="True" HeadersVisibility="None" GridLinesVisibility="Horizontal">
                 <DataGrid.Resources>
                     <Style TargetType="GroupItem">
                         <Setter Property="Margin" Value="0,0,0,5"/>

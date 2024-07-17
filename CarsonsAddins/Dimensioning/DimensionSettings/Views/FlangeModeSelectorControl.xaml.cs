@@ -76,8 +76,10 @@ namespace CarsonsAddins
         }
         public string GetGroupName(DimensioningUtils.FlangeDimensionMode mode)
         {
-            DimensioningUtils.FlangeDimensionMode displayMode = (mode == DimensioningUtils.FlangeDimensionMode.Default) ? defaultMode : mode;
-            return displayMode.ToString() + ((displayMode == defaultMode) ? " ( default )" : "");
+            if (mode != DimensioningUtils.FlangeDimensionMode.Default) return mode.ToString();
+            return "Default ( " + defaultMode.ToString() + " )";
+            //DimensioningUtils.FlangeDimensionMode displayMode = (mode == DimensioningUtils.FlangeDimensionMode.Default) ? defaultMode : mode;
+            //return displayMode.ToString() + ((displayMode == defaultMode) ? " ( default )" : "");
         }
     }
 }
