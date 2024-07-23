@@ -22,11 +22,11 @@ namespace CarsonsAddins
         {
             guidsTypeMap = new Dictionary<Type, Guid>
             {
-                { typeof(PipingLCDockablePane), new Guid("{1524F3C0-B6EB-4A32-985F-E3A7071F32B2}") },
-                { typeof(PipingLCUpdater), new Guid("{BD82E5B2-D984-49F9-8442-ED572680656D}") },
+                //{ typeof(PipingLCDockablePane), new Guid("{1524F3C0-B6EB-4A32-985F-E3A7071F32B2}") },
+                //{ typeof(PipingLCUpdater), new Guid("{BD82E5B2-D984-49F9-8442-ED572680656D}") },
                 { typeof(PipeEndPrepUpdater), new Guid("{892AC63B-A827-466F-A8EA-F4418C27B7C2}") },
                 { typeof(PipeEndPrepWindow), new Guid("{7FAA23DB-AAFD-4F47-857E-C06D21B2717E}") },
-                { typeof(SimpleFilterDockablePane), new Guid("{5539CADC-1545-4427-9495-3E74FAB6071C}") },
+                //{ typeof(SimpleFilterDockablePane), new Guid("{5539CADC-1545-4427-9495-3E74FAB6071C}") },
                 { typeof(ParameterManagerDockablePane), new Guid("{DEF29C25-F7BA-4BE6-A9CD-B1702328043E}") },
                 { typeof(StaleReferenceUpdater), new Guid("E00DAD85-B1A0-4C8D-84A8-CEE2BFBBB2E5") },
                 { typeof(PipeEndPrepBCWindow), new Guid("89C5BB50-B5E9-457E-9A51-F27318BF2DEA") },

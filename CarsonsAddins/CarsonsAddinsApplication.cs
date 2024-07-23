@@ -34,6 +34,9 @@ using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using CarsonsAddins.GenericCommands;
+using CarsonsAddins.Settings.ComponentStates.Models;
+using CarsonsAddins.Settings.Main.Views;
+using CarsonsAddins.Settings.Dimensioning.Models;
 
 namespace CarsonsAddins
 {
@@ -51,13 +54,14 @@ namespace CarsonsAddins
             RibbonPanel panel = app.CreateRibbonPanel("Carsons Addins", "Tools");
             Assembly assembly = Assembly.GetExecutingAssembly();
 
-            MyApplicationSettings.Instance = new MyApplicationSettings();
+            
+            ComponentStatePreferences.Instance = new ComponentStatePreferences();
 
             // Always loads in the Application Settings Window
             panel.AddItem(MyApplicationSettingsWindow.RegisterButton(assembly));
 
             // Then loads in ComponentStates based on the user's saved preference on which Component should be enabled at launch ( or loads in whichever is not a work in progress component by default )
-            componentStates = MyApplicationSettings.Instance.InitComponentStates(assembly);
+            componentStates = ComponentStatePreferences.Instance.InitComponentStates(assembly);
             Dictionary<string, PulldownButton> pulldownButtonDictionary = new Dictionary<string, PulldownButton>();
 
             PulldownButtonData automationPullDownButtonData = new PulldownButtonData("AutomationPullDownButton", "Automation")
@@ -129,8 +133,9 @@ namespace CarsonsAddins
         /// </summary>
         private void DummyLaunchDimensionSettingsWindow(object sender, ApplicationInitializedEventArgs e)
         {
-            UIApplication uiapp = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
-            new ShowWindow<DimensionTextWindow>().InitWindow(uiapp);
+            //UIApplication uiapp = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
+            //new ShowWindow<DimensionTextWindow>().InitWindow(uiapp);
+            DimensionPreferences preferences = DimensionPreferences.CreateFromPreferences(ActiveUIDocument.Document);
         }
             /// <summary>
             /// Registers all of the classes with a SettingsComponent that contain a DockablePane via reflection.

@@ -12,7 +12,7 @@ namespace CarsonsAddins.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.7.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.10.0.0")]
     internal sealed partial class MySettings : global::System.Configuration.ApplicationSettingsBase {
         
         private static MySettings defaultInstance = ((MySettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new MySettings())));
@@ -32,18 +32,6 @@ namespace CarsonsAddins.Properties {
             }
             set {
                 this["PEP_Preferences"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string LC_Preferences {
-            get {
-                return ((string)(this["LC_Preferences"]));
-            }
-            set {
-                this["LC_Preferences"] = value;
             }
         }
         

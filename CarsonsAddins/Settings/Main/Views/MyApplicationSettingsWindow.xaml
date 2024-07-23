@@ -1,0 +1,26 @@
+﻿<Window x:Class="CarsonsAddins.Settings.Main.Views.MyApplicationSettingsWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:dimensioning="clr-namespace:CarsonsAddins.Settings.Dimensioning.Views"
+             xmlns:plugins="clr-namespace:CarsonsAddins.Settings.ComponentStates.Views"
+             mc:Ignorable="d" 
+             Height="786" Width="1024" ResizeMode="NoResize">
+    <Grid>
+        <TabControl>
+            <TabItem Header="Plugins" IsSelected="True">
+                <TabItem.Content>
+                    <plugins:SettingsPluginControl x:Name="PluginControl"/>
+                </TabItem.Content>
+            </TabItem>
+            <TabItem Header="Dimensions">
+                <TabItem.Content>
+                    <dimensioning:DimensionSettingsControl x:Name="DimensionsControl"/>
+                </TabItem.Content>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+
+</Window>

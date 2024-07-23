@@ -1,7 +1,6 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using CarsonsAddins.Dimensioning.DimensionSettings.Models;
 using CarsonsAddins.Properties;
 using CarsonsAddins.Utils;
 using System;
@@ -11,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using CarsonsAddins.Settings.Dimensioning.Models;
 
 namespace CarsonsAddins
 {
@@ -19,7 +19,7 @@ namespace CarsonsAddins
     class DebugGeometryCommand : IExternalCommand, ISettingsComponent
     {
         public const string FolderName = "";
-        public const bool IsWIP = false;
+        public const bool IsWIP = true;
         public PushButtonData RegisterButton(Assembly assembly)
         {
             PushButtonData pushButtonData = new PushButtonData("Debug Geometry", "Debug Geometry", assembly.Location, "CarsonsAddins.DebugGeometryCommand")
@@ -79,11 +79,11 @@ namespace CarsonsAddins
             GraphicsStyle[] graphicStyles = new FilteredElementCollector(doc).OfClass(typeof(GraphicsStyle)).Cast<GraphicsStyle>().Where(gs => pipingCategories.Contains((BuiltInCategory)gs.GraphicsStyleCategory.Id.IntegerValue) || ((gs.GraphicsStyleCategory.Parent != null) && pipingCategories.Contains((BuiltInCategory)gs.GraphicsStyleCategory.Parent.Id.IntegerValue))).ToArray();
             try
             {
-                DimensionSettingsModel dimensionStyleNames = JsonConvert.DeserializeObject<DimensionSettingsModel>(MySettings.Default.DimensionStyles_Preferences);
-                if (dimensionStyleNames.centerlineStyleNames == null) return new ElementId[0];
+                DimensionPreferencesSave dimensionStyleNames = JsonConvert.DeserializeObject<DimensionPreferencesSave>(MySettings.Default.DimensionStyles_Preferences);
+                if (dimensionStyleNames.graphicsStyleNames == null) return new ElementId[0];
                 foreach (GraphicsStyle graphicsStyle in graphicStyles)
                 {
-                    if (dimensionStyleNames.centerlineStyleNames.Contains(graphicsStyle.Name)) validStyleIds.Add(graphicsStyle.Id);
+                    if (dimensionStyleNames.graphicsStyleNames.Contains(graphicsStyle.Name)) validStyleIds.Add(graphicsStyle.Id);
                 }
 
             }

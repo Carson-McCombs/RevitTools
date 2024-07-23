@@ -10,7 +10,7 @@ using static CarsonsAddins.Utils.DimensioningUtils;
 using Autodesk.Revit.UI;
 using System.Runtime.ExceptionServices;
 using System.Windows.Controls;
-using CarsonsAddins.Dimensioning.DimensionSettings.Models;
+using CarsonsAddins.Settings.Dimensioning.Models;
 
 namespace CarsonsAddins.Pipeline.Models
 {
@@ -61,8 +61,8 @@ namespace CarsonsAddins.Pipeline.Models
             View activeView = doc.ActiveView;
             Plane plane = GeometryUtils.GetOrCreatePlane(doc);
 
-            DimensionStyles dimensionStyles = DimensionSettingsWindow.DimensionStylesSettings ?? new DimensionStyles();
-            ElementId[] validStyleIds = dimensionStyles.centerlineStyles.Select(style => style.Id).ToArray();
+            DimensionPreferences dimensionPreferences = DimensionPreferences.Instance ?? new DimensionPreferences();
+            ElementId[] validStyleIds = dimensionPreferences.linesStyles.Select(style => style.Id).ToArray();
             ElementId defaultDimensionTypeId = doc.GetDefaultElementTypeId(ElementTypeGroup.LinearDimensionType);
             DimensionType defaultDimensionType = (defaultDimensionTypeId != ElementId.InvalidElementId) ? doc.GetElement(defaultDimensionTypeId) as DimensionType : default;
 
@@ -91,17 +91,17 @@ namespace CarsonsAddins.Pipeline.Models
 
             //Calculates the secondary dimension line by creating a line parallel to the primary dimension line but offset a distance based on the dimension type settings
             //( right now it only checks the pipe dimension type settings, but it should choose the type with the largest text and text offset )
-            Line secondaryDimensionLine = CreateSecondaryDimensionLine(doc.ActiveView, dimensionStyles.secondaryPipeDimensionType ?? defaultDimensionType, projectedElementLine, primaryDimensionLine);
+            Line secondaryDimensionLine = CreateSecondaryDimensionLine(doc.ActiveView, dimensionPreferences.secondaryPipeDimensionType ?? defaultDimensionType, projectedElementLine, primaryDimensionLine);
 
             //Creates a reference array for the primary dimension based on its end point references.
             ReferenceArray primaryReferenceArray = new ReferenceArray();
             //ReferenceArray secondaryReferenceArray = new ReferenceArray();
-            PipingElementReferenceOrderedList referenceSets = new PipingElementReferenceOrderedList(validStyleIds, doc.ActiveView, dimensionStyles, elements);
+            DimensionReferences referenceSets = new DimensionReferences(validStyleIds, doc.ActiveView, dimensionPreferences, elements);
             ReferenceArray secondaryReferenceArray = new ReferenceArray();
             bool matchesPrimary = true;
             for (int i = 0; i < referenceSets.nodes.Length; i++)
             {
-                PipingElementReferenceOrderedList.ReferenceNode node = referenceSets.nodes[i];
+                DimensionReferences.ReferenceNode node = referenceSets.nodes[i];
                 if (node.ignore) continue;
                                 
                 
@@ -113,7 +113,7 @@ namespace CarsonsAddins.Pipeline.Models
                     BuiltInCategory builtInCategory = (node.referenceCount == secondaryReferenceArray.Size) ? node.builtInCategory : BuiltInCategory.OST_PipeCurves;
                     if (!matchesPrimary)
                     {
-                        if (secondaryReferenceArray.Size > 1) doc.Create.NewDimension(activeView, secondaryDimensionLine, secondaryReferenceArray, dimensionStyles.GetSecondaryDimensionType(builtInCategory) ?? defaultDimensionType);
+                        if (secondaryReferenceArray.Size > 1) doc.Create.NewDimension(activeView, secondaryDimensionLine, secondaryReferenceArray, dimensionPreferences.GetSecondaryDimensionType(builtInCategory) ?? defaultDimensionType);
                         secondaryReferenceArray.Clear();
                         matchesPrimary = true;
                     }
@@ -125,11 +125,10 @@ namespace CarsonsAddins.Pipeline.Models
                 }
 
             }
-            doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionStyles.primaryDimensionType ?? defaultDimensionType);
+            doc.Create.NewDimension(activeView, primaryDimensionLine, primaryReferenceArray, dimensionPreferences.primaryDimensionType ?? defaultDimensionType);
         }
-        private static bool AddReferences(ref ReferenceArray primaryReferenceArray, ref ReferenceArray secondaryReferenceArray, PipingElementReferenceOrderedList.ReferenceNode node, bool secondaryDimension, bool matchesPrimary)
+        private static bool AddReferences(ref ReferenceArray primaryReferenceArray, ref ReferenceArray secondaryReferenceArray, DimensionReferences.ReferenceNode node, bool secondaryDimension, bool matchesPrimary)
         { 
-            //if (node.isFlange) return false;
             int addedFirst = 0;
             int addedCenter = 0;
             int addedLast = 0;

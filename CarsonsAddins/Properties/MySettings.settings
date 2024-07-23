@@ -5,9 +5,6 @@
     <Setting Name="PEP_Preferences" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="LC_Preferences" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
     <Setting Name="ComponentState_Preferences" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
