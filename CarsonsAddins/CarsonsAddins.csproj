@@ -102,6 +102,7 @@
     <Compile Include="Automation\PipeEndPrep\ViewModels\PipeEndPrepWindow.xaml.cs" />
     <None Include="Deprecated\PipingLC\ViewModels\PipingLCDockablePane.xaml.cs" />
     <None Include="Deprecated\PipingLC\ViewModels\PipingSystemSelectorControl.xaml.cs" />
+    <Compile Include="Debug\DebugSettingsCommand.cs" />
     <Compile Include="Dimensioning\DimensionText\Models\SetDimensionTextEventHandler.cs" />
     <None Include="Deprecated\SimpleFilter\ViewModels\SimpleFilterDockablePane.xaml.cs" />
     <Compile Include="Settings\ComponentStates\ViewModels\SettingsPluginViewModel.cs" />
@@ -122,11 +123,11 @@
       <DependentUpon>FlangeModeSelectorControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Dimensioning\DimensionText\ViewModels\DimensionTextWindow.xaml.cs" />
-    <Compile Include="Pipeline\Models\DimensionPipeline.cs" />
-    <Compile Include="Pipeline\Models\DimensionPipeLineCommand.cs" />
-    <Compile Include="Pipeline\Models\PipeLine.cs" />
-    <Compile Include="Pipeline\Models\DimensionReferences.cs" />
-    <Compile Include="Pipeline\Models\SelectPipeLineCommand.cs" />
+    <Compile Include="Dimensioning\DimensionPipeline\DimensionPipeline.cs" />
+    <Compile Include="Dimensioning\DimensionPipeline\DimensionPipeLineCommand.cs" />
+    <Compile Include="Standalone\PipeLine.cs" />
+    <Compile Include="Dimensioning\DimensionPipeline\DimensionReferences.cs" />
+    <Compile Include="Standalone\SelectPipeLineCommand.cs" />
     <Compile Include="Settings\ComponentStates\Views\SettingsPluginControl.xaml.cs">
       <DependentUpon>SettingsPluginControl.xaml</DependentUpon>
     </Compile>
@@ -160,6 +161,9 @@
     <Compile Include="Setup\ComponentState.cs" />
     <Compile Include="Setup\GenericComponentCommands.cs" />
     <Compile Include="Setup\SelectDimensionsIndividuallyCommand.cs" />
+    <Compile Include="Shared\CopyTaskDialog\CopyTaskDialog.xaml.cs">
+      <DependentUpon>CopyTaskDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Shared\EventHandlers\SingleFunctionCallEventHandler.cs" />
     <Compile Include="Shared\SelectionFilters\SelectionFilter_LinearDimension.cs" />
     <Compile Include="Shared\SelectionFilters\SelectionFilter_Pipe.cs" />
@@ -184,7 +188,7 @@
     <Compile Include="Shared\Utils\GeometryUtils.cs" />
     <Compile Include="Shared\Utils\MediaUtils.cs" />
     <Compile Include="Shared\Utils\UnitUtils.cs" />
-    <Compile Include="Standalone\DebugGeometryCommand.cs" />
+    <Compile Include="Debug\DebugGeometryCommand.cs" />
     <Compile Include="Standalone\FilterPipingElementsCommand.cs" />
     <Compile Include="Standalone\GetTotalPipeLengthCommand.cs" />
     <Compile Include="Standalone\ParameterManager\Models\ParameterManagerTable.cs" />
@@ -255,6 +259,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Shared\CopyTaskDialog\CopyTaskDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Shared\TextBoxWithLabel\TextBoxWithLabel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -270,8 +278,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Deprecated\SimpleFilter\Models\" />
-    <Folder Include="Pipeline\ViewModels\" />
-    <Folder Include="Pipeline\Views\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\automation_icon_32.png" />

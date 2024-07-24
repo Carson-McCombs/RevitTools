@@ -81,6 +81,7 @@ namespace CarsonsAddins.Settings.Main.Views
                     {
                         case System.Windows.Visibility.Collapsed: instance.Visibility = System.Windows.Visibility.Visible; break;
                         case System.Windows.Visibility.Hidden: instance.ShowDialog(); break;
+                        case System.Windows.Visibility.Visible: instance.Focus(); break;
                         default: break;
                     }
                     return Result.Succeeded;

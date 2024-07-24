@@ -45,6 +45,7 @@ namespace CarsonsAddins.Settings.ComponentStates.Views
         {
             viewModel.Save();
             TaskDialog.Show("Preferences Updated", "Please restart Revit to apply changes to preferences.");
+           
         }
 
         /// <summary>

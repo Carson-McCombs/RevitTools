@@ -1,0 +1,22 @@
+﻿<Window x:Class="CarsonsAddins.Shared.CopyTaskDialog.CopyTaskDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CarsonsAddins.Shared.CopyTaskDialog"
+             mc:Ignorable="d" 
+             d:Width="512"  Width="auto" Height="auto">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Name="MainText" Text="Default_Text" Grid.Row="0" Margin="16" TextWrapping="Wrap"/>
+        <UniformGrid Grid.Row="1" MinWidth="128" VerticalAlignment="Bottom">
+            <Button Content="Copy" Click="Copy_Click" Width="64"/>
+            <Button Content="Close" Click="Close_Click" Width="64"/>
+        </UniformGrid>
+        
+        
+    </Grid>
+</Window>

@@ -16,7 +16,7 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" FontSize="16" Text="Flange Mode Selector: "/>
-            <DataGrid Background="White" Name="DataGridControl" ItemsSource="{Binding Source={StaticResource FlangeItemsCollection}, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="True" HeadersVisibility="None" GridLinesVisibility="Horizontal" Margin="8">
+            <DataGrid Background="White" Name="DataGridControl" ItemsSource="{Binding Source={StaticResource FlangeItemsCollection}, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserSortColumns="True" HeadersVisibility="None" GridLinesVisibility="Horizontal" Margin="8" HorizontalScrollBarVisibility="Disabled">
                 <DataGrid.Resources>
                     <Style TargetType="GroupItem">
                         <Setter Property="Margin" Value="0,0,0,5"/>
@@ -53,8 +53,8 @@
                     </GroupStyle>
                 </DataGrid.GroupStyle>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Mode" Binding="{Binding Name}" IsReadOnly="True"/>
-                    <DataGridComboBoxColumn x:Name="ModeTextColumn" Header="Mode" SelectedValueBinding="{Binding Mode}" IsReadOnly="False"/>
+                    <DataGridTextColumn Header="Mode" Binding="{Binding Name}" IsReadOnly="True" Width="*"/>
+                    <DataGridComboBoxColumn x:Name="ModeTextColumn" Header="Mode" SelectedValueBinding="{Binding Mode}" IsReadOnly="False" Width="64"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

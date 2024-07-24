@@ -63,32 +63,47 @@ namespace CarsonsAddins
             // Then loads in ComponentStates based on the user's saved preference on which Component should be enabled at launch ( or loads in whichever is not a work in progress component by default )
             componentStates = ComponentStatePreferences.Instance.InitComponentStates(assembly);
             Dictionary<string, PulldownButton> pulldownButtonDictionary = new Dictionary<string, PulldownButton>();
+            if (componentStates.Any(component => component.FolderName == "Automation" && component.IsEnabled))
+            {
+                PulldownButtonData automationPullDownButtonData = new PulldownButtonData("AutomationPullDownButton", "Automation")
+                {
+                    ToolTip = "All tools for automating tasks.",
+                    Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.automation_icon_32.png"),
+                    LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.automation_icon_32.png")
+                };
+                PulldownButton automationPullDownButton = panel.AddItem(automationPullDownButtonData) as PulldownButton;
+                pulldownButtonDictionary.Add("Automation", automationPullDownButton);
+            }
+            if (componentStates.Any(component => component.FolderName == "Dimensioning" && component.IsEnabled))
+            {
+                PulldownButtonData dimensioningPulldownButtonData = new PulldownButtonData("UIComponentsPullDownButton", "Dimensioning")
+                {
+                    ToolTip = "All tools for creating or manipulating dimensions.",
+                    Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.dimension_icon_32.png"),
+                    LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.dimension_icon_32.png")
+                };
+                PulldownButton dimensioningPulldownButton = panel.AddItem(dimensioningPulldownButtonData) as PulldownButton;
+                pulldownButtonDictionary.Add("Dimensioning", dimensioningPulldownButton);
+            }
+            if (componentStates.Any(component => component.FolderName == "Debug" && component.IsEnabled))
+            {
+                PulldownButtonData debugPulldownButtonData = new PulldownButtonData("DebugPullDownButton", "Debug")
+                {
+                    ToolTip = "All tools for development purposes.",
+                };
+                PulldownButton debugPulldownButton = panel.AddItem(debugPulldownButtonData) as PulldownButton;
+                pulldownButtonDictionary.Add("Debug", debugPulldownButton);
+            }
+            if (componentStates.Any(component => component.FolderName == "Misc" && component.IsEnabled))
+            {
+                PulldownButtonData miscComponentsPulldownButtonData = new PulldownButtonData("MiscComponentsPullDownButton", "Misc")
+                {
+                    ToolTip = "All tools without their own dedicated window or dockable pane.",
 
-            PulldownButtonData automationPullDownButtonData = new PulldownButtonData("AutomationPullDownButton", "Automation")
-            {
-                ToolTip = "All tools with their own dedicated window or dockable pane.",
-                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.automation_icon_32.png"),
-                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.automation_icon_32.png")
-            };
-            PulldownButton automationPullDownButton = panel.AddItem(automationPullDownButtonData) as PulldownButton;
-            pulldownButtonDictionary.Add("Automation", automationPullDownButton);
-            // Includes all components with UI, such as Windows and DockablePanes
-            PulldownButtonData dimensioningPulldownButtonData = new PulldownButtonData("UIComponentsPullDownButton", "Dimensioning")
-            {
-                ToolTip = "All tools with their own dedicated window or dockable pane.",
-                Image = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.dimension_icon_32.png"),
-                LargeImage = Utils.MediaUtils.GetImage(assembly, "CarsonsAddins.Resources.dimension_icon_32.png")
-            };
-            PulldownButton dimensioningPulldownButton = panel.AddItem(dimensioningPulldownButtonData) as PulldownButton;
-            pulldownButtonDictionary.Add("Dimensioning", dimensioningPulldownButton);
-            // Includes all components without UI
-            PulldownButtonData miscComponentsPulldownButtonData = new PulldownButtonData("MiscComponentsPullDownButton", "Misc")
-            {
-                ToolTip = "All tools without their own dedicated window or dockable pane.",
-               
-            };
-            PulldownButton miscComponentsPulldownButton = panel.AddItem(miscComponentsPulldownButtonData) as PulldownButton;
-            pulldownButtonDictionary.Add("Misc", miscComponentsPulldownButton);
+                };
+                PulldownButton miscComponentsPulldownButton = panel.AddItem(miscComponentsPulldownButtonData) as PulldownButton;
+                pulldownButtonDictionary.Add("Misc", miscComponentsPulldownButton);
+            }
             RegisterComponentPushButtons(assembly, panel, pulldownButtonDictionary);
             app.ControlledApplication.ApplicationInitialized += RegisterDockablePanes;
             app.ControlledApplication.ApplicationInitialized += DummyLaunchDimensionSettingsWindow;
