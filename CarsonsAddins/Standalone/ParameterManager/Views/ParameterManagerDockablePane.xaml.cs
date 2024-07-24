@@ -15,7 +15,7 @@ using System.Windows.Data;
 namespace CarsonsAddins
 {
     /// <summary>
-    /// Allows for Pipe End Prep to be set for each side of each Flange / Union FamilyInstance that is currently loaded.
+    /// Allows for Elements to be sorted and grouped by parameters as well as edit those parameters
     /// </summary>
     public partial class ParameterManagerDockablePane : Page, IDockablePaneProvider, ISettingsUIComponent, ISettingsUpdaterComponent
     {
@@ -33,8 +33,8 @@ namespace CarsonsAddins
             InitializeComponent();
             CollectionViewSource collectionViewSource = FindResource("ElementRowCollectionViewSource") as CollectionViewSource;
             table = new ParameterTable(SelectionDataGrid, collectionViewSource);
-            
-            
+
+
         }
 
         public void Init(UIDocument uidoc)
@@ -227,14 +227,7 @@ namespace CarsonsAddins
         }
 
 
-        
-        
-    }
 
-    class ParameterTracker
-    {
-        private List<Parameter> allPossibleParameters = new List<Parameter>();
-        private ObservableCollection<Parameter> filteredParameterList = new ObservableCollection<Parameter>();
-        public ParameterTracker() { }
+
     }
 }

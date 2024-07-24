@@ -125,6 +125,9 @@
     <Compile Include="Dimensioning\DimensionText\ViewModels\DimensionTextWindow.xaml.cs" />
     <Compile Include="Dimensioning\DimensionPipeline\DimensionPipeline.cs" />
     <Compile Include="Dimensioning\DimensionPipeline\DimensionPipeLineCommand.cs" />
+    <Compile Include="Standalone\ParameterManager\Views\ParameterManagerDockablePane.xaml.cs">
+      <DependentUpon>ParameterManagerDockablePane.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Standalone\PipeLine.cs" />
     <Compile Include="Dimensioning\DimensionPipeline\DimensionReferences.cs" />
     <Compile Include="Standalone\SelectPipeLineCommand.cs" />
@@ -192,7 +195,6 @@
     <Compile Include="Standalone\FilterPipingElementsCommand.cs" />
     <Compile Include="Standalone\GetTotalPipeLengthCommand.cs" />
     <Compile Include="Standalone\ParameterManager\Models\ParameterManagerTable.cs" />
-    <Compile Include="Standalone\ParameterManager\ViewModels\ParameterManagerDockablePane.xaml.cs" />
     <Compile Include="Standalone\SelectAllElementsOfSystemCommand.cs" />
     <Compile Include="Standalone\SmartFlipCommand.cs" />
   </ItemGroup>
@@ -272,12 +274,13 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Standalone\ParameterManager\Views\ParameterManagerDockablePane.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Deprecated\SimpleFilter\Models\" />
+    <Folder Include="Standalone\ParameterManager\ViewModels\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\automation_icon_32.png" />
