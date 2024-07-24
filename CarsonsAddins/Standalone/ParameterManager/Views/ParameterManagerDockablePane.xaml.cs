@@ -1,7 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using CarsonsAddins.Standalone.ParameterManager.Models;
-using CarsonsAddins.Standalone.ParameterManager.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

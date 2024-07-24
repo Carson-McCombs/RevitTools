@@ -198,7 +198,7 @@
     <Compile Include="Debug\Models\DebugGeometryCommand.cs" />
     <Compile Include="Standalone\FilterPipingElementsCommand.cs" />
     <Compile Include="Standalone\GetTotalPipeLengthCommand.cs" />
-    <Compile Include="Standalone\ParameterManager\ViewModels\ParameterManagerTable.cs" />
+    <Compile Include="Standalone\ParameterManager\Models\ParameterManagerTable.cs" />
     <Compile Include="Standalone\SelectAllElementsOfSystemCommand.cs" />
     <Compile Include="Standalone\SmartFlipCommand.cs" />
   </ItemGroup>

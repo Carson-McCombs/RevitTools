@@ -17,13 +17,12 @@ using Binding = System.Windows.Data.Binding;
 using CarsonsAddins.Utils;
 using System.Windows.Media;
 using CarsonsAddins.Shared.EventHandlers;
-using CarsonsAddins.Standalone.ParameterManager.Models;
 
-namespace CarsonsAddins.Standalone.ParameterManager.ViewModels
+namespace CarsonsAddins.Standalone.ParameterManager.Models
 {
 
     /// <summary>
-    /// Abstracts the parameters and element data and interactions with the WPF DataGrid into its own class.
+    /// Abstracts the parameters and element data and interactions with the WPF DataGrid into its own class. Note: Created before migrating to MVVM architecture, so it doesn't exactly fit.
     /// </summary>
     class ParameterTable
     {
