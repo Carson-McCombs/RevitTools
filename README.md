@@ -43,10 +43,6 @@
 
 ![Total Pipe Length](https://github.com/Carson-McCombs/RevitTools/assets/130939367/c4853da2-6940-4477-a0d8-b9b185f22c1f)
 
-***Dimension Pipe Line Tool***
-
--Allows for Piping Elements ( Pipes, Pipe Fittings, and Pipe Accessories ) within a "Pipeline" ( as defined above ) to be dimensions together ( without gaskets / flanges / unions ) in one click. Note: Pipe Accessories and Pipe Fittings both require Reference Lines with the subcategory of "Center line" or "zLines" from the center of each Connector to the center of the element to function correctly.
-
 ***Smart Flip***
 
 **Issue:** Not being able to flip a flange without breaking connections and occasionally moving elements.
@@ -93,7 +89,14 @@
 
 ![image](https://github.com/Carson-McCombs/RevitTools/assets/130939367/cf724c42-e384-4252-8447-52ea7a0fb922)
 
-
-
 -Functions as the standard Dimension Window except you can apply your changes to multiple Dimensions and DimensionSegments. Due to the inaccessibility of some dimension parameters, the only features not currently functioning is swapping between the "Use Actual Value", the "Replace With Text", and "Show Label in View" as well as the Segment Dimension Leader Visibility Dropdown. To use the "Replace With Text" option, simply click that option and fill in the textfield with the desired text. To revert back to the actual value, simply delete all of the text within the "Replace With Text" textfield.
+
+***Dimension Pipe Line Tool***
+
+-Allows for Piping Elements ( Pipes, Pipe Fittings, and Pipe Accessories ) within a "Pipeline" ( as defined above ) to be dimensions together ( without gaskets / flanges / unions ) in one click. Note: Pipe Accessories and Pipe Fittings both require Reference Lines with the subcategory of "Center line" or "zLines" from the center of each Connector to the center of the element to function correctly. Now overhauled to allow for 3 different dimensioning options that can be set for each flange within the Settings Window. 
+-The three dimensioning options are: "None", "Exact", "Partial", and "Negate". A flange marked with "None" will be ignored, intended for use on fittings such as a Non-Connector where it shouoldn't impact the dimensions given. A flange marked with "Exact" will dimension to each side of the flange, this is useful for fittings where pipes are an exact dimension such as ductile iron flanges or Victualic Couplings. A flange marked with "Negate" will remove dimensions to adjacent connectors, useful for cut to suite pipe where the only the overall dimension is needed. A flange marked with "Partial" acts as a mix between "Exact" and "Negate". It acts as "Exact" when next to a junctions or non-linear fitting ( such as tees or bends ), and then it acts as "Negate" otherwise. You can also think of "Partial" acting the same as "Exact" except for when it is between two pipes.
+
+![image](https://github.com/user-attachments/assets/105335da-49e6-4cc7-aa33-323774f5ffa6)
+
+
 
