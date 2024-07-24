@@ -102,7 +102,7 @@
     <Compile Include="Automation\PipeEndPrep\ViewModels\PipeEndPrepWindow.xaml.cs" />
     <None Include="Deprecated\PipingLC\ViewModels\PipingLCDockablePane.xaml.cs" />
     <None Include="Deprecated\PipingLC\ViewModels\PipingSystemSelectorControl.xaml.cs" />
-    <Compile Include="Debug\DebugSettingsCommand.cs" />
+    <Compile Include="Debug\Models\DebugSettingsCommand.cs" />
     <Compile Include="Dimensioning\DimensionText\Models\SetDimensionTextEventHandler.cs" />
     <None Include="Deprecated\SimpleFilter\ViewModels\SimpleFilterDockablePane.xaml.cs" />
     <Compile Include="Settings\ComponentStates\ViewModels\SettingsPluginViewModel.cs" />
@@ -125,6 +125,10 @@
     <Compile Include="Dimensioning\DimensionText\ViewModels\DimensionTextWindow.xaml.cs" />
     <Compile Include="Dimensioning\DimensionPipeline\DimensionPipeline.cs" />
     <Compile Include="Dimensioning\DimensionPipeline\DimensionPipeLineCommand.cs" />
+    <Compile Include="Standalone\ParameterManager\Models\ElementRow.cs" />
+    <Compile Include="Standalone\ParameterManager\Models\GroupIsSelectedProperty.cs" />
+    <Compile Include="Standalone\ParameterManager\Models\GroupParameterValueProperty.cs" />
+    <Compile Include="Standalone\ParameterManager\Models\ParameterCell.cs" />
     <Compile Include="Standalone\ParameterManager\Views\ParameterManagerDockablePane.xaml.cs">
       <DependentUpon>ParameterManagerDockablePane.xaml</DependentUpon>
     </Compile>
@@ -161,10 +165,10 @@
     <Compile Include="Setup\ApplicationIds.cs" />
     <Compile Include="Setup\Availablity\Availability_ProjectDocumentOnly.cs" />
     <Compile Include="Setup\Availablity\Availablilty_ProjectDocumentAndActiveView.cs" />
-    <Compile Include="Setup\ComponentState.cs" />
+    <Compile Include="Settings\ComponentStates\Models\ComponentState.cs" />
     <Compile Include="Setup\GenericComponentCommands.cs" />
-    <Compile Include="Setup\SelectDimensionsIndividuallyCommand.cs" />
-    <Compile Include="Shared\CopyTaskDialog\CopyTaskDialog.xaml.cs">
+    <Compile Include="Shared\SelectDimensionsIndividuallyCommand.cs" />
+    <Compile Include="Shared\CopyTaskDialog.xaml.cs">
       <DependentUpon>CopyTaskDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Shared\EventHandlers\SingleFunctionCallEventHandler.cs" />
@@ -172,10 +176,10 @@
     <Compile Include="Shared\SelectionFilters\SelectionFilter_Pipe.cs" />
     <Compile Include="Shared\SelectionFilters\SelectionFilter_PipeFittingPartType.cs" />
     <Compile Include="Shared\SelectionFilters\SelectionFilter_PipingElements.cs" />
-    <Compile Include="Shared\TextBoxWithLabel\TextBoxWithLabel.xaml.cs">
+    <Compile Include="Shared\TextBoxWithLabel.xaml.cs">
       <DependentUpon>TextBoxWithLabel.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Shared\ToggleableTextBox\ToggleableTextBox.xaml.cs">
+    <Compile Include="Shared\ToggleableTextBox.xaml.cs">
       <DependentUpon>ToggleableTextBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Standalone\ParameterManager\Models\ParameterManagerUpdater.cs" />
@@ -191,10 +195,10 @@
     <Compile Include="Shared\Utils\GeometryUtils.cs" />
     <Compile Include="Shared\Utils\MediaUtils.cs" />
     <Compile Include="Shared\Utils\UnitUtils.cs" />
-    <Compile Include="Debug\DebugGeometryCommand.cs" />
+    <Compile Include="Debug\Models\DebugGeometryCommand.cs" />
     <Compile Include="Standalone\FilterPipingElementsCommand.cs" />
     <Compile Include="Standalone\GetTotalPipeLengthCommand.cs" />
-    <Compile Include="Standalone\ParameterManager\Models\ParameterManagerTable.cs" />
+    <Compile Include="Standalone\ParameterManager\ViewModels\ParameterManagerTable.cs" />
     <Compile Include="Standalone\SelectAllElementsOfSystemCommand.cs" />
     <Compile Include="Standalone\SmartFlipCommand.cs" />
   </ItemGroup>
@@ -261,15 +265,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Shared\CopyTaskDialog\CopyTaskDialog.xaml">
+    <Page Include="Shared\CopyTaskDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Shared\TextBoxWithLabel\TextBoxWithLabel.xaml">
+    <Page Include="Shared\TextBoxWithLabel.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Shared\ToggleableTextBox\ToggleableTextBox.xaml">
+    <Page Include="Shared\ToggleableTextBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -280,7 +284,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Deprecated\SimpleFilter\Models\" />
-    <Folder Include="Standalone\ParameterManager\ViewModels\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\automation_icon_32.png" />

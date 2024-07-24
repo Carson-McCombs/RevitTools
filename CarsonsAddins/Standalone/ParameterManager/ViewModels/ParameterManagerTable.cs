@@ -17,8 +17,9 @@ using Binding = System.Windows.Data.Binding;
 using CarsonsAddins.Utils;
 using System.Windows.Media;
 using CarsonsAddins.Shared.EventHandlers;
+using CarsonsAddins.Standalone.ParameterManager.Models;
 
-namespace CarsonsAddins.UICommands
+namespace CarsonsAddins.Standalone.ParameterManager.ViewModels
 {
 
     /// <summary>
@@ -41,7 +42,6 @@ namespace CarsonsAddins.UICommands
         {
             this.dataGrid = dataGrid;
             this.collectionViewSource = collectionViewSource;
-            //dataGrid.ItemsSource = rows;
             collectionViewSource.Source = rows;
             ParameterCell.UpdateParameterEventHandler = new SingleCallFunctionEventHandler();
             updateParametersEvent = ExternalEvent.Create(ParameterCell.UpdateParameterEventHandler);
@@ -73,13 +73,13 @@ namespace CarsonsAddins.UICommands
             parameterReadOnly.Clear();
             collectionViewSource.GroupDescriptions.Clear();
             currentGroupName = "";
-            //CollectionViewSource.GetDefaultView(rows).GroupDescriptions.Clear();
             for (int i = dataGrid.Columns.Count - 1; i >= 2; i--)
             {
                 dataGrid.Columns.RemoveAt(i);
 
             }
         }
+
         public void SetGroup(string groupName)
         {
             if (groupName == "ElementId") return;
@@ -100,16 +100,19 @@ namespace CarsonsAddins.UICommands
             collectionViewSource.GroupDescriptions.Add(groupDescription);
             currentGroupName = groupName;
         }
+
         public void ClearGroups()
         {
             if (collectionViewSource == null) return;
             currentGroupName = "";
             collectionViewSource.GroupDescriptions.Clear();
         }
+
         public void RefreshElements(params ElementId[] elementIds)
         {
             Array.ForEach(elementIds, id => RefreshElement(id));
         }
+
         public void RefreshElement(ElementId id)
         {
             if (ElementId.InvalidElementId.Equals(id)) return;
@@ -117,6 +120,7 @@ namespace CarsonsAddins.UICommands
             if (index == -1) return;
             rows[index].Refresh();
         }
+
         public void Refresh()
         {
             foreach (ElementRow row in rows)
@@ -124,10 +128,12 @@ namespace CarsonsAddins.UICommands
                 row.Refresh();
             }
         }
+
         public void SetSelectedStateOfElements(ElementRow[] elementRows, bool isSelected)
         {
             Array.ForEach(elementRows, row => row.IsSelected = isSelected);
         }
+
         public ElementId[] GetSelectedElements()
         {
             return rows.Where(row => row.IsSelected && !ElementId.InvalidElementId.Equals(row.Id)).Select(row => row.Id).ToArray();
@@ -224,14 +230,9 @@ namespace CarsonsAddins.UICommands
                 Header = parameterName,
                 IsReadOnly = isReadOnly,
                 CellStyle = style,
-                //ElementStyle = style,
-                //EditingElementStyle = style,
-
-
             };
             dataGrid.Columns.Add(column);
         }
-
 
         /// <summary>
         /// Removes a parameter column from the datagrid.
@@ -255,6 +256,7 @@ namespace CarsonsAddins.UICommands
             }
 
         }
+
         /// <summary>
         /// Recursive update element parameter values.
         /// </summary>
@@ -285,302 +287,4 @@ namespace CarsonsAddins.UICommands
             ids.Remove(id);
         }
     }
-
-    class ElementRowCollection : ObservableCollection<ElementRow> { }
-
-    /// <summary>
-    /// Stores and References data of a single Element. Currently binding and tracking changes via the INotifyPropertyChanged base class. Will eventually move to binding via DependencyProperties for speed increase.
-    /// </summary>
-    class ElementRow : INotifyPropertyChanged // 1 to 1: Element to Row
-    {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public Element element { get; private set; }
-        private readonly ElementId id = ElementId.InvalidElementId;
-        public ElementId Id { get => id; }
-        private bool isSelected = false;
-        public bool IsSelected
-        {
-            get => isSelected;
-            set
-            {
-                if (isSelected == value) return;
-                isSelected = value;
-                OnNotifyPropertyChanged();
-            }
-        }
-
-        public Dictionary<string, ParameterCell> cells { private set; get; }
-        public ElementRow(Element element)
-        {
-            cells = new Dictionary<string, ParameterCell>();
-            this.element = element;
-            id = element.Id;
-        }
-
-        public void Refresh()
-        {
-            foreach (ParameterCell cell in cells.Values)
-            {
-                cell.Refresh();
-            }
-        }
-        public void Refresh(string parameterName)
-        {
-            if (cells.ContainsKey(parameterName)) cells[parameterName].Refresh();
-        }
-
-        public bool HasParameterValue(string parameterName, string valueString)
-        {
-            if (valueString is null) return false;
-            if (parameterName == "IsSelected") return (GroupIsSelectedProperty.GetGroupName(IsSelected) == valueString);
-            if (!cells.ContainsKey(parameterName)) return false;
-            ParameterCell cell = cells[parameterName];
-            if (cell is null) return false;
-            return valueString.Equals(GroupParameterValueProperty.GetGroupName(cell));
-        }
-
-       
-
-        public Parameter AddParameter(Definition definition)
-        {
-            if (element == null) return null;
-            Parameter parameter = element.get_Parameter(definition);
-            cells.Add(definition.Name, new ParameterCell(parameter));
-            return parameter;
-        }
-        public Parameter AddParameter(string parameterName)
-        {
-            if (element == null) return null;
-            if (parameterName == null) return null;
-            Parameter parameter = element.LookupParameter(parameterName);
-            cells.Add(parameterName, new ParameterCell(parameter));
-            return parameter;
-        }
-        public void RemoveParameter(string parameterName)
-        {
-            if (!cells.ContainsKey(parameterName)) return;
-            cells.Remove(parameterName);
-        }
-        public string GetCellValue(string parameterName)
-        {
-            if (parameterName == null) return "";
-            if (!cells.TryGetValue(parameterName, out ParameterCell cell)) return "";
-            return cell.ParameterValue;
-        }
-        public void PushUpdatesToElement(string parameterName)
-        {
-            try
-            {
-                if (!cells.ContainsKey(parameterName)) return;
-                ParameterCell cell = cells[parameterName];
-                if (cell.IsSynced) return;
-                if (cell.IsNull) return;
-                cell.PushValueToParameter();
-                
-            }
-            catch (Exception ex)
-            {
-                TaskDialog.Show("Parameter Row Error", ex.Message);
-            }
-        }
-        public void PushUpdatesToElement()
-        {
-            foreach (string parameterName in cells.Keys)
-            {
-                PushUpdatesToElement(parameterName);
-
-
-            }
-        }
-
-
-
-        protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
-        }
-    }
-    class ParameterCell : INotifyPropertyChanged
-    {
-        public static SingleCallFunctionEventHandler UpdateParameterEventHandler;
-        public event PropertyChangedEventHandler PropertyChanged;
-        private bool isSynced = true;
-        public bool IsSynced
-        {
-            get => isSynced;
-            set
-            {
-                if (isSynced == value) return;
-                isSynced = value;
-                //OnNotifyPropertyChanged();
-            }
-        }
-        private SolidColorBrush fontColor = new SolidColorBrush(Colors.Black);
-        public SolidColorBrush FontColor
-        {
-            get => fontColor;
-            set
-            {
-                if (value == null) return;
-                if (fontColor == value) return;
-                fontColor = value;
-                OnNotifyPropertyChanged();
-            }
-        }
-        private SolidColorBrush backgroundColor = new SolidColorBrush(Colors.White);
-        public SolidColorBrush BackgroundColor
-        {
-            get => backgroundColor;
-            set
-            {
-                if (value == null) return;
-                if (backgroundColor == value) return;
-                backgroundColor = value;
-                OnNotifyPropertyChanged();
-            }
-        }
-        public bool IsNull = true;
-        private readonly Parameter parameter;
-        private string parameterValue = "";
-        public string ParameterValue
-        {
-            get => parameterValue;
-            set
-            {
-                if (value == null) return;
-                if (parameterValue.Equals(value)) return;
-                if (IsNull) return;
-                parameterValue = value;
-                IsSynced = false;
-                PushValueToParameter();
-                OnNotifyPropertyChanged();
-            }
-        }
-
-
-        public ParameterCell(Parameter parameter)
-        {
-            this.parameter = parameter;
-            IsNull = parameter == null;
-           // parameterValue = GetParameterValue(parameter);
-            ParameterValue = GetParameterValue(parameter);
-            IsSynced = true;
-            if (IsNull) BackgroundColor = new SolidColorBrush(Colors.LightGray);
-            if (!IsNull && parameter.IsReadOnly) FontColor = new SolidColorBrush(Colors.Gray);
-        }
-
-        private string GetParameterValue(Parameter parameter)
-        {
-            if (parameter == null) return null;
-            if (StorageType.String.Equals(parameter.StorageType)) return parameter.AsString();
-            return parameter.AsValueString();
-            /*switch (parameter.StorageType)
-            {
-                case StorageType.String: return parameter.AsValueString();
-                case StorageType.Integer: return parameter.AsInteger().ToString();
-                case StorageType.Double: return parameter.AsDouble().ToString();
-                case StorageType.ElementId: return parameter.AsValueString().ToString();
-                default: return null;
-            }*/
-
-        }
-        public void Refresh()
-        {
-            if (IsNull) return;
-            ParameterValue = GetParameterValue(parameter);
-            IsSynced = true;
-        }
-        //public void PushValueToParameterEvent()
-        //{
-        //    UpdateParameterHandler.Instance.handler.Functions += PushValueToParameter;
-        //}
-        public void PushValueToParameter()
-        {
-            if (IsNull) return;
-            if (parameter.IsReadOnly) return;
-            if (ParameterValue == GetParameterValue(parameter)) return;
-            //Transaction transaction = new Transaction(doc);
-            //transaction.Start("Update " + parameter.Definition.Name + " Cell");
-            try
-            {
-                UpdateParameterEventHandler.Functions += PushValueFromHandler;
-                //transaction.Commit();
-                //return;
-            }
-            catch (Exception ex)
-            {
-                //transaction.RollBack();
-                TaskDialog.Show("ParameterCell Error", ex.Message);
-                //return;
-            }
-            
-        }
-        public void PushValueFromHandler(Document doc)
-        {
-            Transaction transaction = new Transaction(doc);
-            transaction.Start("Update Parameter");
-            try
-            {
-                if (parameter.StorageType != StorageType.String) parameter.SetValueString(ParameterValue);
-                else parameter.Set(ParameterValue);
-                IsSynced = true;
-                transaction.Commit();
-            }
-            catch (Exception ex)
-            {
-                transaction.RollBack();
-                TaskDialog.Show("Error Updating Element", ex.Message);
-            }
-        }
-        protected void OnNotifyPropertyChanged([CallerMemberName] string memberName = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(memberName));
-        }
-    }
-    class GroupParameterValueProperty : PropertyGroupDescription
-    {
-        public GroupParameterValueProperty(string propertyName) : base(propertyName) 
-        { 
-            PropertyName = propertyName; 
-        }
-
-        public override object GroupNameFromItem(object item, int level, CultureInfo culture)
-        {
-            var baseItem = base.GroupNameFromItem(item, level, culture);
-            ParameterCell parameterCell = baseItem as ParameterCell;
-            return GetGroupName(parameterCell);
-        }
-
-        public static string GetGroupName(ParameterCell parameterCell)
-        {
-            if (parameterCell.IsNull) return "No Parameter";
-            else if (string.IsNullOrEmpty(parameterCell.ParameterValue)) return "Empty";
-            return parameterCell.ParameterValue;
-        }
-        public static string GetGroupName(string parameterName)
-        {
-            return (string.IsNullOrEmpty(parameterName)) ? "Empty" : parameterName;
-        }
-
-    }
-
-    class GroupIsSelectedProperty : PropertyGroupDescription
-    {
-        public GroupIsSelectedProperty() : base("IsSelected") { }
-        public override object GroupNameFromItem(object item, int level, CultureInfo culture)
-        {
-            var baseItem = base.GroupNameFromItem(item, level, culture);
-            if (!(baseItem is bool isSelected) ) return "NULL";
-            return GetGroupName(isSelected);
-        }
-        public static string GetGroupName(bool isSelected) 
-        {
-            return isSelected ? "Selected" : "Not Selected";
-        }
-    }
-
-
-
-
 }
