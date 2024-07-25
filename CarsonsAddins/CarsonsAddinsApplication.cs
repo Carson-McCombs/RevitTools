@@ -106,11 +106,17 @@ namespace CarsonsAddins
             }
             RegisterComponentPushButtons(assembly, panel, pulldownButtonDictionary);
             app.ControlledApplication.ApplicationInitialized += RegisterDockablePanes;
-            app.ControlledApplication.ApplicationInitialized += DummyLaunchDimensionSettingsWindow;
+            app.ViewActivated += CheckIfFocusingOnNewDocument;
             return Result.Succeeded;
         }
 
-        
+        private void CheckIfFocusingOnNewDocument(object sender, ViewActivatedEventArgs e)
+        {
+            if (e.CurrentActiveView?.Document == null || e.CurrentActiveView?.Document == e.PreviousActiveView?.Document) return;
+           
+            DimensionPreferences.Instance = DimensionPreferences.CreateFromPreferences(e.CurrentActiveView.Document);
+        }
+
         public Result OnShutdown(UIControlledApplication app)
         {
             return Result.Succeeded;
@@ -143,15 +149,7 @@ namespace CarsonsAddins
                 }
             }
         }
-        /// <summary>
-        /// Registers all of the classes with a SettingsComponent that contain a DockablePane via reflection.
-        /// </summary>
-        private void DummyLaunchDimensionSettingsWindow(object sender, ApplicationInitializedEventArgs e)
-        {
-            //UIApplication uiapp = new UIApplication(sender as Autodesk.Revit.ApplicationServices.Application);
-            //new ShowWindow<DimensionTextWindow>().InitWindow(uiapp);
-            DimensionPreferences preferences = DimensionPreferences.CreateFromPreferences(ActiveUIDocument.Document);
-        }
+
             /// <summary>
             /// Registers all of the classes with a SettingsComponent that contain a DockablePane via reflection.
             /// </summary>
