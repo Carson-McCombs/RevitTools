@@ -234,7 +234,7 @@ namespace CarsonsAddins
             this.pipeTypeId = pipeTypeId;
             this.pipeTypeName = pipeTypeName;
         }
-        [JsonConstructor]
+        [System.Text.Json.Serialization.JsonConstructor]
         public PipeEndPrepPreferences(string pipeTypeId, string pipeTypeName, string bellEndPrep, string spigotEndPrep)
         {
             this.pipeTypeId = pipeTypeId;

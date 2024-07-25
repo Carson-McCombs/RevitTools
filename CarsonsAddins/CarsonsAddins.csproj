@@ -51,6 +51,10 @@
     <AssemblyName>CarsonsAddins</AssemblyName>
   </PropertyGroup>
   <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
@@ -60,22 +64,19 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AdWindows, Version=3.0.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\AdWindows.dll</HintPath>
+    <Reference Include="AdWindows">
+      <HintPath>E:\Revit\Product\Revit 2023\AdWindows.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>E:\Revit\Product\Revit 2023\AddIns\PnIDModeler\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="RevitAPI, Version=23.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\RevitAPI.dll</HintPath>
+    <Reference Include="RevitAPI">
+      <HintPath>E:\Revit\Product\Revit 2023\RevitAPI.dll</HintPath>
     </Reference>
-    <Reference Include="RevitAPIUI, Version=23.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files\Autodesk\Revit 2021\RevitAPIUI.dll</HintPath>
+    <Reference Include="RevitAPIUI">
+      <HintPath>E:\Revit\Product\Revit 2023\RevitAPIUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -87,11 +88,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
@@ -103,20 +100,44 @@
   <ItemGroup>
     <Compile Include="Automation\PipeEndPrep\ViewModels\PipeEndPrepBCWindow.xaml.cs" />
     <Compile Include="Automation\PipeEndPrep\ViewModels\PipeEndPrepWindow.xaml.cs" />
-    <Compile Include="Deprecated\PipingLC\ViewModels\PipingLCDockablePane.xaml.cs" />
-    <Compile Include="Deprecated\PipingLC\ViewModels\PipingSystemSelectorControl.xaml.cs" />
-    <Compile Include="Deprecated\SimpleFilter\Models\SetDimensionTextEventHandler.cs" />
-    <Compile Include="Deprecated\SimpleFilter\ViewModels\SimpleFilterDockablePane.xaml.cs" />
-    <Compile Include="Dimensioning\DimensionSettings\ViewModels\DimensionSettingsWindow.xaml.cs" />
-    <Compile Include="Dimensioning\DimensionSettings\ViewModels\DimensionTypeSelectorControl.xaml.cs" />
-    <Compile Include="Dimensioning\DimensionSettings\ViewModels\GraphicsStyleListControl.xaml.cs" />
-    <Compile Include="Dimensioning\DimensionSettings\ViewModels\PreviewControlWrapper.xaml.cs" />
+    <None Include="Deprecated\PipingLC\ViewModels\PipingLCDockablePane.xaml.cs" />
+    <None Include="Deprecated\PipingLC\ViewModels\PipingSystemSelectorControl.xaml.cs" />
+    <Compile Include="Debug\Models\DebugSettingsCommand.cs" />
+    <Compile Include="Dimensioning\DimensionText\Models\SetDimensionTextEventHandler.cs" />
+    <None Include="Deprecated\SimpleFilter\ViewModels\SimpleFilterDockablePane.xaml.cs" />
+    <Compile Include="Settings\ComponentStates\ViewModels\SettingsPluginViewModel.cs" />
+    <Compile Include="Settings\Dimensioning\Models\DimensionPreferencesSave.cs" />
+    <Compile Include="Settings\Dimensioning\Models\DimensionPreferences.cs" />
+    <Compile Include="Settings\Dimensioning\Models\FlangedModeItem.cs" />
+    <Compile Include="Settings\Dimensioning\ViewModels\DimensionSettingsViewModel.cs" />
+    <Compile Include="Settings\Dimensioning\ViewModels\DimensionTypeSelectorViewModel.cs" />
+    <Compile Include="Settings\Dimensioning\ViewModels\FlangeModeSelectorViewModel.cs" />
+    <Compile Include="Settings\Dimensioning\ViewModels\GraphicsStylesSelectorViewModel.cs" />
+    <Compile Include="Settings\Dimensioning\Views\DimensionSettingsControl.xaml.cs">
+      <DependentUpon>DimensionSettingsControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\Dimensioning\Views\DimensionTypeSelectorControl.xaml.cs">
+      <DependentUpon>DimensionTypeSelectorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\Dimensioning\Views\FlangeModeSelectorControl.xaml.cs">
+      <DependentUpon>FlangeModeSelectorControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dimensioning\DimensionText\ViewModels\DimensionTextWindow.xaml.cs" />
-    <Compile Include="Pipeline\Models\DimensionPipeline.cs" />
-    <Compile Include="Pipeline\Models\DimensionPipeLineCommand.cs" />
-    <Compile Include="Pipeline\Models\PipeLine.cs" />
-    <Compile Include="Pipeline\Models\PipingElementReferenceOrderedList.cs" />
-    <Compile Include="Pipeline\Models\SelectPipeLineCommand.cs" />
+    <Compile Include="Dimensioning\DimensionPipeline\DimensionPipeline.cs" />
+    <Compile Include="Dimensioning\DimensionPipeline\DimensionPipeLineCommand.cs" />
+    <Compile Include="Standalone\ParameterManager\Models\ElementRow.cs" />
+    <Compile Include="Standalone\ParameterManager\Models\GroupIsSelectedProperty.cs" />
+    <Compile Include="Standalone\ParameterManager\Models\GroupParameterValueProperty.cs" />
+    <Compile Include="Standalone\ParameterManager\Models\ParameterCell.cs" />
+    <Compile Include="Standalone\ParameterManager\Views\ParameterManagerDockablePane.xaml.cs">
+      <DependentUpon>ParameterManagerDockablePane.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Standalone\PipeLine.cs" />
+    <Compile Include="Dimensioning\DimensionPipeline\DimensionReferences.cs" />
+    <Compile Include="Standalone\SelectPipeLineCommand.cs" />
+    <Compile Include="Settings\ComponentStates\Views\SettingsPluginControl.xaml.cs">
+      <DependentUpon>SettingsPluginControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\MySettings.cs" />
     <Compile Include="Properties\MySettings.Designer.cs">
@@ -133,37 +154,51 @@
     <Compile Include="CarsonsAddinsApplication.Designer.cs">
       <DependentUpon>CarsonsAddinsApplication.cs</DependentUpon>
     </Compile>
-    <Compile Include="Settings\Models\MyApplicationSettings.cs" />
-    <Compile Include="Settings\ViewModels\MyApplicationSettingsWindow.xaml.cs" />
+    <Compile Include="Settings\ComponentStates\Models\ComponentStatePreferences.cs" />
+    <Compile Include="Settings\Dimensioning\Views\GraphicsStylesSelectorControl.xaml.cs">
+      <DependentUpon>GraphicsStylesSelectorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\Main\ViewModels\MyApplicationSettingsViewModel.cs" />
+    <Compile Include="Settings\Main\Views\MyApplicationSettingsWindow.xaml.cs">
+      <DependentUpon>MyApplicationSettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Setup\ApplicationIds.cs" />
     <Compile Include="Setup\Availablity\Availability_ProjectDocumentOnly.cs" />
     <Compile Include="Setup\Availablity\Availablilty_ProjectDocumentAndActiveView.cs" />
-    <Compile Include="Setup\ComponentState.cs" />
+    <Compile Include="Settings\ComponentStates\Models\ComponentState.cs" />
     <Compile Include="Setup\GenericComponentCommands.cs" />
-    <Compile Include="Setup\SelectDimensionsIndividuallyCommand.cs" />
+    <Compile Include="Shared\SelectDimensionsIndividuallyCommand.cs" />
+    <Compile Include="Shared\CopyTaskDialog.xaml.cs">
+      <DependentUpon>CopyTaskDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Shared\EventHandlers\SingleFunctionCallEventHandler.cs" />
     <Compile Include="Shared\SelectionFilters\SelectionFilter_LinearDimension.cs" />
     <Compile Include="Shared\SelectionFilters\SelectionFilter_Pipe.cs" />
     <Compile Include="Shared\SelectionFilters\SelectionFilter_PipeFittingPartType.cs" />
     <Compile Include="Shared\SelectionFilters\SelectionFilter_PipingElements.cs" />
-    <Compile Include="Shared\TextBoxWithLabel\ViewModels\TextBoxWithLabel.xaml.cs" />
-    <Compile Include="Shared\ToggleableTextBox\ViewModels\ToggleableTextBox.xaml.cs" />
-    <Compile Include="Shared\Updaters\ParameterManagerUpdater.cs" />
-    <Compile Include="Shared\Updaters\PipeEndPrepBCUpdater.cs" />
-    <Compile Include="Shared\Updaters\PipeEndPrepUpdater.cs" />
-    <Compile Include="Shared\Updaters\PipingLCUpdater.cs" />
-    <Compile Include="Shared\Updaters\StaleReferenceUpdater.cs" />
+    <Compile Include="Shared\TextBoxWithLabel.xaml.cs">
+      <DependentUpon>TextBoxWithLabel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Shared\ToggleableTextBox.xaml.cs">
+      <DependentUpon>ToggleableTextBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Standalone\ParameterManager\Models\ParameterManagerUpdater.cs" />
+    <Compile Include="Automation\PipeEndPrep\Models\PipeEndPrepBCUpdater.cs" />
+    <Compile Include="Automation\PipeEndPrep\Models\PipeEndPrepUpdater.cs" />
+    <None Include="Deprecated\PipingLC\Models\PipingLCUpdater.cs" />
+    <Compile Include="Standalone\ParameterManager\Models\StaleReferenceUpdater.cs" />
     <Compile Include="Shared\Utils\ConnectionUtils.cs" />
     <Compile Include="Shared\Utils\DatabaseUtils.cs" />
     <Compile Include="Shared\Utils\DimensioningUtils.cs" />
     <Compile Include="Shared\Utils\ElementCheckUtils.cs" />
-    <Compile Include="Shared\Utils\GenericFunctionEventHandler.cs" />
+    <Compile Include="Shared\EventHandlers\RepeatedFunctionCallEventHandler.cs" />
     <Compile Include="Shared\Utils\GeometryUtils.cs" />
     <Compile Include="Shared\Utils\MediaUtils.cs" />
     <Compile Include="Shared\Utils\UnitUtils.cs" />
+    <Compile Include="Debug\Models\DebugGeometryCommand.cs" />
     <Compile Include="Standalone\FilterPipingElementsCommand.cs" />
     <Compile Include="Standalone\GetTotalPipeLengthCommand.cs" />
     <Compile Include="Standalone\ParameterManager\Models\ParameterManagerTable.cs" />
-    <Compile Include="Standalone\ParameterManager\ViewModels\ParameterManagerDockablePane.xaml.cs" />
     <Compile Include="Standalone\SelectAllElementsOfSystemCommand.cs" />
     <Compile Include="Standalone\SmartFlipCommand.cs" />
   </ItemGroup>
@@ -176,7 +211,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
     <None Include="Properties\MySettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>MySettings.Designer.cs</LastGenOutput>
@@ -191,62 +225,65 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Deprecated\PipingLC\Views\PipingLCDockablePane.xaml">
+    <None Include="Deprecated\PipingLC\Views\PipingLCDockablePane.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </None>
+    <None Include="Deprecated\PipingLC\Views\PipingSystemSelectorControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Deprecated\SimpleFilter\Views\SimpleFilterDockablePane.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </None>
+    <Page Include="Settings\Dimensioning\Views\DimensionSettingsControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Deprecated\PipingLC\Views\PipingSystemSelectorControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Deprecated\SimpleFilter\Views\SimpleFilterDockablePane.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Dimensioning\DimensionSettings\Views\PreviewControlWrapper.xaml">
+    <Page Include="Settings\Dimensioning\Views\DimensionTypeSelectorControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Dimensioning\DimensionSettings\Views\DimensionSettingsWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Settings\Dimensioning\Views\FlangeModeSelectorControl.xaml">
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Dimensioning\DimensionSettings\Views\DimensionTypeSelectorControl.xaml">
       <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Dimensioning\DimensionSettings\Views\GraphicsStyleListControl.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="Dimensioning\DimensionText\Views\DimensionTextWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Settings\Views\MyApplicationSettingsWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Settings\ComponentStates\Views\SettingsPluginControl.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Shared\TextBoxWithLabel\Views\TextBoxWithLabel.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Settings\Dimensioning\Views\GraphicsStylesSelectorControl.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Shared\ToggleableTextBox\Views\ToggleableTextBox.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Settings\Main\Views\MyApplicationSettingsWindow.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Shared\CopyTaskDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Shared\TextBoxWithLabel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Shared\ToggleableTextBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Standalone\ParameterManager\Views\ParameterManagerDockablePane.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Automation\PipeEndPrep\Models\" />
-    <Folder Include="Deprecated\PipingLC\Models\" />
-    <Folder Include="Dimensioning\DimensionSettings\Models\" />
-    <Folder Include="Dimensioning\DimensionText\Models\" />
-    <Folder Include="Pipeline\ViewModels\" />
-    <Folder Include="Pipeline\Views\" />
+    <Folder Include="Deprecated\SimpleFilter\Models\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\automation_icon_32.png" />
@@ -256,6 +293,41 @@
     <EmbeddedResource Include="Resources\select_pipeline_icon_32.png" />
     <EmbeddedResource Include="Resources\settings_icon_32.png" />
     <EmbeddedResource Include="Resources\total_pipe_length_icon_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces">
+      <Version>8.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Buffers">
+      <Version>4.5.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Memory">
+      <Version>4.5.5</Version>
+    </PackageReference>
+    <PackageReference Include="System.Numerics.Vectors">
+      <Version>4.5.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime">
+      <Version>4.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
+      <Version>6.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Text.Encodings.Web">
+      <Version>8.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Text.Json">
+      <Version>8.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="System.Threading.Tasks.Extensions">
+      <Version>4.5.4</Version>
+    </PackageReference>
+    <PackageReference Include="System.ValueTuple">
+      <Version>4.5.0</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.Targets" />
 </Project>

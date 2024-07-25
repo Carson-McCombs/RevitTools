@@ -80,7 +80,7 @@ namespace CarsonsAddins
                     {
                         transaction.RollBack();
                         message += "Could not flip element.\n";
-                        return Result.Failed;
+                        return Result.Cancelled;
                     }
 
                     transaction.Commit();

@@ -6,8 +6,7 @@
     xmlns:local="clr-namespace:CarsonsAddins"
     xmlns:system="clr-namespace:System;assembly=mscorlib"
     mc:Ignorable="d" 
-      
-    d:DesignHeight="444" d:DesignWidth="512" >
+    Height="444" Width="512">
     <Page.Resources>
         <Style x:Key="CheckButtonsStyle" TargetType="Button">
             <Setter Property="Height" Value="28"/>
@@ -66,10 +65,10 @@
             </Setter>
         </Style>
 
-        
-        
+
+
         <CollectionViewSource x:Key="ElementRowCollectionViewSource" IsLiveGroupingRequested="True" IsLiveSortingRequested="True"/>
-    
+
     </Page.Resources>
 
     <Grid Background="WhiteSmoke">
@@ -99,7 +98,7 @@
                             <Style TargetType="DataGridColumnHeader">
                                 <Setter Property="ContextMenu" Value="{StaticResource DataGridColumnHeaderContextMenu}"/>
                             </Style>
-                            
+
                         </DataGrid.Resources>
                         <DataGrid.GroupStyle>
                             <GroupStyle ContainerStyle="{StaticResource DataGridGroupHeaderStyle}">
@@ -130,7 +129,7 @@
             <Button Content="Select From List" Click="SelectHighlightedElements" Style="{StaticResource CheckButtonsStyle}"/>
 
             <Line/>
-            
+
             <Button Content="Add Parameter" Click="AddParameterButton"  Style="{StaticResource CheckButtonsStyle}"/>
             <!--TextBox Name="ParameterNameControl" Text="" IsReadOnly="false" FontSize="14" FontFamily="Arial" Margin="4" Padding="4" VerticalContentAlignment="Center" ToolTip="Parameter Name"/-->
             <ComboBox Name="ParameterNameControl" Text="" IsEditable="True" IsReadOnly="false" FontSize="14" FontFamily="Arial" Margin="4" Padding="4" VerticalContentAlignment="Center" ToolTip="Parameter Name">

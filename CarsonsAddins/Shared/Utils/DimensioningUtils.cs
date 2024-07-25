@@ -10,6 +10,8 @@ namespace CarsonsAddins.Utils
 {
     public static class DimensioningUtils
     {
+
+        
         public static Line GetDimensionSegmentLine(DimensionSegment segment, XYZ direction)
         {
             if (segment.Value == null) return null;
@@ -292,21 +294,7 @@ namespace CarsonsAddins.Utils
             if (connector == null) return null;
             Connector adjacent = ConnectionUtils.GetAdjacentConnector(connector);
             if (adjacent == null) return null;
-            return GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, adjacent);
-        }
-
-
-        /// <summary>
-        /// Retrieves a reference to the end point of a Piping Element. Meant to be used when dimensioning to a end of the Pipeline
-        /// </summary>
-        /// <param name="activeView">The active View.</param>
-        /// <param name="validStyleIds">The ElementIds corresponding to the valid centerline line styles.</param>
-        /// <param name="element">a Piping Element</param>
-        /// <returns>a Reference corresponding to the endpoint of the Piping Element.</returns>
-        public static Reference GetEndReference(View activeView, ElementId[] validStyleIds, Element element)
-        {
-            if (ElementCheckUtils.IsPipe(element)) return GetPipeEndReference(activeView, element as Pipe);
-            return GetCenterReference(validStyleIds, element);
+            return GeometryUtils.GetPseudoReferenceOfConnector(null, GeometryUtils.GetGeometryOptions(), plane, adjacent);
         }
 
         /// <summary>
@@ -372,8 +360,7 @@ namespace CarsonsAddins.Utils
         {
             Line[] instanceLines = GeometryUtils.GetInstanceGeometryObjectsWithStyleIds<Line>(GeometryUtils.GetGeometryOptions(), element, validStyleIds);
             Line[] symbolLines = GeometryUtils.GetSymbolGeometryObjectsWithStyleIds<Line>(GeometryUtils.GetGeometryOptions(), element, validStyleIds);
-            if (instanceLines == null || symbolLines == null) return null;
-            if (instanceLines.Length == 0 || symbolLines.Length == 0) return null;
+            if (instanceLines == null || instanceLines.Length == 0 || symbolLines == null || symbolLines.Length == 0) return null;
             XYZ origin = GetOriginOfElement(element);
             int id = -1;
             int endIndex = -1;
@@ -394,6 +381,31 @@ namespace CarsonsAddins.Utils
             return symbolLines.Where(line => line.Id.Equals(id)).FirstOrDefault()?.GetEndPointReference(endIndex);
         }
 
+        public static Reference GetProjectedCenterReference(Options geometryOptions, ElementId[] validStyleIds, Plane plane, Element element)
+        {
+            Line[] instanceLines = GeometryUtils.GetInstanceGeometryObjectsWithStyleIds<Line>(geometryOptions, element, validStyleIds);
+            Line[] symbolLines = GeometryUtils.GetSymbolGeometryObjectsWithStyleIds<Line>(geometryOptions, element, validStyleIds);
+            if (instanceLines == null || instanceLines.Length == 0 || symbolLines == null || symbolLines.Length == 0) return null;
+            XYZ projectedOrigin = GeometryUtils.ProjectPointOntoPlane(plane, GetOriginOfElement(element));
+            int id = -1;
+            int endIndex = -1;
+            foreach (Line line in instanceLines)
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    XYZ projectedEndPoint = GeometryUtils.ProjectPointOntoPlane(plane, line.GetEndPoint(i));
+                    if (projectedEndPoint.IsAlmostEqualTo(projectedOrigin))
+                    {
+                        id = line.Id;
+                        endIndex = i;
+                        break;
+                    }
+                }
+                if (id != -1) break;
+            }
+            if (id == -1 || endIndex == -1) return null;
+            return symbolLines.Where(line => line.Id.Equals(id)).FirstOrDefault()?.GetEndPointReference(endIndex);
+        }
 
         /// <summary>
         /// Retrieves the Reference for unused connector of the pipe.
@@ -423,9 +435,10 @@ namespace CarsonsAddins.Utils
 
         public static Reference GetMechanicalEquipmentEndReference(Plane plane, FamilyInstance mechanicalEquipment, FamilyInstance connected)
         {
-            Connector connector = ConnectionUtils.TryGetOneSidedConnection(mechanicalEquipment, connected);
-            if (connector == null) return null;
-            return GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, connector);
+            return null;
+            //Connector connector = ConnectionUtils.TryGetOneSidedConnection(mechanicalEquipment, connected);
+            //if (connector == null) return null;
+            //return GeometryUtils.GetPseudoReferenceOfConnector(GeometryUtils.GetGeometryOptions(), plane, connector);
         }
     }
     

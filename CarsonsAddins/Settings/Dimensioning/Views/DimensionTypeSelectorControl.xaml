@@ -1,0 +1,59 @@
+﻿<UserControl x:Class="CarsonsAddins.Settings.Dimensioning.Views.DimensionTypeSelectorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CarsonsAddins.Settings.Dimensioning.Views"
+             mc:Ignorable="d" 
+            Width="auto" Height="auto">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Arial"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="FontFamily" Value="Arial"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+    </UserControl.Resources>
+    <Border Background="White" BorderBrush="DarkGray" BorderThickness="2" CornerRadius="8" Width="auto" Height="auto">
+        <Grid Margin="12">
+            <Grid.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Margin" Value="4"/>
+                </Style>
+                <Style TargetType="ComboBox">
+                    <Setter Property="Margin" Value="2"/>
+                    <Setter Property="ItemsSource" Value="{Binding DimensionTypes}"/>
+                    <Setter Property="DisplayMemberPath" Value="Name"/>
+                </Style>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto" MinWidth="150"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Dimension Types: " Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" FontSize="16"/>
+            <TextBlock Text="Primary Dimension Type" Grid.Column="0" Grid.Row="1"/>
+            <ComboBox Name="PrimaryDimensionType_ComboBox" Grid.Column="1" Grid.Row="1" SelectedItem="{Binding PrimaryDimensionType, Mode=TwoWay}"/>
+            <TextBlock Text="Secondary Dimension Types:" Grid.Column="0" Grid.Row="2" Margin="0, 16, 0, 8" />
+            <TextBlock Text="Pipes" Grid.Column="0" Grid.Row="3"/>
+            <ComboBox Name="SecondaryDimensionTypePipes_ComboBox" Grid.Column="1" Grid.Row="3" SelectedItem="{Binding SecondaryPipeDimensionType, Mode=TwoWay}"/>
+            <TextBlock Text="Fittings" Grid.Column="0" Grid.Row="4"/>
+            <ComboBox Name="SecondaryDimensionTypeFittings_ComboBox" Grid.Column="1" Grid.Row="4" SelectedItem="{Binding SecondaryFittingDimensionType, Mode=TwoWay}"/>
+            <TextBlock Text="Accessories" Grid.Column="0" Grid.Row="5"/>
+            <ComboBox Name="SecondaryDimensionTypeAccessories_ComboBox" Grid.Column="1" Grid.Row="5" SelectedItem="{Binding SecondaryAccessoryDimensionType, Mode=TwoWay}"/>
+            <TextBlock Text="Others" Grid.Column="0" Grid.Row="6"/>
+            <ComboBox Name="SecondaryDimensionTypeOthers_ComboBox" Grid.Column="1" Grid.Row="6" SelectedItem="{Binding SecondaryOtherDimensionType, Mode=TwoWay}"/>
+        </Grid>
+    </Border>
+
+</UserControl>

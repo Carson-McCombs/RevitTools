@@ -14,7 +14,7 @@ namespace CarsonsAddins.Utils
     public static class ConnectionUtils
     {
         /// <summary>
-        ///  Default: None,
+        ///  Default: Default,
         ///  Bell: Female end of the Pipe.
         ///  Spigot: Male end of the Pipe.
         /// </summary>
